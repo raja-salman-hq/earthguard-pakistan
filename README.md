@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EarthGuard Pakistan
 
-## Getting Started
+An interactive foundation for exploring environmental change across Pakistan.
+This phase contains the design system, API contract and synthetic demo layer,
+shareable UI state, responsive site shell, landing page, and placeholder
+Explore/Compare/About pages. Map and charts are intentionally not included yet.
 
-First, run the development server:
+## Run locally
 
 ```bash
+npm install
+Copy-Item .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). Mock mode is enabled by
+default in `.env.example`; every demo value is synthetic and clearly labeled.
+Set `NEXT_PUBLIC_USE_MOCK=false` and configure `NEXT_PUBLIC_API_URL` to connect a
+backend implementing the draft contract in [docs/API_CONTRACT.md](docs/API_CONTRACT.md).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/app/` — app routes and global styles
+- `src/components/` — provider, layout, and route-shell components
+- `src/lib/api/` — validated API client and mock/real switch
+- `src/lib/mock/` — synthetic demo response data
+- `src/store/` — Zustand UI state synchronized with URL search parameters
+- `src/types/` — API response types and Zod schemas
+- `docs/` — [design tokens](docs/DESIGN_SYSTEM.md) and [API contract](docs/API_CONTRACT.md)
 
-## Learn More
+## Checks
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run lint
+npm run build
+```
