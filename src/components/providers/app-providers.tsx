@@ -13,6 +13,8 @@ const urlStateSchema = z
     start: z.coerce.number().int().min(2000).max(2025).optional(),
     end: z.coerce.number().int().min(2000).max(2025).optional(),
     layer: z.enum(["none", ...VARIABLE_IDS]).optional(),
+    mapLayerType: z.enum(["absolute", "change"]).optional(),
+    changeBasis: z.enum(["previous-year", "range-start", "backend"]).optional(),
     language: z.enum(["en", "ur"]).optional(),
     theme: z.enum(["dark", "light"]).optional(),
   })
@@ -34,6 +36,8 @@ function readUrlState() {
     start: params.get("start") ?? undefined,
     end: params.get("end") ?? undefined,
     layer: params.get("layer") ?? undefined,
+    mapLayerType: params.get("mapLayerType") ?? undefined,
+    changeBasis: params.get("changeBasis") ?? undefined,
     language: params.get("language") ?? undefined,
     theme: params.get("theme") ?? undefined,
   });
@@ -55,6 +59,8 @@ function writeUrlState(): void {
   url.searchParams.set("start", String(state.yearRange[0]));
   url.searchParams.set("end", String(state.yearRange[1]));
   url.searchParams.set("layer", state.layer);
+  url.searchParams.set("mapLayerType", state.mapLayerType);
+  url.searchParams.set("changeBasis", state.changeBasis);
   url.searchParams.set("language", state.language);
   url.searchParams.set("theme", state.theme);
 
@@ -71,6 +77,8 @@ function UrlStateSync() {
         region: values.region ?? current.region,
         yearRange: [values.start ?? current.yearRange[0], values.end ?? current.yearRange[1]],
         layer: values.layer ?? current.layer,
+        mapLayerType: values.mapLayerType ?? current.mapLayerType,
+        changeBasis: values.changeBasis ?? current.changeBasis,
         language: values.language ?? current.language,
         theme: values.theme ?? current.theme,
       });

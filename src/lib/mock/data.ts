@@ -320,8 +320,35 @@ export function getMockTrendForVariable(variable: VariableId): TrendResponse {
 export function getMockMapLayer(query: MapLayerQuery): MapLayerResponse {
   return regionIds.map((regionId) => ({
     regionId,
-    value: getSyntheticValue(query.variable, regionId, query.year, 6),
+    value: mapLayerValue(query, regionId),
   }));
+}
+
+function mapLayerValue(query: MapLayerQuery, regionId: RegionId): number {
+  const value = getSyntheticValue(query.variable, regionId, query.year, 6);
+
+  if (query.comparison === "absolute") {
+    return value;
+  }
+
+  if (query.comparison === "backend") {
+    return Number(
+      (value - getSyntheticValue(query.variable, regionId, 2000, 6)).toFixed(3),
+    );
+  }
+
+  const baselineYear =
+    query.comparison === "range-start"
+      ? query.baselineYear
+      : query.year - 1;
+
+  if (baselineYear === undefined) {
+    throw new Error("A baseline year is required for a range-start map comparison.");
+  }
+
+  return Number(
+    (value - getSyntheticValue(query.variable, regionId, baselineYear, 6)).toFixed(3),
+  );
 }
 
 export function getMockHotspots(variable: VariableId, limit: number) {

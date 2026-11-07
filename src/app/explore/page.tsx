@@ -1,11 +1,5 @@
-import { RoutePlaceholder } from "@/components/layout/route-placeholder";
+import ExploreWorkspace from "./explore-workspace";
 
 export default function ExplorePage() {
-  return (
-    <RoutePlaceholder
-      variant="explore"
-      title="exploreTitle"
-      description="exploreDescription"
-    />
-  );
+  return <ExploreWorkspace />;
 }

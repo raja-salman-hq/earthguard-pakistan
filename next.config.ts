@@ -1,8 +1,13 @@
 import type { NextConfig } from "next";
 
 const connectSources = ["'self'"];
+const scriptSources = ["'self'", "'unsafe-inline'"];
 if (process.env.NEXT_PUBLIC_API_URL) {
   connectSources.push(new URL(process.env.NEXT_PUBLIC_API_URL).origin);
+}
+connectSources.push("https://basemaps.cartocdn.com", "https://*.basemaps.cartocdn.com");
+if (process.env.NODE_ENV === "development") {
+  scriptSources.push("'unsafe-eval'");
 }
 
 const nextConfig: NextConfig = {
@@ -29,11 +34,12 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline'",
+              `script-src ${scriptSources.join(" ")}`,
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob:",
+              "img-src 'self' data: blob: https://basemaps.cartocdn.com https://*.basemaps.cartocdn.com",
               "font-src 'self' data:",
               `connect-src ${connectSources.join(" ")}`,
+              "worker-src 'self' blob:",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

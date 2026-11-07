@@ -19,6 +19,7 @@ import {
   getMockVariables,
 } from "@/lib/mock/data";
 import { requestValidated } from "./client";
+import { getPakistanProvinceBoundaries } from "./pakistan-provinces";
 import type {
   HotspotsQuery,
   MapLayerQuery,
@@ -40,6 +41,10 @@ export function getRegions() {
     schema: regionsResponseSchema,
     mock: getMockRegions,
   });
+}
+
+export function getPakistanProvinceRegions() {
+  return getPakistanProvinceBoundaries();
 }
 
 export function getTimeSeries(query: TimeSeriesQuery) {

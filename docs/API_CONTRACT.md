@@ -9,8 +9,11 @@ to call `NEXT_PUBLIC_API_URL`. Every response, including mock responses, is
 validated with its endpoint Zod schema before it is returned.
 
 The examples below are illustrative and are **not NASA observations**. The mock
-regions have no geometries because real Pakistan boundaries must come from the
-backend or an approved source.
+regions have no geometries. The explore map uses the local
+`public/data/pakistan-provinces.geojson` geoBoundaries FeatureCollection, whose
+province names are read from `properties.shapeName` and mapped explicitly to
+mock region IDs. Unknown or missing regions are errors; the frontend does not
+guess a mapping.
 
 ## `GET /api/variables`
 
@@ -129,7 +132,7 @@ the generated time series or any real region.
 Request:
 
 ```http
-GET /api/map-layer?variable=air_temperature&year=2025
+GET /api/map-layer?variable=air_temperature&year=2025&comparison=absolute
 ```
 
 Response:
@@ -142,7 +145,26 @@ Response:
 ```
 
 The response contains one value per region. Its unit is the selected variable's
-unit from `/api/variables`.
+unit from `/api/variables` for `absolute` comparisons. Supported comparisons:
+
+- `absolute`: the selected year's value.
+- `previous-year`: selected year minus the preceding year.
+- `range-start&baselineYear=2000`: selected year minus the supplied range start.
+- `backend`: an explicit signed change value supplied by the backend.
+
+For change comparisons, `value` is a signed difference in the selected
+variable's unit, not a trend statistic. `baselineYear` is accepted only with
+`comparison=range-start`; it must be from 2000 through the selected year. The
+backend remains responsible for map values in live mode. The synthetic mock
+calculates illustrative differences from its generated values and they are not
+NASA observations. The `backend` comparison must return an explicit change
+layer from the backend; the frontend will not substitute absolute values. In
+demo mode, this option uses the mock-generated 2000-to-selected-year difference
+as an explicitly synthetic stand-in.
+
+The boundary file is attributed to geoBoundaries under CC BY 4.0. Include
+`geoBoundaries` with a link to https://www.geoboundaries.org in derivative
+products.
 
 ## `GET /api/hotspots`
 

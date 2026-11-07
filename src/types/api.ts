@@ -111,10 +111,40 @@ export const trendResponseSchema = z.object({
   summary: z.string().min(1),
 });
 
-export const mapLayerQuerySchema = z.object({
-  variable: variableIdSchema,
-  year: z.number().int().min(2000).max(2025),
-});
+export const mapLayerQuerySchema = z
+  .object({
+    variable: variableIdSchema,
+    year: z.number().int().min(2000).max(2025),
+    comparison: z
+      .enum(["absolute", "previous-year", "range-start", "backend"])
+      .default("absolute"),
+    baselineYear: z.number().int().min(2000).max(2025).optional(),
+  })
+  .superRefine((query, context) => {
+    if (query.comparison === "previous-year" && query.year === 2000) {
+      context.addIssue({
+        code: "custom",
+        message: "A previous-year comparison is unavailable for 2000.",
+        path: ["year"],
+      });
+    }
+
+    if (query.comparison === "range-start") {
+      if (query.baselineYear === undefined || query.baselineYear > query.year) {
+        context.addIssue({
+          code: "custom",
+          message: "A range-start comparison requires a baseline year no later than the selected year.",
+          path: ["baselineYear"],
+        });
+      }
+    } else if (query.baselineYear !== undefined) {
+      context.addIssue({
+        code: "custom",
+        message: "A baseline year is only used for range-start comparisons.",
+        path: ["baselineYear"],
+      });
+    }
+  });
 
 export const mapLayerResponseSchema = z.array(
   z.object({
