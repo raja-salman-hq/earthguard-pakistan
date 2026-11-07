@@ -1,11 +1,8 @@
-import { RoutePlaceholder } from "@/components/layout/route-placeholder";
+import AboutContent from "./about-content";
+import { getPageMetadata } from "@/lib/site-metadata";
+
+export const metadata = getPageMetadata("about");
 
 export default function AboutPage() {
-  return (
-    <RoutePlaceholder
-      variant="about"
-      title="aboutTitle"
-      description="aboutDescription"
-    />
-  );
+  return <AboutContent />;
 }

@@ -7,6 +7,7 @@ import {
 } from "next/font/google";
 import { AppProviders } from "@/components/providers/app-providers";
 import { SiteFrame } from "@/components/layout/site-frame";
+import { siteUrl } from "@/lib/site-metadata";
 import "./globals.css";
 
 const inter = Inter({
@@ -34,12 +35,39 @@ const notoSansArabic = Noto_Sans_Arabic({
 });
 
 export const metadata: Metadata = {
+  metadataBase: siteUrl,
   title: {
     default: "EarthGuard Pakistan",
     template: "%s | EarthGuard Pakistan",
   },
   description:
     "Explore environmental patterns and change across Pakistan with EarthGuard Pakistan.",
+  applicationName: "EarthGuard Pakistan",
+  icons: {
+    icon: "/brand/earthguard-mark.svg",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "EarthGuard Pakistan",
+    title: "EarthGuard Pakistan",
+    description:
+      "Explore environmental patterns and change across Pakistan with clear, understandable stories.",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "EarthGuard Pakistan — explore environmental change",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "EarthGuard Pakistan",
+    description:
+      "Explore environmental patterns and change across Pakistan with clear, understandable stories.",
+    images: ["/opengraph-image"],
+  },
 };
 
 export default function RootLayout({
