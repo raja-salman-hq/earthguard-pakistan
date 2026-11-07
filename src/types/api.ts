@@ -22,6 +22,15 @@ export const REGION_IDS = [
 
 export const variableIdSchema = z.enum(VARIABLE_IDS);
 export const regionIdSchema = z.enum(REGION_IDS);
+export const compareModeSchema = z.enum(["regions", "variables"]);
+export const compareRegionsSchema = z
+  .array(regionIdSchema)
+  .max(4)
+  .refine((regions) => new Set(regions).size === regions.length);
+export const compareVariablesSchema = z
+  .array(variableIdSchema)
+  .max(2)
+  .refine((variables) => new Set(variables).size === variables.length);
 
 export const variableSchema = z.object({
   id: variableIdSchema,
@@ -109,12 +118,51 @@ export const trendResponseSchema = z.object({
   changePercent: z.number().finite(),
   confidence: z.number().min(0).max(1),
   summary: z.string().min(1),
+  trendLine: z
+    .array(
+      z.object({
+        date: z.string().date(),
+        value: z.number().finite(),
+      }),
+    )
+    .min(2)
+    .optional(),
 });
 
-export const mapLayerQuerySchema = z.object({
-  variable: variableIdSchema,
-  year: z.number().int().min(2000).max(2025),
-});
+export const mapLayerQuerySchema = z
+  .object({
+    variable: variableIdSchema,
+    year: z.number().int().min(2000).max(2025),
+    comparison: z
+      .enum(["absolute", "previous-year", "range-start", "backend"])
+      .default("absolute"),
+    baselineYear: z.number().int().min(2000).max(2025).optional(),
+  })
+  .superRefine((query, context) => {
+    if (query.comparison === "previous-year" && query.year === 2000) {
+      context.addIssue({
+        code: "custom",
+        message: "A previous-year comparison is unavailable for 2000.",
+        path: ["year"],
+      });
+    }
+
+    if (query.comparison === "range-start") {
+      if (query.baselineYear === undefined || query.baselineYear > query.year) {
+        context.addIssue({
+          code: "custom",
+          message: "A range-start comparison requires a baseline year no later than the selected year.",
+          path: ["baselineYear"],
+        });
+      }
+    } else if (query.baselineYear !== undefined) {
+      context.addIssue({
+        code: "custom",
+        message: "A baseline year is only used for range-start comparisons.",
+        path: ["baselineYear"],
+      });
+    }
+  });
 
 export const mapLayerResponseSchema = z.array(
   z.object({
@@ -142,6 +190,7 @@ export const hotspotsResponseSchema = z.array(
 
 export type VariableId = z.infer<typeof variableIdSchema>;
 export type RegionId = z.infer<typeof regionIdSchema>;
+export type CompareMode = z.infer<typeof compareModeSchema>;
 export type Variable = z.infer<typeof variableSchema>;
 export type VariablesResponse = z.infer<typeof variablesResponseSchema>;
 export type RegionsResponse = z.infer<typeof regionsResponseSchema>;

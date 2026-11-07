@@ -19,6 +19,7 @@ import {
   getMockVariables,
 } from "@/lib/mock/data";
 import { requestValidated } from "./client";
+import { getPakistanProvinceBoundaries } from "./pakistan-provinces";
 import type {
   HotspotsQuery,
   MapLayerQuery,
@@ -42,6 +43,10 @@ export function getRegions() {
   });
 }
 
+export function getPakistanProvinceRegions() {
+  return getPakistanProvinceBoundaries();
+}
+
 export function getTimeSeries(query: TimeSeriesQuery) {
   const validQuery = timeSeriesQuerySchema.parse(query);
 
@@ -60,7 +65,7 @@ export function getTrend(query: TrendQuery) {
     path: "api/trend",
     schema: trendResponseSchema,
     query: validQuery,
-    mock: () => getMockTrendForVariable(validQuery.variable),
+    mock: () => getMockTrendForVariable(validQuery),
   });
 }
 

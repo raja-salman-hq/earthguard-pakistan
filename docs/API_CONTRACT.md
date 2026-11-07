@@ -9,8 +9,11 @@ to call `NEXT_PUBLIC_API_URL`. Every response, including mock responses, is
 validated with its endpoint Zod schema before it is returned.
 
 The examples below are illustrative and are **not NASA observations**. The mock
-regions have no geometries because real Pakistan boundaries must come from the
-backend or an approved source.
+regions have no geometries. The explore map uses the local
+`public/data/pakistan-provinces.geojson` geoBoundaries FeatureCollection, whose
+province names are read from `properties.shapeName` and mapped explicitly to
+mock region IDs. Unknown or missing regions are errors; the frontend does not
+guess a mapping.
 
 ## `GET /api/variables`
 
@@ -96,13 +99,17 @@ illustrative seasonal cycles and gentle trends. Demo yearly points use a
 representative seasonal value and are placeholders, not annual aggregates.
 Define the live API's annual aggregation semantics with the backend.
 
-## `GET /api/trend`
+## `GET /api/trend` — proposed extension
 
 Request:
 
 ```http
-GET /api/trend?variable=air_temperature&region=punjab&start=2000&end=2025
+GET /api/trend?variable=air_temperature&region=punjab&start=2000&end=2025&lang=en
 ```
+
+`lang` is a proposed optional parameter (`en` or `ur`) for localizing the
+backend-generated `summary`. Until the backend confirms support, the frontend
+must treat `summary` as English-only.
 
 Response:
 
@@ -116,20 +123,32 @@ Response:
   "changeTotal": 0.9,
   "changePercent": 3.8,
   "confidence": 0.95,
-  "summary": "Backend-generated plain-language summary."
+  "summary": "Backend-generated plain-language summary.",
+  "trendLine": [
+    { "date": "2000-01-01", "value": 14.2 },
+    { "date": "2025-01-01", "value": 15.1 }
+  ]
 }
 ```
 
+Proposed optional `trendLine` points provide the backend-computed line to overlay
+on the time-series chart. Each point uses an ISO date and the same value unit as
+the selected time series. The backend must compute these values; the frontend
+must not infer a line from `slope`, fit a regression, or calculate an intercept.
+If `trendLine` is absent, the frontend will display the time series without a
+trend line and explain that the backend trend line is not yet available.
+
 The backend owns slope, Mann–Kendall, p-value, significance, and confidence
 calculations. Mock trend fields are fixed synthetic examples and do not describe
-the generated time series or any real region.
+the generated time series or any real region. The optional trend line and
+localized summary remain proposals pending backend confirmation.
 
 ## `GET /api/map-layer`
 
 Request:
 
 ```http
-GET /api/map-layer?variable=air_temperature&year=2025
+GET /api/map-layer?variable=air_temperature&year=2025&comparison=absolute
 ```
 
 Response:
@@ -142,7 +161,26 @@ Response:
 ```
 
 The response contains one value per region. Its unit is the selected variable's
-unit from `/api/variables`.
+unit from `/api/variables` for `absolute` comparisons. Supported comparisons:
+
+- `absolute`: the selected year's value.
+- `previous-year`: selected year minus the preceding year.
+- `range-start&baselineYear=2000`: selected year minus the supplied range start.
+- `backend`: an explicit signed change value supplied by the backend.
+
+For change comparisons, `value` is a signed difference in the selected
+variable's unit, not a trend statistic. `baselineYear` is accepted only with
+`comparison=range-start`; it must be from 2000 through the selected year. The
+backend remains responsible for map values in live mode. The synthetic mock
+calculates illustrative differences from its generated values and they are not
+NASA observations. The `backend` comparison must return an explicit change
+layer from the backend; the frontend will not substitute absolute values. In
+demo mode, this option uses the mock-generated 2000-to-selected-year difference
+as an explicitly synthetic stand-in.
+
+The boundary file is attributed to geoBoundaries under CC BY 4.0. Include
+`geoBoundaries` with a link to https://www.geoboundaries.org in derivative
+products.
 
 ## `GET /api/hotspots`
 

@@ -38,8 +38,20 @@ available through labels or symbols as well as color.
 
 - Interface: **Inter**, self-hosted at build time with `next/font/google`.
 - Numeric/data: **JetBrains Mono**, also self-hosted with `next/font/google`.
-- Urdu: language/RTL toggling is wired; Urdu font selection and translated
-  scientific copy remain a follow-up.
+- Urdu body text and headings use **Noto Nastaliq Urdu**, self-hosted at build
+  time through `next/font/google`. Give Nastaliq text a line height near 2.1 and
+  enough block padding to avoid clipping large headings.
+- Urdu controls, labels, buttons, tooltips, and compact UI text use
+  **Noto Sans Arabic** for legibility at small sizes. Nastaliq is harder to read
+  at compact sizes, so keep it for body copy and headings rather than dense
+  controls.
+- Urdu font faces are not preloaded and apply only while the root document has
+  `lang="ur"`; English remains Inter and JetBrains Mono. Keep numeric values,
+  years, and units in JetBrains Mono, wrapped in an LTR `<bdi>` when embedded in
+  Urdu text. This preserves Latin digits without disturbing RTL text flow.
+- Urdu interface panels follow RTL inline-start/inline-end placement. The map
+  and timeline retain LTR direction so geography and year progression do not
+  reverse.
 
 Tailwind's `font-sans` and `font-mono` map to these font variables. Use mono for
 compact numeric readouts, not paragraphs.

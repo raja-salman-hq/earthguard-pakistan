@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import {
+  Inter,
+  JetBrains_Mono,
+  Noto_Nastaliq_Urdu,
+  Noto_Sans_Arabic,
+} from "next/font/google";
 import { AppProviders } from "@/components/providers/app-providers";
 import { SiteFrame } from "@/components/layout/site-frame";
 import "./globals.css";
@@ -12,6 +17,20 @@ const inter = Inter({
 const jetBrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
   subsets: ["latin"],
+});
+
+const notoNastaliqUrdu = Noto_Nastaliq_Urdu({
+  variable: "--font-noto-nastaliq-urdu",
+  subsets: ["arabic"],
+  display: "swap",
+  preload: false,
+});
+
+const notoSansArabic = Noto_Sans_Arabic({
+  variable: "--font-noto-sans-arabic",
+  subsets: ["arabic"],
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -33,7 +52,7 @@ export default function RootLayout({
       lang="en"
       dir="ltr"
       data-theme="dark"
-      className={`${inter.variable} ${jetBrainsMono.variable}`}
+      className={`${inter.variable} ${jetBrainsMono.variable} ${notoNastaliqUrdu.variable} ${notoSansArabic.variable}`}
     >
       <body>
         <AppProviders>
