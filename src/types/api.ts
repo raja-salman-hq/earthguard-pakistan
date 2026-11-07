@@ -102,6 +102,7 @@ export const trendQuerySchema = z
     region: regionIdSchema,
     start: z.number().int().min(2000).max(2025),
     end: z.number().int().min(2000).max(2025),
+    lang: z.enum(["en", "ur"]),
   })
   .refine((query) => query.start <= query.end, {
     message: "The start year must not be after the end year.",

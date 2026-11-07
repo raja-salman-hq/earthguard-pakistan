@@ -124,13 +124,14 @@ export default function CompareWorkspace() {
   const trendQueries = useQueries({
     queries: canCompare
       ? items.map((item) => ({
-          queryKey: ["trend", item.variable, item.region, yearRange[0], yearRange[1]],
+          queryKey: ["trend", item.variable, item.region, yearRange[0], yearRange[1], language],
           queryFn: () =>
             getTrend({
               variable: item.variable,
               region: item.region,
               start: yearRange[0],
               end: yearRange[1],
+              lang: language,
             }),
           staleTime: 60_000,
         }))

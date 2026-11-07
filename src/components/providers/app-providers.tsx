@@ -11,6 +11,7 @@ import {
   VARIABLE_IDS,
 } from "@/types/api";
 import { useUiStore } from "@/store/ui-store";
+import { ApiWakeupNotice } from "./api-wakeup-notice";
 
 const defaultCompareRegions = ["punjab", "sindh"] as const;
 const defaultCompareVariables = ["air_temperature", "precipitation"] as const;
@@ -37,6 +38,10 @@ function parseListParameter(value: string | null, defaults: readonly string[]): 
     return [...defaults];
   }
   return value === "" ? [] : value.split(",");
+}
+
+function listsMatch(left: readonly string[], right: readonly string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
 function readUrlState() {
@@ -105,7 +110,9 @@ function writeUrlState(): void {
   url.searchParams.set("compareRegions", state.compareRegions.join(","));
   url.searchParams.set("compareVariables", state.compareVariables.join(","));
 
-  window.history.replaceState(window.history.state, "", url);
+  if (url.href !== window.location.href) {
+    window.history.replaceState(window.history.state, "", url);
+  }
 }
 
 function UrlStateSync() {
@@ -113,19 +120,39 @@ function UrlStateSync() {
     const applyUrlState = () => {
       const values = readUrlState();
       const current = useUiStore.getState();
+
+      const stateMatchesUrl =
+        current.variable === values.variable &&
+        current.region === values.region &&
+        current.yearRange[0] === values.start &&
+        current.yearRange[1] === values.end &&
+        current.currentYear === values.year &&
+        current.layer === values.layer &&
+        current.mapLayerType === values.mapLayerType &&
+        current.changeBasis === values.changeBasis &&
+        current.language === values.language &&
+        current.theme === values.theme &&
+        current.compareMode === values.compareMode &&
+        listsMatch(current.compareRegions, values.compareRegions) &&
+        listsMatch(current.compareVariables, values.compareVariables);
+
+      if (stateMatchesUrl) {
+        return;
+      }
+
       useUiStore.setState({
-        variable: values.variable ?? current.variable,
-        region: values.region ?? current.region,
-        yearRange: [values.start ?? current.yearRange[0], values.end ?? current.yearRange[1]],
-        currentYear: values.year ?? current.currentYear,
-        layer: values.layer ?? current.layer,
-        mapLayerType: values.mapLayerType ?? current.mapLayerType,
-        changeBasis: values.changeBasis ?? current.changeBasis,
-        language: values.language ?? current.language,
-        theme: values.theme ?? current.theme,
-        compareMode: values.compareMode ?? current.compareMode,
-        compareRegions: values.compareRegions ?? current.compareRegions,
-        compareVariables: values.compareVariables ?? current.compareVariables,
+        variable: values.variable,
+        region: values.region,
+        yearRange: [values.start, values.end],
+        currentYear: values.year,
+        layer: values.layer,
+        mapLayerType: values.mapLayerType,
+        changeBasis: values.changeBasis,
+        language: values.language,
+        theme: values.theme,
+        compareMode: values.compareMode,
+        compareRegions: values.compareRegions,
+        compareVariables: values.compareVariables,
       });
     };
 
@@ -161,7 +188,7 @@ export function AppProviders({ children }: Readonly<{ children: React.ReactNode 
     () =>
       new QueryClient({
         defaultOptions: {
-          queries: { staleTime: 60_000, retry: 1 },
+          queries: { staleTime: 60_000, retry: false },
         },
       }),
   );
@@ -170,6 +197,7 @@ export function AppProviders({ children }: Readonly<{ children: React.ReactNode 
     <QueryClientProvider client={queryClient}>
       <UrlStateSync />
       <DocumentPreferences />
+      <ApiWakeupNotice />
       {children}
     </QueryClientProvider>
   );

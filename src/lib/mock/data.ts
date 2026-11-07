@@ -242,6 +242,37 @@ const syntheticTrends: Record<VariableId, TrendResponse> = {
   },
 };
 
+const syntheticTrendSummaries: Record<VariableId, Record<"en" | "ur", string>> = {
+  air_temperature: {
+    en: syntheticTrends.air_temperature.summary,
+    ur: "صرف ڈیمو: یہ مصنوعی سلسلہ بتدریج بڑھتا ہوا نمونہ دکھاتا ہے۔",
+  },
+  precipitation: {
+    en: syntheticTrends.precipitation.summary,
+    ur: "صرف ڈیمو: اس مصنوعی سلسلے میں موسمی اتار چڑھاؤ اور معمولی کمی دکھائی گئی ہے۔",
+  },
+  vegetation_index: {
+    en: syntheticTrends.vegetation_index.summary,
+    ur: "صرف ڈیمو: اس مصنوعی سلسلے میں معمولی اضافہ دکھایا گیا ہے۔",
+  },
+  snow_cover: {
+    en: syntheticTrends.snow_cover.summary,
+    ur: "صرف ڈیمو: اس مصنوعی سلسلے میں معمولی کمی دکھائی گئی ہے۔",
+  },
+  soil_moisture: {
+    en: syntheticTrends.soil_moisture.summary,
+    ur: "صرف ڈیمو: اس مصنوعی سلسلے میں معمولی کمی دکھائی گئی ہے۔",
+  },
+  evapotranspiration: {
+    en: syntheticTrends.evapotranspiration.summary,
+    ur: "صرف ڈیمو: اس مصنوعی سلسلے میں بتدریج اضافہ دکھایا گیا ہے۔",
+  },
+  land_surface_temperature: {
+    en: syntheticTrends.land_surface_temperature.summary,
+    ur: "صرف ڈیمو: یہ مصنوعی سلسلہ بتدریج بڑھتا ہوا نمونہ دکھاتا ہے۔",
+  },
+};
+
 export function getMockVariables(): Variable[] {
   return variables;
 }
@@ -319,6 +350,7 @@ export function getMockTrendForVariable(query: TrendQuery): TrendResponse {
 
   return {
     ...syntheticTrends[variable],
+    summary: syntheticTrendSummaries[variable][query.lang],
     trendLine: [
       {
         date: `${start}-01-01`,

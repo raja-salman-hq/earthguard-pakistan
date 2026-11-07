@@ -106,9 +106,8 @@ export function TrendSummaryCard({
       </div>
       <TrendTakeaway trend={trend} variable={variable} variableUnit={variableUnit} start={start} end={end} />
       <div className="trend-backend-summary">
-        <span className="map-panel-eyebrow">{messages.trendBackendSummaryEnglish}</span>
-        <p lang="en" dir="ltr">{trend.summary}</p>
-        {language === "ur" && <small>{messages.trendSummaryEnglishNote}</small>}
+        <span className="map-panel-eyebrow">{messages.trendBackendSummary}</span>
+        <p lang={language} dir={language === "ur" ? "rtl" : "ltr"}>{trend.summary}</p>
       </div>
     </section>
   );

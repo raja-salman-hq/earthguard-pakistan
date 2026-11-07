@@ -15,23 +15,9 @@ export function LocalizedMetadataSync() {
   const description = pageCopy?.description ?? messages.notFoundDescription;
 
   useEffect(() => {
-    const updateTitle = () => {
-      const titleElements = Array.from(document.head.querySelectorAll("title"));
-      for (const element of titleElements) {
-        if (element.textContent !== title) {
-          element.textContent = title;
-        }
-      }
+    if (document.title !== title) {
       document.title = title;
-    };
-
-    updateTitle();
-    const titleObserver = new MutationObserver(updateTitle);
-    titleObserver.observe(document.head, {
-      characterData: true,
-      childList: true,
-      subtree: true,
-    });
+    }
 
     const metadata = [
       ['meta[name="description"]', description],
@@ -44,11 +30,10 @@ export function LocalizedMetadataSync() {
 
     for (const [selector, content] of metadata) {
       const element = document.head.querySelector<HTMLMetaElement>(selector);
-      if (element) {
+      if (element && element.content !== content) {
         element.content = content;
       }
     }
-    return () => titleObserver.disconnect();
   }, [description, language, messages.notFoundDescription, messages.notFoundTitle, pathname, title]);
 
   return null;
