@@ -1632,14 +1632,18 @@ html[lang="ur"] .feedback-card h1 {
   }
 
   .explore-filters-panel {
+    display: flex;
     inset-inline-start: 16px;
     width: 310px;
+    height: calc(100% - 104px);
+    flex-direction: column;
     max-height: calc(100% - 104px);
     overflow: hidden;
   }
 
   .explore-filter-heading {
     display: flex;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
@@ -1671,7 +1675,8 @@ html[lang="ur"] .feedback-card h1 {
 
   .explore-filter-content {
     display: grid;
-    max-height: calc(100% - 44px);
+    min-height: 0;
+    flex: 1 1 auto;
     gap: 14px;
     overflow-y: auto;
     padding: 5px 15px 15px;
@@ -2727,8 +2732,7 @@ html[lang="ur"] .feedback-card h1 {
 .hotspots-list {
   display: grid;
   gap: 4px;
-  max-height: 190px;
-  overflow-y: auto;
+  overflow: visible;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -3669,16 +3673,17 @@ html[lang="ur"] .compare-page :is(h1, h2) {
     bottom: max(78px, calc(66px + env(safe-area-inset-bottom)));
     display: none;
     width: auto;
+    height: min(44dvh, 420px);
     max-height: min(44dvh, 420px);
     z-index: var(--z-drawer);
   }
 
   .explore-filters-panel.filters-open {
-    display: block;
+    display: flex;
   }
 
   .explore-filter-content {
-    max-height: calc(min(44dvh, 420px) - 56px);
+    max-height: none;
   }
 
   .map-region-panel {

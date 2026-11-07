@@ -19,6 +19,7 @@ Date: 2026-11-07
 | At tablet widths, the desktop chart and map panels were squeezed into very narrow columns. | Moved Explore to its compact sheet and tab layout through 1180px. |
 | On phones, the region summary sheet and full-width legend covered almost all of the map. | Capped the insight sheet height and kept its content scrollable, leaving an exposed map area for region clicks. |
 | Opening the filter sheet covered its own toggle, preventing the user from closing it. | Reduced the sheet's maximum height so the toggle stays accessible. |
+| In Change over time mode, the comparison selector increased the filter content height; hotspots were clipped by the panel and had a second nested scrollbar. | Gave the filter panel a bounded flex layout and let its contents, including all hotspot rows, use one scroll area. |
 | The map error callback could synchronously update `PakistanMap` while a child `Layer` was rendering. | Queued a single state update in a microtask from `handleMapError`. |
 | The dark logo's pale lettering had low contrast on the light theme. | Added a light-theme SVG variant used by both the header and footer. |
 
@@ -33,6 +34,7 @@ Date: 2026-11-07
 - Simulated 150% and 200% root font sizing on Explore at 320, 640, and 1280px. No document-level horizontal overflow was found. This does not replace testing an operating system's accessibility font setting.
 - At 844×390 landscape, the Explore sheet keeps the region selector and tabs visible, retains summary content, and the page scrolls vertically without horizontal overflow.
 - Production browser interactions at 390×900 passed: open/close filters, change variable and province, open Chart and Table tabs, move the timeline by mouse, select a visible map region, choose a hotspot, and toggle light theme/Urdu. No browser console warnings or errors were recorded.
+- Switched to Change over time at 320, 390, 768, 1024, and 1280px widths. The filter content stayed within its panel; the year-range thumb moved, the hotspot list used the same scroll area as the other filters, and clicking a hotspot updated the selected region.
 - Captured and visually reviewed browser screenshots for the main routes, including phone, tablet, desktop, landscape, and light/Urdu views. The test environment could not load the external basemap, so screenshots show the app's plain-background fallback with the region geometry and fallback notice.
 
 ## Test limits
