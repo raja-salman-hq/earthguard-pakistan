@@ -2294,7 +2294,18 @@ html[lang="ur"] .explore-chart-panel-heading h2 {
 }
 
 @media (max-width: 620px) {
-  .explore-chart-panel,
+  .explore-chart-panel {
+    inset-inline-start: -10000px;
+    inset-inline-end: auto;
+    top: 0;
+    bottom: auto;
+    display: flex;
+    width: min(360px, calc(100vw - 32px));
+    height: 300px;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   .map-region-panel {
     display: none;
   }

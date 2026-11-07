@@ -5,11 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 import { getPakistanProvinceRegions } from "@/lib/api";
 import { useMessages } from "@/hooks/use-messages";
 import { useUiStore } from "@/store/ui-store";
+import { getRegionLabel } from "@/lib/i18n";
 import { regionIdSchema } from "@/types/api";
 
 export function RegionPicker() {
   const selectId = useId();
   const messages = useMessages();
+  const language = useUiStore((state) => state.language);
   const selectedRegion = useUiStore((state) => state.region);
   const setRegion = useUiStore((state) => state.setRegion);
   const regionsQuery = useQuery({
@@ -49,7 +51,7 @@ export function RegionPicker() {
         >
           {regions.map((feature) => (
             <option key={feature.id} value={feature.id}>
-              {feature.properties.name}
+              {getRegionLabel(feature.id, language)}
             </option>
           ))}
         </select>

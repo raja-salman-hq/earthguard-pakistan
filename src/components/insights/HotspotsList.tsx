@@ -102,7 +102,7 @@ export function HotspotsList({ variable }: HotspotsListProps) {
                   <strong>{label}</strong>
                   <span className="hotspot-direction">
                     <span aria-hidden="true">{directionIcon}</span>
-                    {directionText}
+                    {" "}{directionText}
                   </span>
                 </span>
                 <span className="hotspot-values">

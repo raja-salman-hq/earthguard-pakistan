@@ -93,7 +93,7 @@ export function TrendSummaryCard({
     start: <bdi dir="ltr">{start}</bdi>,
     end: <bdi dir="ltr">{end}</bdi>,
     variable: getVariableLabel(variable, language),
-    direction,
+    direction: direction.toLocaleLowerCase(language),
     change: <bdi dir="ltr">{formatNumber(trend.changeTotal)}</bdi>,
     unit: <bdi dir="ltr">{variableUnit}</bdi>,
     percent: <bdi dir="ltr">{formatNumber(trend.changePercent)}</bdi>,
@@ -136,9 +136,7 @@ export function TrendSummaryCard({
       </div>
       <p className="trend-plain-language">{sentence}</p>
       <div className="trend-backend-summary">
-        <span className="map-panel-eyebrow">
-          {language === "ur" ? messages.trendBackendSummaryEnglish : messages.trendBackendSummary}
-        </span>
+        <span className="map-panel-eyebrow">{messages.trendBackendSummaryEnglish}</span>
         <p lang="en" dir="ltr">{trend.summary}</p>
         {language === "ur" && <small>{messages.trendSummaryEnglishNote}</small>}
       </div>

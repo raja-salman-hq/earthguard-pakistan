@@ -3,6 +3,8 @@
 import type { Variable } from "@/types/api";
 import type { MapLayerType } from "@/store/ui-store";
 import { useMessages } from "@/hooks/use-messages";
+import { getVariableLabel } from "@/lib/i18n";
+import { useUiStore } from "@/store/ui-store";
 
 type MapLegendProps = {
   variable: Variable | undefined;
@@ -16,6 +18,7 @@ function formatValue(value: number): string {
 
 export function MapLegend({ variable, values, layerType }: MapLegendProps) {
   const messages = useMessages();
+  const language = useUiStore((state) => state.language);
 
   if (!variable || !values || values.length === 0) {
     return null;
@@ -32,7 +35,7 @@ export function MapLegend({ variable, values, layerType }: MapLegendProps) {
   return (
     <aside className="map-legend glass-panel" aria-label={messages.mapLegend}>
       <div className="map-legend-heading">
-        <strong>{variable.name}</strong>
+        <strong>{getVariableLabel(variable.id, language)}</strong>
         <bdi dir="ltr">{variable.unit}</bdi>
       </div>
       <div

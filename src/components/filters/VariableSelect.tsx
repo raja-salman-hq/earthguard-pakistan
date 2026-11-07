@@ -3,11 +3,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMessages } from "@/hooks/use-messages";
 import { useUiStore } from "@/store/ui-store";
+import { getVariableLabel } from "@/lib/i18n";
 import { getVariables } from "@/lib/api";
 import { variableIdSchema } from "@/types/api";
 
 export function VariableSelect() {
   const messages = useMessages();
+  const language = useUiStore((state) => state.language);
   const selectedVariable = useUiStore((state) => state.variable);
   const yearRange = useUiStore((state) => state.yearRange);
   const currentYear = useUiStore((state) => state.currentYear);
@@ -61,7 +63,7 @@ export function VariableSelect() {
         >
           {variables.map((item) => (
             <option key={item.id} value={item.id}>
-              {item.name} ({item.unit})
+              {getVariableLabel(item.id, language)} ({item.unit})
             </option>
           ))}
         </select>
