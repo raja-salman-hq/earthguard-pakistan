@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
-import { getPakistanProvinceRegions, getVariables } from "@/lib/api";
+import { getPakistanProvinceRegions, getTrend, getVariables } from "@/lib/api";
 import { useMessages } from "@/hooks/use-messages";
 import { useUiStore } from "@/store/ui-store";
 import type { PakistanMapProps } from "@/components/map/PakistanMap";
@@ -12,6 +12,9 @@ import { LayerToggle } from "@/components/filters/LayerToggle";
 import { RegionPicker } from "@/components/filters/RegionPicker";
 import { TimelineControl } from "@/components/filters/TimelineControl";
 import { useEffect, useState } from "react";
+import { TrendSummaryCard } from "@/components/insights/TrendSummaryCard";
+import { HotspotsList } from "@/components/insights/HotspotsList";
+import type { TrendChartView } from "@/components/charts/TrendChart";
 import type { Variable } from "@/types/api";
 
 const PakistanMap = dynamic<PakistanMapProps>(
@@ -20,6 +23,11 @@ const PakistanMap = dynamic<PakistanMapProps>(
     ssr: false,
     loading: () => <MapChunkSkeleton />,
   },
+);
+
+const TrendChart = dynamic(
+  () => import("@/components/charts/TrendChart").then((module) => module.TrendChart),
+  { ssr: false, loading: () => <div className="trend-chart-loading" role="status" /> },
 );
 
 function MapChunkSkeleton() {
@@ -38,6 +46,7 @@ function MapChunkSkeleton() {
 
 export default function ExploreWorkspace() {
   const messages = useMessages();
+  const selectedRegion = useUiStore((state) => state.region);
   const setRegion = useUiStore((state) => state.setRegion);
   const variableId = useUiStore((state) => state.variable);
   const yearRange = useUiStore((state) => state.yearRange);
@@ -49,6 +58,9 @@ export default function ExploreWorkspace() {
   const setChangeBasis = useUiStore((state) => state.setChangeBasis);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [shareStatus, setShareStatus] = useState<"copied" | "error" | null>(null);
+  const [mobileInsightTab, setMobileInsightTab] = useState<"summary" | TrendChartView>("summary");
+  const [chartOpen, setChartOpen] = useState(true);
+  const [chartExpanded, setChartExpanded] = useState(false);
   const variablesQuery = useQuery({
     queryKey: ["variables"],
     queryFn: getVariables,
@@ -61,6 +73,53 @@ export default function ExploreWorkspace() {
   const variable = variablesQuery.data?.find(
     (item) => item.id === variableId,
   );
+  const trendQuery = useQuery({
+    queryKey: ["trend", variableId, selectedRegion, yearRange[0], yearRange[1]],
+    queryFn: () =>
+      getTrend({
+        variable: variableId,
+        region: selectedRegion,
+        start: yearRange[0],
+        end: yearRange[1],
+      }),
+    staleTime: 60_000,
+    placeholderData: (previousData) => previousData,
+  });
+  const trendChartProps = {
+    variable: variableId,
+    region: selectedRegion,
+    start: yearRange[0],
+    end: yearRange[1],
+    trendLine: trendQuery.data?.trendLine,
+    trendLineLoaded: Boolean(trendQuery.data),
+  };
+
+  function renderTrendSummary() {
+    return (
+      <TrendSummaryCard
+        trend={trendQuery.data}
+        variable={variableId}
+        variableUnit={variable?.unit ?? ""}
+        start={yearRange[0]}
+        end={yearRange[1]}
+        loading={trendQuery.isPending}
+        error={trendQuery.error?.message}
+        onRetry={() => void trendQuery.refetch()}
+      />
+    );
+  }
+
+  function renderTrendChart(displayMode?: TrendChartView, onDisplayModeChange?: (mode: TrendChartView) => void) {
+    return (
+      <TrendChart
+        {...trendChartProps}
+        displayMode={displayMode}
+        onDisplayModeChange={onDisplayModeChange}
+        expanded={chartExpanded}
+        onToggleExpanded={() => setChartExpanded((expanded) => !expanded)}
+      />
+    );
+  }
   useEffect(() => {
     if (!variable) {
       return;
@@ -118,7 +177,11 @@ export default function ExploreWorkspace() {
         </div>
       </div>
 
-      <section className="explore-map-frame" aria-label={messages.exploreTitle}>
+      <section
+        className="explore-map-frame"
+        aria-label={messages.exploreTitle}
+        data-mobile-insight={mobileInsightTab}
+      >
         <PakistanMap
           regions={boundariesQuery.data}
           boundaryLoading={boundariesQuery.isPending}
@@ -160,6 +223,7 @@ export default function ExploreWorkspace() {
               error={variablesQuery.error?.message}
             />
             <LayerToggle />
+            <HotspotsList variable={variableId} />
             <div className="explore-share-actions">
               <button type="button" onClick={copyShareableLink}>{messages.filterCopyLink}</button>
               {shareStatus && (
@@ -175,8 +239,85 @@ export default function ExploreWorkspace() {
           <summary>{messages.mapSelectedRegion}</summary>
           <div className="map-panel-content">
             <RegionPicker />
+            {renderTrendSummary()}
           </div>
         </details>
+
+        <section className={`explore-mobile-insights${mobileInsightTab === "summary" ? "" : " has-active-view"}`}>
+          <div className="mobile-insights-heading">
+            <span>{messages.mapSelectedRegion}</span>
+            <RegionPicker />
+          </div>
+          <div className="mobile-insight-tabs" role="tablist" aria-label={messages.trendPanelTitle}>
+            {([
+              ["summary", messages.trendSummaryTab],
+              ["chart", messages.trendChartTab],
+              ["table", messages.trendTableTab],
+            ] as const).map(([tab, label]) => (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                id={`mobile-insight-tab-${tab}`}
+                aria-selected={mobileInsightTab === tab}
+                tabIndex={mobileInsightTab === tab ? 0 : -1}
+                aria-controls="mobile-insight-content"
+                onKeyDown={(event) => {
+                  const target = event.currentTarget;
+                  const tabs = Array.from(
+                    target.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ?? [],
+                  );
+                  const index = tabs.indexOf(target);
+                  const forwardKey =
+                    document.documentElement.dir === "rtl" ? "ArrowLeft" : "ArrowRight";
+                  const backwardKey = forwardKey === "ArrowRight" ? "ArrowLeft" : "ArrowRight";
+                  let nextIndex = index;
+                  if (event.key === forwardKey) nextIndex = (index + 1) % tabs.length;
+                  if (event.key === backwardKey) nextIndex = (index - 1 + tabs.length) % tabs.length;
+                  if (event.key === "Home") nextIndex = 0;
+                  if (event.key === "End") nextIndex = tabs.length - 1;
+                  if (nextIndex === index) return;
+                  event.preventDefault();
+                  tabs[nextIndex]?.focus();
+                  const nextTab = tabs[nextIndex]?.id.replace("mobile-insight-tab-", "");
+                  if (nextTab === "summary" || nextTab === "chart" || nextTab === "table") {
+                    setMobileInsightTab(nextTab);
+                  }
+                }}
+                onClick={() => setMobileInsightTab(tab)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div
+            className="mobile-insight-content"
+            id="mobile-insight-content"
+            role="tabpanel"
+            aria-labelledby={`mobile-insight-tab-${mobileInsightTab}`}
+          >
+            {mobileInsightTab === "summary"
+              ? renderTrendSummary()
+              : renderTrendChart(mobileInsightTab, setMobileInsightTab)}
+          </div>
+        </section>
+
+        <section
+          className={`map-floating-panel explore-chart-panel${chartExpanded ? " is-expanded" : ""}${chartOpen ? "" : " is-collapsed"}`}
+          aria-label={messages.trendPanelTitle}
+        >
+          <div className="explore-chart-panel-heading">
+            <h2>{messages.trendPanelTitle}</h2>
+            <button type="button" onClick={() => setChartOpen((open) => !open)}>
+              {chartOpen ? messages.trendCollapse : messages.trendOpen}
+            </button>
+          </div>
+          {chartOpen && (
+            <div className="explore-chart-panel-content">
+              {renderTrendChart()}
+            </div>
+          )}
+        </section>
 
         <div className="timeline-bar" dir="ltr">
           <TimelineControl

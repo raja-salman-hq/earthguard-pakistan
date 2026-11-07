@@ -5,6 +5,7 @@ import type {
   RegionsResponse,
   TimeSeriesQuery,
   TimeSeriesResponse,
+  TrendQuery,
   TrendResponse,
   Variable,
   VariableId,
@@ -313,8 +314,22 @@ export function getMockTimeSeries(query: TimeSeriesQuery): TimeSeriesResponse {
   };
 }
 
-export function getMockTrendForVariable(variable: VariableId): TrendResponse {
-  return syntheticTrends[variable];
+export function getMockTrendForVariable(query: TrendQuery): TrendResponse {
+  const { variable, region, start, end } = query;
+
+  return {
+    ...syntheticTrends[variable],
+    trendLine: [
+      {
+        date: `${start}-01-01`,
+        value: getSyntheticValue(variable, region, start, 1),
+      },
+      {
+        date: `${end}-01-01`,
+        value: getSyntheticValue(variable, region, end, 1),
+      },
+    ],
+  };
 }
 
 export function getMockMapLayer(query: MapLayerQuery): MapLayerResponse {
@@ -359,9 +374,8 @@ export function getMockHotspots(variable: VariableId, limit: number) {
   }
 
   const direction = trend.direction === "decreasing" ? "decreasing" : "increasing";
-  const candidates = regionIds.slice(0, 3);
-
-  return candidates.slice(0, limit).map((regionId, index) => ({
+  return regionIds
+    .map((regionId, index) => ({
     regionId,
     value: getSyntheticValue(variable, regionId, 2025, 6),
     unit: definition.unit,
@@ -369,5 +383,7 @@ export function getMockHotspots(variable: VariableId, limit: number) {
     changePercent: trend.changePercent + index * 0.5,
     significant: true as const,
     summary: `Demo only: generated change pattern for ${regionNames[regionId]}.`,
-  }));
+    }))
+    .sort((left, right) => Math.abs(right.changePercent) - Math.abs(left.changePercent))
+    .slice(0, limit);
 }

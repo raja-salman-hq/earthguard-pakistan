@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getPakistanProvinceRegions } from "@/lib/api";
 import { useMessages } from "@/hooks/use-messages";
@@ -7,6 +8,7 @@ import { useUiStore } from "@/store/ui-store";
 import { regionIdSchema } from "@/types/api";
 
 export function RegionPicker() {
+  const selectId = useId();
   const messages = useMessages();
   const selectedRegion = useUiStore((state) => state.region);
   const setRegion = useUiStore((state) => state.setRegion);
@@ -32,10 +34,10 @@ export function RegionPicker() {
 
   return (
     <div className="filter-field-group">
-      <label className="map-field" htmlFor="map-region-select">
+      <label className="map-field" htmlFor={selectId}>
         <span>{messages.mapRegionList}</span>
         <select
-          id="map-region-select"
+          id={selectId}
           value={selectedRegion}
           dir="ltr"
           onChange={(event) => {

@@ -65,7 +65,7 @@ export function getTrend(query: TrendQuery) {
     path: "api/trend",
     schema: trendResponseSchema,
     query: validQuery,
-    mock: () => getMockTrendForVariable(validQuery.variable),
+    mock: () => getMockTrendForVariable(validQuery),
   });
 }
 

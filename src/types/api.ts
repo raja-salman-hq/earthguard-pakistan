@@ -109,6 +109,15 @@ export const trendResponseSchema = z.object({
   changePercent: z.number().finite(),
   confidence: z.number().min(0).max(1),
   summary: z.string().min(1),
+  trendLine: z
+    .array(
+      z.object({
+        date: z.string().date(),
+        value: z.number().finite(),
+      }),
+    )
+    .min(2)
+    .optional(),
 });
 
 export const mapLayerQuerySchema = z
