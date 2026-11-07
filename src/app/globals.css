@@ -1261,7 +1261,6 @@ html[lang="ur"] .feedback-card h1 {
     background: var(--background);
     box-shadow: var(--shadow);
     isolation: isolate;
-    pointer-events: none;
   }
 
   .map-canvas,
