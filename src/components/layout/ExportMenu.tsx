@@ -28,19 +28,25 @@ export function ExportMenu({ metadata, series }: ExportMenuProps) {
       const charts = Array.from(
         document.querySelectorAll<SVGSVGElement>("[data-export-chart] svg"),
       );
-      const visibleChart = charts.find((chart) => {
+      const availableCharts = charts.filter((chart) => {
         const bounds = chart.getBoundingClientRect();
-        return (
-          bounds.width > 0 &&
-          bounds.height > 0 &&
-          getComputedStyle(chart).visibility !== "hidden"
-        );
+        return bounds.width > 0 && bounds.height > 0;
       });
-      if (!visibleChart) {
-        throw new Error("No visible chart is available to export.");
+      const visibleCharts = availableCharts.filter(
+        (candidate) => getComputedStyle(candidate).visibility !== "hidden",
+      );
+      const chart = (visibleCharts.length > 0 ? visibleCharts : availableCharts).sort(
+        (left, right) => {
+          const leftBounds = left.getBoundingClientRect();
+          const rightBounds = right.getBoundingClientRect();
+          return rightBounds.width * rightBounds.height - leftBounds.width * leftBounds.height;
+        },
+      )[0];
+      if (!chart) {
+        throw new Error("No rendered chart is available to export.");
       }
 
-      await downloadChartPng(visibleChart, exportMetadata, series, {
+      await downloadChartPng(chart, exportMetadata, series, {
         dataCredit: messages.exportDataCredit,
         demoLabel: messages.demoBadge,
         period: messages.exportPeriod,

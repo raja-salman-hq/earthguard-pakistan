@@ -104,7 +104,11 @@ export function CompareLineChart({
         aria-describedby={summaryId}
         dir="ltr"
       >
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          initialDimension={{ width: 640, height: 290 }}
+        >
           <LineChart data={data} margin={{ top: 10, right: 12, bottom: 24, left: 12 }}>
             <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
             <XAxis

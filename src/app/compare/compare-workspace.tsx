@@ -529,7 +529,9 @@ export default function CompareWorkspace() {
                   <caption>{messages.compareTableCaption}</caption>
                   <thead>
                     <tr>
-                      <th scope="col">{messages.compareItem}</th>
+                      <th scope="col">
+                        {mode === "regions" ? messages.compareRegion : messages.compareVariable}
+                      </th>
                       <th scope="col">{messages.compareSlope}</th>
                       <th scope="col">{messages.compareUnit}</th>
                       <th scope="col">{messages.compareTotalChange}</th>
