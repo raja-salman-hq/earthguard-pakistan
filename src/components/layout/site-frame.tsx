@@ -13,6 +13,10 @@ export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>)
   const language = useUiStore((state) => state.language);
   const setTheme = useUiStore((state) => state.setTheme);
   const setLanguage = useUiStore((state) => state.setLanguage);
+  const logoSrc =
+    theme === "dark"
+      ? "/brand/earthguard-horizontal.svg"
+      : "/brand/earthguard-horizontal-light.svg";
 
   return (
     <div className="site-frame">
@@ -22,7 +26,7 @@ export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>)
           <Link className="brand" href="/" aria-label={`${messages.brand} ${messages.country}`}>
             <Image
               className="brand-logo"
-              src="/brand/earthguard-horizontal.svg"
+              src={logoSrc}
               width={292}
               height={56}
               alt=""
@@ -67,7 +71,7 @@ export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>)
           <Link className="footer-brand" href="/" aria-label={`${messages.brand} ${messages.country}`}>
             <Image
               className="brand-logo"
-              src="/brand/earthguard-horizontal.svg"
+              src={logoSrc}
               width={292}
               height={56}
               alt=""

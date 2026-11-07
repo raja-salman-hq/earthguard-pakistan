@@ -114,6 +114,7 @@ export function PakistanMap({
   const layerType = useUiStore((state) => state.mapLayerType);
   const changeBasis = useUiStore((state) => state.changeBasis);
   const [fallbackStyle, setFallbackStyle] = useState(false);
+  const fallbackUpdateQueued = useRef(false);
   const [hoveredRegion, setHoveredRegion] = useState<HoveredRegion | null>(null);
   const colors = useMemo(() => readMapColors(), []);
   const mapLib = useMemo(() => import("maplibre-gl"), []);
@@ -377,7 +378,12 @@ export function PakistanMap({
   );
 
   const handleMapError = useCallback(() => {
-    setFallbackStyle(true);
+    if (fallbackUpdateQueued.current) {
+      return;
+    }
+
+    fallbackUpdateQueued.current = true;
+    queueMicrotask(() => setFallbackStyle(true));
   }, []);
   const mapStyle = fallbackStyle ? plainStyle : MAP_STYLE_URL;
 
