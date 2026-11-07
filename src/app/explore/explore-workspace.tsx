@@ -38,7 +38,6 @@ function MapChunkSkeleton() {
 
 export default function ExploreWorkspace() {
   const messages = useMessages();
-  const selectedRegion = useUiStore((state) => state.region);
   const setRegion = useUiStore((state) => state.setRegion);
   const variableId = useUiStore((state) => state.variable);
   const yearRange = useUiStore((state) => state.yearRange);
@@ -62,11 +61,6 @@ export default function ExploreWorkspace() {
   const variable = variablesQuery.data?.find(
     (item) => item.id === variableId,
   );
-  const regions = boundariesQuery.data?.features ?? [];
-  const selectedName =
-    regions.find((feature) => feature.id === selectedRegion)?.properties.name ??
-    selectedRegion;
-
   useEffect(() => {
     if (!variable) {
       return;
@@ -166,7 +160,6 @@ export default function ExploreWorkspace() {
               error={variablesQuery.error?.message}
             />
             <LayerToggle />
-            <RegionPicker />
             <div className="explore-share-actions">
               <button type="button" onClick={copyShareableLink}>{messages.filterCopyLink}</button>
               {shareStatus && (
@@ -181,12 +174,11 @@ export default function ExploreWorkspace() {
         <details className="map-floating-panel map-region-panel" open>
           <summary>{messages.mapSelectedRegion}</summary>
           <div className="map-panel-content">
-            <span className="map-panel-eyebrow">{messages.mapSelectedRegion}</span>
-            <h2>{selectedName}</h2>
+            <RegionPicker />
           </div>
         </details>
 
-        <div className="timeline-bar">
+        <div className="timeline-bar" dir="ltr">
           <TimelineControl
             variable={variable}
             loading={variablesQuery.isPending}

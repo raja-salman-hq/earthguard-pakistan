@@ -382,7 +382,7 @@ export function PakistanMap({
   const mapStyle = fallbackStyle ? plainStyle : MAP_STYLE_URL;
 
   return (
-    <div className="map-canvas">
+    <div className="map-canvas" dir="ltr">
       <MapView
         ref={mapRef}
         mapLib={mapLib}
@@ -451,7 +451,12 @@ export function PakistanMap({
           <span>
             {hoveredRegion.value === null
               ? messages.mapNoData
-              : `${new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(hoveredRegion.value)} ${variable?.unit ?? ""}`}
+              : (
+                <>
+                  <bdi dir="ltr">{new Intl.NumberFormat("en", { maximumFractionDigits: 2 }).format(hoveredRegion.value)}</bdi>{" "}
+                  <bdi dir="ltr">{variable?.unit ?? ""}</bdi>
+                </>
+              )}
           </span>
         </div>
       )}

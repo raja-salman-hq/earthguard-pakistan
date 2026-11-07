@@ -11,7 +11,7 @@ type MapLegendProps = {
 };
 
 function formatValue(value: number): string {
-  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value);
+  return new Intl.NumberFormat("en", { maximumFractionDigits: 2 }).format(value);
 }
 
 export function MapLegend({ variable, values, layerType }: MapLegendProps) {
@@ -33,7 +33,7 @@ export function MapLegend({ variable, values, layerType }: MapLegendProps) {
     <aside className="map-legend glass-panel" aria-label={messages.mapLegend}>
       <div className="map-legend-heading">
         <strong>{variable.name}</strong>
-        <span>{variable.unit}</span>
+        <bdi dir="ltr">{variable.unit}</bdi>
       </div>
       <div
         className={`map-legend-gradient map-legend-gradient-${layerType}`}
@@ -41,8 +41,8 @@ export function MapLegend({ variable, values, layerType }: MapLegendProps) {
         aria-label={`${messages.mapLegend}: ${formatValue(lowerBound)} to ${formatValue(upperBound)} ${variable.unit}`}
       />
       <div className="map-legend-range">
-        <span>{formatValue(lowerBound)}</span>
-        <span>{formatValue(upperBound)}</span>
+        <bdi dir="ltr">{formatValue(lowerBound)}</bdi>
+        <bdi dir="ltr">{formatValue(upperBound)}</bdi>
       </div>
     </aside>
   );

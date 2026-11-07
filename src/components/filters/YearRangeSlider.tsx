@@ -58,7 +58,7 @@ export function YearRangeSlider({ variable, loading, error }: YearRangeSliderPro
     <div className="filter-field-group">
       <div className="range-label-row">
         <span className="map-field-label">{messages.filterYearRange}</span>
-        <span className="map-number">{draft[0]}–{draft[1]}</span>
+        <bdi className="map-number" dir="ltr">{draft[0]}–{draft[1]}</bdi>
       </div>
       <div className="dual-range">
         <div className="dual-range-track" aria-hidden="true">
@@ -94,8 +94,8 @@ export function YearRangeSlider({ variable, loading, error }: YearRangeSliderPro
         />
       </div>
       <div className="range-bound-labels">
-        <span>{variable.availableFrom}</span>
-        <span>{variable.availableTo}</span>
+        <bdi dir="ltr">{variable.availableFrom}</bdi>
+        <bdi dir="ltr">{variable.availableTo}</bdi>
       </div>
     </div>
   );

@@ -137,7 +137,7 @@ export function TimelineControl({ variable, loading, error }: TimelineControlPro
         {playing && !reducedMotion ? "Ⅱ" : "▶"}
       </button>
       <label className="timeline-slider-group">
-        <span className="timeline-year">{currentYear}</span>
+        <bdi className="timeline-year" dir="ltr">{currentYear}</bdi>
         <input
           type="range"
           min={rangeStart}

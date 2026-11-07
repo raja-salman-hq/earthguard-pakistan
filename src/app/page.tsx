@@ -15,7 +15,7 @@ export default function HomePage() {
           <p>{messages.heroSubtitle}</p>
           <Link className="primary-button" href="/explore">
             {messages.startExploring}
-            <span aria-hidden="true" className="ms-2">
+            <span aria-hidden="true" className="ms-2 start-exploring-arrow">
               →
             </span>
           </Link>

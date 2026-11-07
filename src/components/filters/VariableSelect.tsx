@@ -56,6 +56,7 @@ export function VariableSelect() {
         <select
           id="variable-select"
           value={selectedVariable}
+          dir="ltr"
           onChange={(event) => handleVariableChange(event.currentTarget.value)}
         >
           {variables.map((item) => (
@@ -72,7 +73,13 @@ export function VariableSelect() {
             <summary aria-label={messages.filterVariableInfo}>{messages.filterVariableInfo}</summary>
             <div className="variable-info-content">
               <span>{selected.source}</span>
-              <span>{messages.filterAvailableYears}: {selected.availableFrom}–{selected.availableTo}</span>
+              <span>
+                {selected.name}: <bdi dir="ltr">{selected.unit}</bdi>
+              </span>
+              <span>
+                {messages.filterAvailableYears}:{" "}
+                <bdi dir="ltr">{selected.availableFrom}–{selected.availableTo}</bdi>
+              </span>
             </div>
           </details>
         </div>
