@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { isDemoMode } from "@/lib/api/client";
 import { useMessages } from "@/hooks/use-messages";
 import { useUiStore } from "@/store/ui-store";
+import { LocalizedMetadataSync } from "@/components/layout/localized-metadata-sync";
 
 export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>) {
   const messages = useMessages();
@@ -14,16 +16,18 @@ export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>)
 
   return (
     <div className="site-frame">
+      <LocalizedMetadataSync />
       <header className="site-header">
         <div className="header-inner">
           <Link className="brand" href="/" aria-label={`${messages.brand} ${messages.country}`}>
-            <span className="brand-mark" aria-hidden="true">
-              E
-            </span>
-            <span className="brand-name">
-              <strong>{messages.brand}</strong>
-              <span>{messages.country}</span>
-            </span>
+            <Image
+              className="brand-logo"
+              src="/brand/earthguard-horizontal.svg"
+              width={292}
+              height={56}
+              alt=""
+              priority
+            />
           </Link>
 
           <nav className="primary-nav" aria-label={messages.mainNavigation}>
@@ -60,8 +64,24 @@ export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>)
 
       <footer className="site-footer">
         <div className="footer-inner">
-          <p>{messages.nasaCredit}</p>
-          <p className="footer-note">{messages.syntheticNotice}</p>
+          <Link className="footer-brand" href="/" aria-label={`${messages.brand} ${messages.country}`}>
+            <Image
+              className="brand-logo"
+              src="/brand/earthguard-horizontal.svg"
+              width={292}
+              height={56}
+              alt=""
+            />
+          </Link>
+          <div className="footer-credits">
+            <div className="footer-credit-links">
+              <a href="https://www.geoboundaries.org" target="_blank" rel="noreferrer">
+                {messages.footerBoundaries}
+              </a>
+              <Link href="/about">{messages.footerAbout}</Link>
+            </div>
+            {isDemoMode && <p className="footer-note">{messages.syntheticNotice}</p>}
+          </div>
         </div>
       </footer>
     </div>

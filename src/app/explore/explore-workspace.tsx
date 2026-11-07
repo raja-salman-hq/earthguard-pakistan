@@ -78,13 +78,14 @@ export default function ExploreWorkspace() {
     (item) => item.id === variableId,
   );
   const trendQuery = useQuery({
-    queryKey: ["trend", variableId, selectedRegion, yearRange[0], yearRange[1]],
+    queryKey: ["trend", variableId, selectedRegion, yearRange[0], yearRange[1], language],
     queryFn: () =>
       getTrend({
         variable: variableId,
         region: selectedRegion,
         start: yearRange[0],
         end: yearRange[1],
+        lang: language,
       }),
     staleTime: 60_000,
     placeholderData: (previousData) => previousData,

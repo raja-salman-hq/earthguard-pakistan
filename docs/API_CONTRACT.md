@@ -1,8 +1,8 @@
 # EarthGuard Pakistan API contract
 
-The frontend contract is a draft for the backend integration. Request and
-response validation is defined in `src/types/api.ts`; all HTTP calls pass through
-`src/lib/api/`. No trend statistics are calculated in the browser.
+This contract is used by the frontend and its backend integration checker.
+Request and response validation is defined in `src/types/api.ts`; all HTTP calls
+pass through `src/lib/api/`. No trend statistics are calculated in the browser.
 
 Set `NEXT_PUBLIC_USE_MOCK=true` for synthetic demo responses. Set it to `false`
 to call `NEXT_PUBLIC_API_URL`. Every response, including mock responses, is
@@ -12,8 +12,15 @@ The examples below are illustrative and are **not NASA observations**. The mock
 regions have no geometries. The explore map uses the local
 `public/data/pakistan-provinces.geojson` geoBoundaries FeatureCollection, whose
 province names are read from `properties.shapeName` and mapped explicitly to
-mock region IDs. Unknown or missing regions are errors; the frontend does not
-guess a mapping.
+the seven region IDs. Unknown or missing regions are errors; the frontend does
+not guess a mapping. The map currently reads its boundary geometry from this
+local file in both mock and live modes; it does not use `/api/regions` geometry.
+Keep the static file as the map-boundary fallback/source. `/api/regions` supplies
+region metadata and is validated independently.
+
+All required numeric response values must be finite JSON numbers, not `null`.
+Dates must be valid ISO `YYYY-MM-DD` dates. The only currently permitted null in
+the response schemas is `geometry` in `/api/regions`.
 
 ## `GET /api/variables`
 
@@ -99,7 +106,7 @@ illustrative seasonal cycles and gentle trends. Demo yearly points use a
 representative seasonal value and are placeholders, not annual aggregates.
 Define the live API's annual aggregation semantics with the backend.
 
-## `GET /api/trend` — proposed extension
+## `GET /api/trend`
 
 Request:
 
@@ -107,9 +114,9 @@ Request:
 GET /api/trend?variable=air_temperature&region=punjab&start=2000&end=2025&lang=en
 ```
 
-`lang` is a proposed optional parameter (`en` or `ur`) for localizing the
-backend-generated `summary`. Until the backend confirms support, the frontend
-must treat `summary` as English-only.
+`lang` is required and must be `en` or `ur`. The backend-generated `summary`
+must use the requested language. The frontend includes `lang` in its trend query
+cache key so English and Urdu results are not mixed.
 
 Response:
 
@@ -131,17 +138,17 @@ Response:
 }
 ```
 
-Proposed optional `trendLine` points provide the backend-computed line to overlay
-on the time-series chart. Each point uses an ISO date and the same value unit as
-the selected time series. The backend must compute these values; the frontend
-must not infer a line from `slope`, fit a regression, or calculate an intercept.
-If `trendLine` is absent, the frontend will display the time series without a
-trend line and explain that the backend trend line is not yet available.
+Optional `trendLine` points provide the backend-computed line to overlay on the
+time-series chart. Each point uses an ISO date and the same value unit as the
+selected time series. The backend must compute these values; the frontend must
+not infer a line from `slope`, fit a regression, or calculate an intercept. If
+`trendLine` is absent, the frontend displays the time series without a trend line
+and explains that the backend trend line is not yet available.
 
-The backend owns slope, Mann–Kendall, p-value, significance, and confidence
-calculations. Mock trend fields are fixed synthetic examples and do not describe
-the generated time series or any real region. The optional trend line and
-localized summary remain proposals pending backend confirmation.
+The backend owns slope, Mann–Kendall, p-value, significance, confidence, and
+trend-line calculations. Mock trend fields are fixed synthetic examples and do
+not describe the generated time series or any real region. Mock summaries are
+available in English and Urdu.
 
 ## `GET /api/map-layer`
 

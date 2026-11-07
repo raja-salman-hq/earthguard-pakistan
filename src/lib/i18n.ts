@@ -13,8 +13,8 @@ export const messages = {
     lightTheme: "Light",
     darkTheme: "Dark",
     demoBadge: "DEMO DATA",
-    nasaCredit:
-      "NASA Earth observation data credits will be provided when the live API is connected.",
+    footerBoundaries: "Boundary data: geoBoundaries (CC BY 4.0)",
+    footerAbout: "Project and data details",
     syntheticNotice: "Demo values are synthetic and are not NASA observations.",
     heroEyebrow: "EARTH SYSTEM TREND DETECTIVE",
     heroTitle: "See how Pakistan’s environment has changed",
@@ -44,6 +44,92 @@ export const messages = {
     compareDescription: "Compare backend-provided trends across regions or variables.",
     aboutTitle: "About EarthGuard Pakistan",
     aboutDescription: "Learn how this project presents environmental observations and trends.",
+    seoHomeTitle: "Explore environmental change in Pakistan",
+    seoHomeDescription:
+      "Explore environmental patterns across Pakistan with clear explanations of change over time.",
+    seoExploreTitle: "Explore Pakistan’s environmental data",
+    seoExploreDescription:
+      "Explore mapped environmental values and backend-computed trends across Pakistan.",
+    seoCompareTitle: "Compare environmental trends in Pakistan",
+    seoCompareDescription:
+      "Compare backend-provided environmental trends across regions or variables in Pakistan.",
+    seoAboutTitle: "About EarthGuard Pakistan",
+    seoAboutDescription:
+      "Learn what EarthGuard Pakistan measures, how it presents environmental trends, and where its data comes from.",
+    aboutEyebrow: "PROJECT / METHOD / DATA",
+    aboutPurposeTitle: "Project purpose",
+    aboutPurposeText:
+      "EarthGuard Pakistan helps people explore how environmental indicators vary across places and time. It presents maps, time series, and backend-computed trend results in plain language.",
+    aboutChallengeTitle: "The challenge we answer",
+    aboutChallengeText:
+      "This project is being built for the 2026 NASA Space Apps Challenge, “Be An Earth System Trend Detective!” It helps users ask where an environmental variable changed, by how much, and whether the reported trend is statistically significant. The project is not an official NASA product.",
+    aboutMeasuresTitle: "What we measure",
+    aboutMeasuresText:
+      "The available indicators and year ranges come from the variables service. Descriptions below explain each indicator in everyday language.",
+    aboutAirTemperatureDescription: "How warm the air near the ground is over time.",
+    aboutPrecipitationDescription: "Rainfall or other precipitation accumulated over time.",
+    aboutVegetationIndexDescription: "An indicator of how much green vegetation is present.",
+    aboutSnowCoverDescription: "The area covered by snow.",
+    aboutSoilMoistureDescription: "The amount of water held in soil.",
+    aboutEvapotranspirationDescription:
+      "Water transferred from land and plants into the atmosphere.",
+    aboutLandSurfaceTemperatureDescription: "The temperature of the land surface.",
+    aboutVariablesLoading: "Loading available variables",
+    aboutVariablesError: "Available variables could not be loaded.",
+    aboutVariablesEmpty: "No variables are currently available.",
+    aboutRetry: "Retry",
+    aboutAvailableYears: "Available years",
+    aboutMethodsTitle: "How we detect change",
+    aboutTrendTitle: "Trend",
+    aboutTrendText:
+      "A trend describes the overall direction of values through the selected period. Short-term ups and downs can still occur.",
+    aboutSenSlopeTitle: "Sen’s slope",
+    aboutSenSlopeText:
+      "Sen’s slope estimates the typical amount of change per time step. It uses the median of pairwise rates, so a few unusually high or low values have less influence.",
+    aboutMannKendallTitle: "Mann–Kendall test",
+    aboutMannKendallText:
+      "This rank-based test checks whether values tend to move consistently upward or downward over time. It does not describe why the change happened.",
+    aboutPValueTitle: "p-value",
+    aboutPValueText:
+      "The p-value describes how compatible the observed pattern is with a no-trend assumption. A smaller value is stronger evidence against that assumption; it is not the probability that a trend is true.",
+    aboutSignificanceTitle: "What “significant” means",
+    aboutSignificanceText:
+      "“Significant” means the backend’s statistical test met its configured significance rule. It does not mean the change is large, important, or caused by a particular event.",
+    aboutBackendNote:
+      "Trend statistics—including Sen’s slope, Mann–Kendall results, p-values, and significance—are computed by the backend. The browser only displays the returned results.",
+    aboutCreditsTitle: "Data sources and credits",
+    aboutDatasetSourcesTitle: "Sources reported by the variables service",
+    aboutBackendCredits:
+      "Data credits to be confirmed by the backend team",
+    aboutDemoCredits:
+      "Demo mode uses synthetic values. Dataset credits are intentionally not inferred from demo data.",
+    aboutBoundaryCitationPrefix:
+      "Please include the term 'geoBoundaries' with a link to ",
+    aboutBoundaryCitationSuffix: ".",
+    aboutBoundaryLicense: "The supplied boundary data is released under CC BY 4.0; attribution is required.",
+    aboutBoundaryMetadataCredit:
+      "For individual boundary files, the geoBoundaries citation instructions also ask users to cite sources listed in each file’s metadata where available.",
+    aboutAcademicCitation:
+      "Runfola D. geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866.",
+    aboutLimitationsTitle: "Limitations",
+    aboutResolutionLimit:
+      "Spatial detail depends on the source dataset and the map boundaries. Provincial summaries can hide local variation.",
+    aboutDisputedBoundaryLimit:
+      "Displayed administrative boundaries follow the supplied boundary source and are not a statement on territorial claims or disputes.",
+    aboutCausationLimit:
+      "A relationship or trend does not prove that one environmental factor caused another.",
+    aboutPeriodLimit:
+      "The apparent direction and size of a trend depend on the selected time period and available observations.",
+    aboutTeamTitle: "Team and open source",
+    aboutTeamPlaceholder: "Team members and affiliations: add names and organizations.",
+    aboutOpenSourcePlaceholder: "Source repository: add the public project URL.",
+    errorTitle: "Something went wrong",
+    errorDescription: "The page could not be displayed. You can try again or explore the data.",
+    errorRetry: "Try again",
+    errorExplore: "Go to Explore",
+    notFoundTitle: "Page not found",
+    notFoundDescription: "The page you requested does not exist or may have moved.",
+    notFoundExplore: "Explore Pakistan",
     controlsPlaceholder: "Filter controls",
     insightsPlaceholder: "Insights panel",
     workspacePlaceholder: "Interactive workspace",
@@ -52,6 +138,7 @@ export const messages = {
     loading: "Loading workspace",
     mapLoading: "Loading interactive map",
     mapLoadingData: "Loading province values",
+    apiWakingUp: "Waking up the data server...",
     mapDataError: "Province values could not be loaded.",
     mapNoData: "No province values are available for this selection.",
     mapBoundaryError: "Province boundaries could not be loaded.",
@@ -160,8 +247,6 @@ export const messages = {
     trendSentenceDecreasing: "From {start} to {end}, {variable} had a {direction} trend, with a total change of {change} {unit} ({percent}%).",
     trendSentenceNoChange: "From {start} to {end}, {variable} showed {direction}, with a total change of {change} {unit} ({percent}%).",
     trendBackendSummary: "Backend summary",
-    trendBackendSummaryEnglish: "Backend summary (English only)",
-    trendSummaryEnglishNote: "The backend summary is currently available in English only.",
     compareRegionsMode: "Compare regions",
     compareVariablesMode: "Compare variables",
     compareModes: "Comparison modes",
@@ -244,7 +329,8 @@ export const messages = {
     lightTheme: "روشن",
     darkTheme: "تاریک",
     demoBadge: "ڈیمو ڈیٹا",
-    nasaCredit: "لائیو API منسلک ہونے پر NASA ڈیٹا کے کریڈٹ شامل کیے جائیں گے۔",
+    footerBoundaries: "حدود کا ڈیٹا: geoBoundaries (CC BY 4.0)",
+    footerAbout: "منصوبے اور ڈیٹا کی تفصیل",
     syntheticNotice: "ڈیمو اقدار مصنوعی ہیں، NASA کے مشاہدات نہیں۔",
     heroEyebrow: "زمینی نظام کے رجحانات",
     heroTitle: "دیکھیں کہ پاکستان کا ماحول کیسے بدلا ہے",
@@ -274,6 +360,90 @@ export const messages = {
     compareDescription: "علاقوں یا متغیرات کے سرور سے فراہم کردہ رجحانات کا موازنہ کریں۔",
     aboutTitle: "ارتھ گارڈ پاکستان کے بارے میں",
     aboutDescription: "جانیں کہ یہ منصوبہ ماحولیاتی مشاہدات اور رجحانات کیسے دکھاتا ہے۔",
+    seoHomeTitle: "پاکستان میں ماحولیاتی تبدیلی دریافت کریں",
+    seoHomeDescription:
+      "پاکستان میں ماحولیاتی نمونوں اور وقت کے ساتھ تبدیلی کی واضح وضاحتیں دریافت کریں۔",
+    seoExploreTitle: "پاکستان کے ماحولیاتی ڈیٹا کا جائزہ",
+    seoExploreDescription:
+      "پاکستان کے ماحولیاتی نقشوں اور بیک اینڈ سے حاصل کردہ رجحانات کا جائزہ لیں۔",
+    seoCompareTitle: "پاکستان میں ماحولیاتی رجحانات کا موازنہ",
+    seoCompareDescription:
+      "پاکستان کے علاقوں یا متغیرات میں بیک اینڈ سے فراہم کردہ ماحولیاتی رجحانات کا موازنہ کریں۔",
+    seoAboutTitle: "ارتھ گارڈ پاکستان کے بارے میں",
+    seoAboutDescription:
+      "جانیں کہ ارتھ گارڈ پاکستان کیا ناپتا ہے، ماحولیاتی رجحانات کیسے دکھاتا ہے اور ڈیٹا کہاں سے آتا ہے۔",
+    aboutEyebrow: "منصوبہ / طریقہ / ڈیٹا",
+    aboutPurposeTitle: "منصوبے کا مقصد",
+    aboutPurposeText:
+      "ارتھ گارڈ پاکستان لوگوں کو مختلف مقامات اور اوقات میں ماحولیاتی اشاریوں کو سمجھنے میں مدد دیتا ہے۔ یہ نقشے، وقت کے ساتھ اقدار اور بیک اینڈ سے حاصل کردہ رجحانات کو آسان زبان میں دکھاتا ہے۔",
+    aboutChallengeTitle: "ہم کس چیلنج کا جواب دیتے ہیں",
+    aboutChallengeText:
+      "یہ منصوبہ 2026 کے NASA Space Apps Challenge، “Be An Earth System Trend Detective!” کے لیے بنایا جا رہا ہے۔ اس سے صارفین دیکھ سکتے ہیں کہ ماحولیاتی متغیر کہاں اور کتنا بدلا، اور آیا رپورٹ کردہ رجحان شماریاتی طور پر اہم ہے۔ یہ NASA کی سرکاری پراڈکٹ نہیں ہے۔",
+    aboutMeasuresTitle: "ہم کیا ناپتے ہیں",
+    aboutMeasuresText:
+      "دستیاب اشاریے اور سالوں کی حد متغیرات کی سروس سے آتی ہے۔ ذیل میں ہر اشاریے کی آسان وضاحت دی گئی ہے۔",
+    aboutAirTemperatureDescription: "وقت کے ساتھ زمین کے قریب ہوا کی گرمی۔",
+    aboutPrecipitationDescription: "وقت کے ساتھ جمع ہونے والی بارش یا دوسری بارش کی مقدار۔",
+    aboutVegetationIndexDescription: "موجود سبز نباتات کی مقدار کا ایک اشاریہ۔",
+    aboutSnowCoverDescription: "برف سے ڈھکا ہوا رقبہ۔",
+    aboutSoilMoistureDescription: "مٹی میں موجود پانی کی مقدار۔",
+    aboutEvapotranspirationDescription: "زمین اور پودوں سے فضا میں منتقل ہونے والا پانی۔",
+    aboutLandSurfaceTemperatureDescription: "زمین کی سطح کا درجہ حرارت۔",
+    aboutVariablesLoading: "دستیاب متغیرات لوڈ ہو رہے ہیں",
+    aboutVariablesError: "دستیاب متغیرات لوڈ نہیں ہو سکے۔",
+    aboutVariablesEmpty: "فی الحال کوئی متغیر دستیاب نہیں۔",
+    aboutRetry: "دوبارہ کوشش کریں",
+    aboutAvailableYears: "دستیاب سال",
+    aboutMethodsTitle: "تبدیلی کی شناخت کیسے ہوتی ہے",
+    aboutTrendTitle: "رجحان",
+    aboutTrendText:
+      "رجحان منتخب مدت میں اقدار کی مجموعی سمت بتاتا ہے۔ اس دوران مختصر مدت کے اتار چڑھاؤ بھی ہو سکتے ہیں۔",
+    aboutSenSlopeTitle: "سین کی ڈھلوان",
+    aboutSenSlopeText:
+      "سین کی ڈھلوان ہر وقت کے وقفے میں عام تبدیلی کا اندازہ لگاتی ہے۔ یہ جوڑوں کی شرحِ تبدیلی کا درمیانی عدد لیتی ہے، اس لیے چند غیر معمولی بڑی یا چھوٹی اقدار کا اثر کم ہوتا ہے۔",
+    aboutMannKendallTitle: "مین–کینڈل ٹیسٹ",
+    aboutMannKendallText:
+      "یہ درجہ بندی پر مبنی ٹیسٹ دیکھتا ہے کہ وقت کے ساتھ اقدار مسلسل بڑھنے یا گھٹنے کا رجحان رکھتی ہیں یا نہیں۔ یہ تبدیلی کی وجہ نہیں بتاتا۔",
+    aboutPValueTitle: "پی ویلیو",
+    aboutPValueText:
+      "پی ویلیو بتاتی ہے کہ دیکھی گئی صورتِ حال 'کوئی رجحان نہیں' کے مفروضے سے کتنی مطابقت رکھتی ہے۔ چھوٹی قدر اس مفروضے کے خلاف زیادہ ثبوت ہے؛ یہ رجحان درست ہونے کا امکان نہیں۔",
+    aboutSignificanceTitle: "“شماریاتی طور پر اہم” کا مطلب",
+    aboutSignificanceText:
+      "“اہم” کا مطلب ہے کہ بیک اینڈ کا شماریاتی ٹیسٹ اپنے مقررہ اصول پر پورا اترا۔ اس کا مطلب یہ نہیں کہ تبدیلی بڑی، اہمیت کی حامل یا کسی خاص واقعے کی وجہ سے ہے۔",
+    aboutBackendNote:
+      "رجحانی شماریات، بشمول سین کی ڈھلوان، مین–کینڈل نتائج، پی ویلیوز اور شماریاتی اہمیت، بیک اینڈ میں حساب کیے جاتے ہیں۔ براؤزر صرف موصولہ نتائج دکھاتا ہے۔",
+    aboutCreditsTitle: "ڈیٹا کے ذرائع اور کریڈٹ",
+    aboutDatasetSourcesTitle: "متغیرات کی سروس کے بتائے ہوئے ذرائع",
+    aboutBackendCredits: "ڈیٹا کے کریڈٹ کی تصدیق بیک اینڈ ٹیم سے ہونا باقی ہے",
+    aboutDemoCredits:
+      "ڈیمو موڈ میں مصنوعی اقدار استعمال ہوتی ہیں۔ ڈیمو ڈیٹا سے ڈیٹاسیٹ کے کریڈٹ اخذ نہیں کیے گئے۔",
+    aboutBoundaryCitationPrefix:
+      "براہِ کرم 'geoBoundaries' کی اصطلاح کے ساتھ اس لنک کا حوالہ دیں: ",
+    aboutBoundaryCitationSuffix: "۔",
+    aboutBoundaryLicense: "فراہم کردہ حدود کا ڈیٹا CC BY 4.0 کے تحت جاری ہے؛ کریڈٹ دینا ضروری ہے۔",
+    aboutBoundaryMetadataCredit:
+      "انفرادی حدود کی فائلوں کے لیے geoBoundaries کی ہدایات یہ بھی کہتی ہیں کہ جہاں دستیاب ہو، فائل کے میٹاڈیٹا میں درج ذرائع کا حوالہ دیں۔",
+    aboutAcademicCitation:
+      "Runfola D. geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866.",
+    aboutLimitationsTitle: "حدود اور احتیاطیں",
+    aboutResolutionLimit:
+      "مقامی تفصیل ماخذ ڈیٹاسیٹ اور نقشے کی حدود پر منحصر ہے۔ صوبائی خلاصے مقامی فرق چھپا سکتے ہیں۔",
+    aboutDisputedBoundaryLimit:
+      "دکھائی گئی انتظامی حدود فراہم کردہ ماخذ کے مطابق ہیں اور علاقائی دعووں یا تنازعات پر کوئی مؤقف نہیں۔",
+    aboutCausationLimit:
+      "کسی تعلق یا رجحان سے یہ ثابت نہیں ہوتا کہ ایک ماحولیاتی عنصر نے دوسرے کو پیدا کیا۔",
+    aboutPeriodLimit:
+      "رجحان کی سمت اور مقدار منتخب مدت اور دستیاب مشاہدات کے مطابق بدل سکتی ہے۔",
+    aboutTeamTitle: "ٹیم اور اوپن سورس",
+    aboutTeamPlaceholder: "ٹیم کے ارکان اور ادارے: نام اور تنظیمیں شامل کریں۔",
+    aboutOpenSourcePlaceholder: "ماخذ کوڈ کی ریپوزٹری: عوامی منصوبے کا لنک شامل کریں۔",
+    errorTitle: "کچھ خرابی پیش آئی",
+    errorDescription: "صفحہ نہیں دکھایا جا سکا۔ دوبارہ کوشش کریں یا ڈیٹا دریافت کریں۔",
+    errorRetry: "دوبارہ کوشش کریں",
+    errorExplore: "دریافت کے صفحے پر جائیں",
+    notFoundTitle: "صفحہ نہیں ملا",
+    notFoundDescription: "درخواست کردہ صفحہ موجود نہیں یا منتقل ہو چکا ہے۔",
+    notFoundExplore: "پاکستان دریافت کریں",
     controlsPlaceholder: "فلٹرز",
     insightsPlaceholder: "اہم معلومات",
     workspacePlaceholder: "انٹرایکٹو ورک اسپیس",
@@ -282,6 +452,7 @@ export const messages = {
     loading: "ورک اسپیس لوڈ ہو رہی ہے",
     mapLoading: "انٹرایکٹو نقشہ لوڈ ہو رہا ہے",
     mapLoadingData: "علاقائی اقدار لوڈ ہو رہی ہیں",
+    apiWakingUp: "ڈیٹا سرور فعال ہو رہا ہے...",
     mapDataError: "علاقائی اقدار لوڈ نہیں ہو سکیں۔",
     mapNoData: "اس انتخاب کے لیے کوئی علاقائی قدر دستیاب نہیں۔",
     mapBoundaryError: "صوبائی حدود لوڈ نہیں ہو سکیں۔",
@@ -390,8 +561,6 @@ export const messages = {
     trendSentenceDecreasing: "{start} سے {end} تک {variable} کا رجحان {direction} رہا۔ کل تبدیلی {change} {unit} ({percent}٪) تھی۔",
     trendSentenceNoChange: "{start} سے {end} تک {variable} میں {direction}۔ کل تبدیلی {change} {unit} ({percent}٪) تھی۔",
     trendBackendSummary: "بیک اینڈ کا خلاصہ",
-    trendBackendSummaryEnglish: "بیک اینڈ کا خلاصہ (صرف انگریزی میں)",
-    trendSummaryEnglishNote: "بیک اینڈ کا خلاصہ فی الحال صرف انگریزی میں دستیاب ہے۔",
     compareRegionsMode: "علاقوں کا موازنہ",
     compareVariablesMode: "متغیرات کا موازنہ",
     compareModes: "موازنہ کے طریقے",

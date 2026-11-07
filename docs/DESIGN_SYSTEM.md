@@ -4,6 +4,19 @@ The interface uses a dark, data-first visual language: deep blue-black surfaces,
 quiet borders, high-contrast type, and restrained green/blue highlights. The dark
 theme is the default. The header toggle switches to the light token set.
 
+## Brand assets
+
+- Use `public/brand/earthguard-horizontal.svg` for horizontal navigation and
+  footer lockups. Render it at roughly 180–212 CSS pixels wide; its logo mark is
+  designed to remain legible at 32 CSS pixels high.
+- Use `public/brand/earthguard-mark.svg` when only the symbol fits, including
+  the favicon. The Apple touch icon and 1200 × 630 social preview are generated
+  through the App Router metadata image conventions.
+- The SVG wordmark uses the brand teal `#22D3A6` and the dark surface `#121B2E`.
+  Keep these in sync with `--primary` and `--surface` in the stylesheet tokens.
+- Set `SITE_URL` in the deployment environment to the canonical public origin.
+  The `.example` value in `.env.example` is a placeholder, not a production URL.
+
 ## Color tokens
 
 | Token | Dark | Light | Use |
