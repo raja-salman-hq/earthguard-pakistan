@@ -45,9 +45,13 @@ function formatNumber(value: number): string {
   return new Intl.NumberFormat("en", { maximumSignificantDigits: 4 }).format(value);
 }
 
-function formatDate(value: string, resolution: TimeSeriesQuery["resolution"]): string {
+function formatDate(
+  value: string,
+  resolution: TimeSeriesQuery["resolution"],
+  language: "en" | "ur",
+): string {
   const date = new Date(`${value}T00:00:00Z`);
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat(language === "ur" ? "ur-u-nu-latn" : "en", {
     month: resolution === "monthly" ? "short" : undefined,
     year: resolution === "monthly" ? "2-digit" : "numeric",
     timeZone: "UTC",
@@ -226,7 +230,11 @@ export function TrendChart({
             <tbody>
               {observations.map((point) => (
                 <tr key={point.date}>
-                  <th scope="row"><bdi dir="ltr">{formatDate(point.date, resolution)}</bdi></th>
+                  <th scope="row">
+                    <bdi dir={language === "ur" ? "auto" : "ltr"}>
+                      {formatDate(point.date, resolution, language)}
+                    </bdi>
+                  </th>
                   <td><bdi dir="ltr">{formatNumber(point.value)}</bdi></td>
                 </tr>
               ))}
@@ -250,9 +258,13 @@ export function TrendChart({
                 <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
                 <XAxis
                   dataKey="date"
-                  tickFormatter={(value: string) => formatDate(value, resolution)}
+                  tickFormatter={(value: string) => formatDate(value, resolution, language)}
                   minTickGap={24}
-                  tick={{ fill: "var(--muted)", fontSize: 10 }}
+                  tick={{
+                    fill: "var(--muted)",
+                    fontSize: 10,
+                    direction: language === "ur" ? "rtl" : "ltr",
+                  }}
                   label={{ value: messages.trendAxisDate, position: "insideBottom", offset: -14, fill: "var(--muted)" }}
                 />
                 <YAxis
@@ -267,7 +279,7 @@ export function TrendChart({
                   }}
                 />
                 <Tooltip
-                  labelFormatter={(value) => formatDate(String(value), resolution)}
+                  labelFormatter={(value) => formatDate(String(value), resolution, language)}
                   formatter={(value, name) => [
                     `${formatNumber(Number(value))} ${query.data.unit}`,
                     String(name),
