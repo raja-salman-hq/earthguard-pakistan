@@ -1,12 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { useId } from "react";
 import { useMessages } from "@/hooks/use-messages";
 import { useUiStore } from "@/store/ui-store";
-import { getVariableLabel } from "@/lib/i18n";
 import type { TrendResponse, VariableId } from "@/types/api";
 import { SignificanceBadge } from "./SignificanceBadge";
+import { TrendTakeaway } from "./TrendTakeaway";
 
 type TrendSummaryCardProps = {
   trend: TrendResponse | undefined;
@@ -21,20 +20,6 @@ type TrendSummaryCardProps = {
 
 function formatNumber(value: number): string {
   return new Intl.NumberFormat("en", { maximumSignificantDigits: 4 }).format(value);
-}
-
-function interpolateSentence(
-  template: string,
-  values: Record<string, ReactNode>,
-): ReactNode[] {
-  return template.split(/(\{[a-zA-Z]+\})/g).map((part, index) => {
-    const key = part.slice(1, -1);
-    return part.startsWith("{") && key in values ? (
-      <span key={`${key}-${index}`}>{values[key]}</span>
-    ) : (
-      part
-    );
-  });
 }
 
 export function TrendSummaryCard({
@@ -84,21 +69,6 @@ export function TrendSummaryCard({
     decreasing: "↓",
     no_change: "→",
   }[trend.direction];
-  const sentenceTemplate = {
-    increasing: messages.trendSentenceIncreasing,
-    decreasing: messages.trendSentenceDecreasing,
-    no_change: messages.trendSentenceNoChange,
-  }[trend.direction];
-  const sentence = interpolateSentence(sentenceTemplate, {
-    start: <bdi dir="ltr">{start}</bdi>,
-    end: <bdi dir="ltr">{end}</bdi>,
-    variable: getVariableLabel(variable, language),
-    direction: direction.toLocaleLowerCase(language),
-    change: <bdi dir="ltr">{formatNumber(trend.changeTotal)}</bdi>,
-    unit: <bdi dir="ltr">{variableUnit}</bdi>,
-    percent: <bdi dir="ltr">{formatNumber(trend.changePercent)}</bdi>,
-  });
-
   return (
     <section className="trend-summary-card" aria-labelledby={headingId} aria-busy={loading}>
       <h3 id={headingId}>{messages.trendSummaryTitle}</h3>
@@ -134,7 +104,7 @@ export function TrendSummaryCard({
           </strong>
         </div>
       </div>
-      <p className="trend-plain-language">{sentence}</p>
+      <TrendTakeaway trend={trend} variable={variable} variableUnit={variableUnit} start={start} end={end} />
       <div className="trend-backend-summary">
         <span className="map-panel-eyebrow">{messages.trendBackendSummaryEnglish}</span>
         <p lang="en" dir="ltr">{trend.summary}</p>

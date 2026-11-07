@@ -29,6 +29,8 @@ type TrendChartProps = {
   end: number;
   trendLine: Array<{ date: string; value: number }> | undefined;
   trendLineLoaded: boolean;
+  resolution?: TimeSeriesQuery["resolution"];
+  onResolutionChange?: (resolution: TimeSeriesQuery["resolution"]) => void;
   displayMode?: TrendChartView;
   onDisplayModeChange?: (mode: TrendChartView) => void;
   expanded?: boolean;
@@ -76,6 +78,8 @@ export function TrendChart({
   end,
   trendLine,
   trendLineLoaded,
+  resolution: controlledResolution,
+  onResolutionChange,
   displayMode,
   onDisplayModeChange,
   expanded = false,
@@ -85,8 +89,9 @@ export function TrendChart({
   const language = useUiStore((state) => state.language);
   const headingId = useId();
   const descriptionId = useId();
-  const [resolution, setResolution] = useState<TimeSeriesQuery["resolution"]>("monthly");
+  const [localResolution, setLocalResolution] = useState<TimeSeriesQuery["resolution"]>("monthly");
   const [localDisplayMode, setLocalDisplayMode] = useState<TrendChartView>("chart");
+  const resolution = controlledResolution ?? localResolution;
   const view = displayMode ?? localDisplayMode;
   const title = messages.trendChartTitle
     .replace("{variable}", getVariableLabel(variable, language))
@@ -115,6 +120,14 @@ export function TrendChart({
       onDisplayModeChange(mode);
     } else {
       setLocalDisplayMode(mode);
+    }
+  }
+
+  function changeResolution(nextResolution: TimeSeriesQuery["resolution"]) {
+    if (onResolutionChange) {
+      onResolutionChange(nextResolution);
+    } else {
+      setLocalResolution(nextResolution);
     }
   }
 
@@ -170,7 +183,7 @@ export function TrendChart({
               value={resolution}
               onChange={(event) => {
                 if (event.currentTarget.value === "monthly" || event.currentTarget.value === "yearly") {
-                  setResolution(event.currentTarget.value);
+                  changeResolution(event.currentTarget.value);
                 }
               }}
             >
@@ -248,6 +261,7 @@ export function TrendChart({
           </p>
           <div
             className="trend-chart-plot"
+            data-export-chart
             role="img"
             aria-labelledby={headingId}
             aria-describedby={descriptionId}

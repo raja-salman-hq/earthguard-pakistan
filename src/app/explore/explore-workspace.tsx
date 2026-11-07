@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
-import { getPakistanProvinceRegions, getTrend, getVariables } from "@/lib/api";
+import { getPakistanProvinceRegions, getTimeSeries, getTrend, getVariables } from "@/lib/api";
 import { useMessages } from "@/hooks/use-messages";
 import { useUiStore } from "@/store/ui-store";
 import type { PakistanMapProps } from "@/components/map/PakistanMap";
@@ -15,7 +15,9 @@ import { useEffect, useState } from "react";
 import { TrendSummaryCard } from "@/components/insights/TrendSummaryCard";
 import { HotspotsList } from "@/components/insights/HotspotsList";
 import type { TrendChartView } from "@/components/charts/TrendChart";
-import type { Variable } from "@/types/api";
+import type { TimeSeriesQuery, Variable } from "@/types/api";
+import { ExportMenu } from "@/components/layout/ExportMenu";
+import { getRegionLabel, getVariableLabel } from "@/lib/i18n";
 
 const PakistanMap = dynamic<PakistanMapProps>(
   () => import("@/components/map/PakistanMap").then((module) => module.PakistanMap),
@@ -46,6 +48,7 @@ function MapChunkSkeleton() {
 
 export default function ExploreWorkspace() {
   const messages = useMessages();
+  const language = useUiStore((state) => state.language);
   const selectedRegion = useUiStore((state) => state.region);
   const setRegion = useUiStore((state) => state.setRegion);
   const variableId = useUiStore((state) => state.variable);
@@ -57,10 +60,11 @@ export default function ExploreWorkspace() {
   const setMapLayerType = useUiStore((state) => state.setMapLayerType);
   const setChangeBasis = useUiStore((state) => state.setChangeBasis);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [shareStatus, setShareStatus] = useState<"copied" | "error" | null>(null);
   const [mobileInsightTab, setMobileInsightTab] = useState<"summary" | TrendChartView>("summary");
   const [chartOpen, setChartOpen] = useState(true);
   const [chartExpanded, setChartExpanded] = useState(false);
+  const [chartResolution, setChartResolution] =
+    useState<TimeSeriesQuery["resolution"]>("monthly");
   const variablesQuery = useQuery({
     queryKey: ["variables"],
     queryFn: getVariables,
@@ -85,6 +89,29 @@ export default function ExploreWorkspace() {
     staleTime: 60_000,
     placeholderData: (previousData) => previousData,
   });
+  const exportSeriesQuery = useQuery({
+    queryKey: ["timeseries", variableId, selectedRegion, yearRange[0], yearRange[1], chartResolution],
+    queryFn: () =>
+      getTimeSeries({
+        variable: variableId,
+        region: selectedRegion,
+        start: yearRange[0],
+        end: yearRange[1],
+        resolution: chartResolution,
+      }),
+    enabled: Boolean(variable),
+    staleTime: 60_000,
+    placeholderData: (previousData) => previousData,
+  });
+  const exportSeries =
+    exportSeriesQuery.data?.variable === variableId &&
+    exportSeriesQuery.data.region === selectedRegion
+      ? [{
+          label: getRegionLabel(selectedRegion, language),
+          unit: exportSeriesQuery.data.unit,
+          points: exportSeriesQuery.data.points,
+        }]
+      : [];
   const trendChartProps = {
     variable: variableId,
     region: selectedRegion,
@@ -92,6 +119,8 @@ export default function ExploreWorkspace() {
     end: yearRange[1],
     trendLine: trendQuery.data?.trendLine,
     trendLineLoaded: Boolean(trendQuery.data),
+    resolution: chartResolution,
+    onResolutionChange: setChartResolution,
   };
 
   function renderTrendSummary() {
@@ -154,17 +183,6 @@ export default function ExploreWorkspace() {
     setLayer(defaults.id);
     setMapLayerType("absolute");
     setChangeBasis("previous-year");
-    setShareStatus(null);
-  }
-
-  async function copyShareableLink() {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setShareStatus("copied");
-    } catch (error) {
-      console.error("Could not copy the shareable explore URL.", error);
-      setShareStatus("error");
-    }
   }
 
   return (
@@ -174,6 +192,23 @@ export default function ExploreWorkspace() {
           <span className="eyebrow">{messages.country}</span>
           <h1>{messages.exploreTitle}</h1>
           <p>{messages.exploreDescription}</p>
+        </div>
+        <div className="explore-heading-actions">
+          <ExportMenu
+            metadata={{
+              fileName: `${variableId}-${selectedRegion}-${yearRange[0]}-${yearRange[1]}`,
+              title: messages.trendChartTitle
+                .replace("{variable}", getVariableLabel(variableId, language))
+                .replace("{region}", getRegionLabel(selectedRegion, language)),
+              variableLabel: getVariableLabel(variableId, language),
+              regionLabel: getRegionLabel(selectedRegion, language),
+              unitLabel: variable?.unit ?? messages.mapUnitUnavailable,
+              yearRangeLabel: `${yearRange[0]}–${yearRange[1]}`,
+              source: variable?.source ?? messages.exportSourceUnavailable,
+              demoLabel: messages.exportSyntheticCredit,
+            }}
+            series={exportSeries}
+          />
         </div>
       </div>
 
@@ -224,14 +259,6 @@ export default function ExploreWorkspace() {
             />
             <LayerToggle />
             <HotspotsList variable={variableId} />
-            <div className="explore-share-actions">
-              <button type="button" onClick={copyShareableLink}>{messages.filterCopyLink}</button>
-              {shareStatus && (
-                <span className={shareStatus === "error" ? "map-inline-error" : "share-status"} role="status">
-                  {shareStatus === "copied" ? messages.filterLinkCopied : messages.filterCopyError}
-                </span>
-              )}
-            </div>
           </div>
         </div>
 

@@ -7,6 +7,7 @@ type SignificanceBadgeProps = {
   significant: boolean;
   pValue: number;
   confidence: number;
+  compact?: boolean;
 };
 
 function formatNumber(value: number): string {
@@ -24,6 +25,7 @@ export function SignificanceBadge({
   significant,
   pValue,
   confidence,
+  compact = false,
 }: SignificanceBadgeProps) {
   const messages = useMessages();
   const tooltipId = useId();
@@ -31,19 +33,23 @@ export function SignificanceBadge({
   const label = significant ? messages.trendSignificant : messages.trendNotSignificant;
 
   return (
-    <div className={`significance-badge ${significant ? "is-significant" : "is-not-significant"}`}>
+    <div
+      className={`significance-badge${compact ? " is-compact" : ""} ${significant ? "is-significant" : "is-not-significant"}`}
+    >
       <span className="significance-status">
         <span aria-hidden="true">{significant ? "✓" : "○"}</span>
         {label}
       </span>
-      <div className="significance-values">
-        <span>
-          {messages.trendPValue}: <bdi dir="ltr">{formatNumber(pValue)}</bdi>
-        </span>
-        <span>
-          {messages.trendConfidence}: <bdi dir="ltr">{formatPercent(confidence)}</bdi>
-        </span>
-      </div>
+      {!compact && (
+        <div className="significance-values">
+          <span>
+            {messages.trendPValue}: <bdi dir="ltr">{formatNumber(pValue)}</bdi>
+          </span>
+          <span>
+            {messages.trendConfidence}: <bdi dir="ltr">{formatPercent(confidence)}</bdi>
+          </span>
+        </div>
+      )}
       <span className="significance-tooltip-wrap">
         <button
           className="significance-tooltip-trigger"

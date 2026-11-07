@@ -22,6 +22,15 @@ export const REGION_IDS = [
 
 export const variableIdSchema = z.enum(VARIABLE_IDS);
 export const regionIdSchema = z.enum(REGION_IDS);
+export const compareModeSchema = z.enum(["regions", "variables"]);
+export const compareRegionsSchema = z
+  .array(regionIdSchema)
+  .max(4)
+  .refine((regions) => new Set(regions).size === regions.length);
+export const compareVariablesSchema = z
+  .array(variableIdSchema)
+  .max(2)
+  .refine((variables) => new Set(variables).size === variables.length);
 
 export const variableSchema = z.object({
   id: variableIdSchema,
@@ -181,6 +190,7 @@ export const hotspotsResponseSchema = z.array(
 
 export type VariableId = z.infer<typeof variableIdSchema>;
 export type RegionId = z.infer<typeof regionIdSchema>;
+export type CompareMode = z.infer<typeof compareModeSchema>;
 export type Variable = z.infer<typeof variableSchema>;
 export type VariablesResponse = z.infer<typeof variablesResponseSchema>;
 export type RegionsResponse = z.infer<typeof regionsResponseSchema>;

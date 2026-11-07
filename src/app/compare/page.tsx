@@ -1,11 +1,5 @@
-import { RoutePlaceholder } from "@/components/layout/route-placeholder";
+import CompareWorkspace from "./compare-workspace";
 
 export default function ComparePage() {
-  return (
-    <RoutePlaceholder
-      variant="compare"
-      title="compareTitle"
-      description="compareDescription"
-    />
-  );
+  return <CompareWorkspace />;
 }

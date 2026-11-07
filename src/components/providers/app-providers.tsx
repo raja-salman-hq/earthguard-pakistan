@@ -3,8 +3,17 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { REGION_IDS, VARIABLE_IDS } from "@/types/api";
+import {
+  compareModeSchema,
+  compareRegionsSchema,
+  compareVariablesSchema,
+  REGION_IDS,
+  VARIABLE_IDS,
+} from "@/types/api";
 import { useUiStore } from "@/store/ui-store";
+
+const defaultCompareRegions = ["punjab", "sindh"] as const;
+const defaultCompareVariables = ["air_temperature", "precipitation"] as const;
 
 const urlStateSchema = z
   .object({
@@ -18,7 +27,17 @@ const urlStateSchema = z
     changeBasis: z.enum(["previous-year", "range-start", "backend"]).catch("previous-year"),
     language: z.enum(["en", "ur"]).catch("en"),
     theme: z.enum(["dark", "light"]).catch("dark"),
+    compareMode: compareModeSchema.catch("regions"),
+    compareRegions: compareRegionsSchema.catch([...defaultCompareRegions]),
+    compareVariables: compareVariablesSchema.catch([...defaultCompareVariables]),
   });
+
+function parseListParameter(value: string | null, defaults: readonly string[]): string[] {
+  if (value === null) {
+    return [...defaults];
+  }
+  return value === "" ? [] : value.split(",");
+}
 
 function readUrlState() {
   const params = new URLSearchParams(window.location.search);
@@ -33,6 +52,9 @@ function readUrlState() {
     changeBasis: params.get("changeBasis"),
     language: params.get("language"),
     theme: params.get("theme"),
+    compareMode: params.get("compareMode"),
+    compareRegions: parseListParameter(params.get("compareRegions"), defaultCompareRegions),
+    compareVariables: parseListParameter(params.get("compareVariables"), defaultCompareVariables),
   });
 
   if (!parsed.success) {
@@ -48,6 +70,9 @@ function readUrlState() {
       changeBasis: "previous-year" as const,
       language: "en" as const,
       theme: "dark" as const,
+      compareMode: "regions" as const,
+      compareRegions: [...defaultCompareRegions],
+      compareVariables: [...defaultCompareVariables],
     };
   }
 
@@ -76,6 +101,9 @@ function writeUrlState(): void {
   url.searchParams.set("changeBasis", state.changeBasis);
   url.searchParams.set("language", state.language);
   url.searchParams.set("theme", state.theme);
+  url.searchParams.set("compareMode", state.compareMode);
+  url.searchParams.set("compareRegions", state.compareRegions.join(","));
+  url.searchParams.set("compareVariables", state.compareVariables.join(","));
 
   window.history.replaceState(window.history.state, "", url);
 }
@@ -95,6 +123,9 @@ function UrlStateSync() {
         changeBasis: values.changeBasis ?? current.changeBasis,
         language: values.language ?? current.language,
         theme: values.theme ?? current.theme,
+        compareMode: values.compareMode ?? current.compareMode,
+        compareRegions: values.compareRegions ?? current.compareRegions,
+        compareVariables: values.compareVariables ?? current.compareVariables,
       });
     };
 
