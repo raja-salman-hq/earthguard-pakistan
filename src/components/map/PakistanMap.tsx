@@ -15,7 +15,13 @@ import { isDemoMode } from "@/lib/api/client";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useMessages } from "@/hooks/use-messages";
 import { useUiStore } from "@/store/ui-store";
-import { regionIdSchema, type MapLayerQuery, type RegionsResponse, type Variable } from "@/types/api";
+import {
+  mapLayerQuerySchema,
+  regionIdSchema,
+  type RegionsResponse,
+  type Variable,
+} from "@/types/api";
+import { createMapLayerQuery } from "@/lib/map-layer-query";
 import { MapLegend } from "./MapLegend";
 
 const MAP_STYLE_URL =
@@ -90,24 +96,6 @@ function makeFallbackStyle(background: string): StyleSpecification {
   };
 }
 
-function comparisonRequest(
-  variable: MapLayerQuery["variable"],
-  year: number,
-  layerType: "absolute" | "change",
-  changeBasis: "previous-year" | "range-start" | "backend",
-  startYear: number,
-): MapLayerQuery {
-  if (layerType === "absolute") {
-    return { variable, year, comparison: "absolute" };
-  }
-
-  if (changeBasis === "range-start") {
-    return { variable, year, comparison: "range-start", baselineYear: startYear };
-  }
-
-  return { variable, year, comparison: changeBasis };
-}
-
 export function PakistanMap({
   regions,
   boundaryLoading,
@@ -121,7 +109,7 @@ export function PakistanMap({
   const selectedRegion = useUiStore((state) => state.region);
   const setRegion = useUiStore((state) => state.setRegion);
   const selectedVariable = useUiStore((state) => state.variable);
-  const selectedYear = useUiStore((state) => state.yearRange[1]);
+  const selectedYear = useUiStore((state) => state.currentYear);
   const startYear = useUiStore((state) => state.yearRange[0]);
   const layerType = useUiStore((state) => state.mapLayerType);
   const changeBasis = useUiStore((state) => state.changeBasis);
@@ -132,7 +120,7 @@ export function PakistanMap({
 
   const request = useMemo(
     () =>
-      comparisonRequest(
+      createMapLayerQuery(
         selectedVariable,
         selectedYear,
         layerType,
@@ -148,6 +136,15 @@ export function PakistanMap({
     queryKey: ["map-layer", debouncedRequest],
     queryFn: () => getMapLayer(debouncedRequest),
     enabled: canLoadPreviousYear,
+    placeholderData: (previousData, previousQuery) => {
+      const previousRequest = mapLayerQuerySchema.safeParse(previousQuery?.queryKey[1]);
+      const sameLayer =
+        previousRequest.success &&
+        previousRequest.data.variable === debouncedRequest.variable &&
+        previousRequest.data.comparison === debouncedRequest.comparison &&
+        previousRequest.data.baselineYear === debouncedRequest.baselineYear;
+      return sameLayer ? previousData : undefined;
+    },
   });
 
   const valueByRegion = useMemo(
