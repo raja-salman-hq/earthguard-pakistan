@@ -9,7 +9,7 @@ import MapView, {
   type MapRef,
   Source,
 } from "react-map-gl/maplibre";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getMapLayer } from "@/lib/api";
 import { isDemoMode } from "@/lib/api/client";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -96,7 +96,7 @@ function makeFallbackStyle(background: string): StyleSpecification {
   };
 }
 
-export function PakistanMap({
+export const PakistanMap = memo(function PakistanMap({
   regions,
   boundaryLoading,
   boundaryError,
@@ -522,11 +522,11 @@ export function PakistanMap({
           className="map-boundary-attribution"
           href="https://www.geoboundaries.org"
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
         >
           {messages.mapBoundaryAttribution}
         </a>
       )}
     </div>
   );
-}
+});

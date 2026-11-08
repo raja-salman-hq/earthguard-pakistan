@@ -133,7 +133,7 @@ export default function AboutContent() {
             <h3>geoBoundaries</h3>
             <p>
               {messages.aboutBoundaryCitationPrefix}
-              <a href="https://www.geoboundaries.org" target="_blank" rel="noreferrer">
+              <a href="https://www.geoboundaries.org" target="_blank" rel="noopener noreferrer">
                 https://www.geoboundaries.org
               </a>
               {messages.aboutBoundaryCitationSuffix}
@@ -145,7 +145,7 @@ export default function AboutContent() {
               <a
                 href="https://doi.org/10.1371/journal.pone.0231866"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
               >
                 https://doi.org/10.1371/journal.pone.0231866
               </a>

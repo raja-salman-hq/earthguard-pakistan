@@ -11,6 +11,9 @@ export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>)
   const messages = useMessages();
   const theme = useUiStore((state) => state.theme);
   const language = useUiStore((state) => state.language);
+  const themeButtonLabel = theme === "dark" ? messages.lightTheme : messages.darkTheme;
+  const languageButtonLabel =
+    language === "en" ? messages.languageToggleEnglish : messages.languageToggleUrdu;
   const setTheme = useUiStore((state) => state.setTheme);
   const setLanguage = useUiStore((state) => state.setLanguage);
 
@@ -42,19 +45,19 @@ export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>)
               className="control-button"
               type="button"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label={messages.switchTheme}
+              aria-label={themeButtonLabel + ", " + messages.switchTheme}
               title={messages.switchTheme}
             >
-              {theme === "dark" ? messages.lightTheme : messages.darkTheme}
+              {themeButtonLabel}
             </button>
             <button
               className="control-button language-button"
               type="button"
               onClick={() => setLanguage(language === "en" ? "ur" : "en")}
-              aria-label={messages.switchLanguage}
+              aria-label={languageButtonLabel + ", " + messages.switchLanguage}
               title={messages.switchLanguage}
             >
-              {language === "en" ? "EN | UR" : "UR | EN"}
+              {languageButtonLabel}
             </button>
           </div>
         </div>
@@ -75,7 +78,7 @@ export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>)
           </Link>
           <div className="footer-credits">
             <div className="footer-credit-links">
-              <a href="https://www.geoboundaries.org" target="_blank" rel="noreferrer">
+              <a href="https://www.geoboundaries.org" target="_blank" rel="noopener noreferrer">
                 {messages.footerBoundaries}
               </a>
               <Link href="/about">{messages.footerAbout}</Link>

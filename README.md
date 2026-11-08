@@ -68,5 +68,8 @@ requests or rewrites before any proxy implementation.
 ```bash
 npm run lint
 npm run build
+npm run dev
+npm run start
+npm run test:e2e
 npm run check:api
 ```

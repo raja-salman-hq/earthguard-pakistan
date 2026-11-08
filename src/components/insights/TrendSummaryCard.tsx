@@ -71,7 +71,7 @@ export function TrendSummaryCard({
   }[trend.direction];
   return (
     <section className="trend-summary-card" aria-labelledby={headingId} aria-busy={loading}>
-      <h3 id={headingId}>{messages.trendSummaryTitle}</h3>
+      <h2 id={headingId}>{messages.trendSummaryTitle}</h2>
       <SignificanceBadge
         significant={trend.significant}
         pValue={trend.pValue}

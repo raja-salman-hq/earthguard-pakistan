@@ -18,6 +18,7 @@ import type { TrendChartView } from "@/components/charts/TrendChart";
 import type { TimeSeriesQuery, Variable } from "@/types/api";
 import { ExportMenu } from "@/components/layout/ExportMenu";
 import { getRegionLabel, getVariableLabel } from "@/lib/i18n";
+import { ComponentErrorBoundary } from "@/components/ui/component-error-boundary";
 
 const PakistanMap = dynamic<PakistanMapProps>(
   () => import("@/components/map/PakistanMap").then((module) => module.PakistanMap),
@@ -141,13 +142,19 @@ export default function ExploreWorkspace() {
 
   function renderTrendChart(displayMode?: TrendChartView, onDisplayModeChange?: (mode: TrendChartView) => void) {
     return (
-      <TrendChart
-        {...trendChartProps}
-        displayMode={displayMode}
-        onDisplayModeChange={onDisplayModeChange}
-        expanded={chartExpanded}
-        onToggleExpanded={() => setChartExpanded((expanded) => !expanded)}
-      />
+      <ComponentErrorBoundary
+        title={messages.componentErrorTitle}
+        description={messages.componentErrorDescription}
+        retryLabel={messages.errorRetry}
+      >
+        <TrendChart
+          {...trendChartProps}
+          displayMode={displayMode}
+          onDisplayModeChange={onDisplayModeChange}
+          expanded={chartExpanded}
+          onToggleExpanded={() => setChartExpanded((expanded) => !expanded)}
+        />
+      </ComponentErrorBoundary>
     );
   }
   useEffect(() => {
@@ -218,12 +225,18 @@ export default function ExploreWorkspace() {
         aria-label={messages.exploreTitle}
         data-mobile-insight={mobileInsightTab}
       >
-        <PakistanMap
-          regions={boundariesQuery.data}
-          boundaryLoading={boundariesQuery.isPending}
-          boundaryError={boundariesQuery.error?.message}
-          variable={variable}
-        />
+        <ComponentErrorBoundary
+          title={messages.componentErrorTitle}
+          description={messages.componentErrorDescription}
+          retryLabel={messages.errorRetry}
+        >
+          <PakistanMap
+            regions={boundariesQuery.data}
+            boundaryLoading={boundariesQuery.isPending}
+            boundaryError={boundariesQuery.error?.message}
+            variable={variable}
+          />
+        </ComponentErrorBoundary>
 
         <button
           className="filters-mobile-toggle"

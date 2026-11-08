@@ -9,6 +9,7 @@ import { VariableSelect } from "@/components/filters/VariableSelect";
 import { YearRangeSlider } from "@/components/filters/YearRangeSlider";
 import { SignificanceBadge } from "@/components/insights/SignificanceBadge";
 import { TrendTakeaway } from "@/components/insights/TrendTakeaway";
+import { ComponentErrorBoundary } from "@/components/ui/component-error-boundary";
 import { useMessages } from "@/hooks/use-messages";
 import { getRegions, getTimeSeries, getTrend, getVariables } from "@/lib/api";
 import { getRegionLabel, getVariableLabel } from "@/lib/i18n";
@@ -518,13 +519,19 @@ export default function CompareWorkspace() {
             <p className="compare-state-card" role="status">{messages.compareEmpty}</p>
           ) : (
             <>
-              <CompareLineChart
-                mode={mode}
-                series={exportSeries}
-                title={chartTitle}
-                start={yearRange[0]}
-                end={yearRange[1]}
-              />
+              <ComponentErrorBoundary
+                title={messages.componentErrorTitle}
+                description={messages.componentErrorDescription}
+                retryLabel={messages.errorRetry}
+              >
+                <CompareLineChart
+                  mode={mode}
+                  series={exportSeries}
+                  title={chartTitle}
+                  start={yearRange[0]}
+                  end={yearRange[1]}
+                />
+              </ComponentErrorBoundary>
               <div className="compare-table-wrap" role="region" aria-label={messages.compareTableCaption} tabIndex={0}>
                 <table className="compare-table">
                   <caption>{messages.compareTableCaption}</caption>
