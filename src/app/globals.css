@@ -1650,7 +1650,7 @@ html[lang="ur"] .feedback-card h1 {
 
   .map-field input[type="search"] {
     width: 100%;
-    min-height: 36px;
+    min-height: 44px;
     padding: 0 10px;
     border: 1px solid var(--border);
     border-radius: 9px;
@@ -2139,6 +2139,10 @@ html[lang="ur"] .feedback-card h1 {
     display: none;
     width: auto;
     max-height: min(58svh, 520px);
+  }
+
+  .explore-filters-panel.filters-open {
+    z-index: 14;
   }
 
   .explore-filters-panel.filters-open {
@@ -2709,10 +2713,11 @@ html[lang="ur"] .feedback-card h1 {
 .hotspot-item {
   display: flex;
   width: 100%;
+  min-height: 44px;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 7px;
+  gap: 6px;
+  padding: 7px 6px;
   border: 1px solid transparent;
   border-radius: 8px;
   background: transparent;
@@ -2733,6 +2738,11 @@ html[lang="ur"] .feedback-card h1 {
   min-width: 0;
   gap: 3px;
   font-size: 9px;
+}
+
+.hotspot-main {
+  flex: 1 1 auto;
+  overflow-wrap: anywhere;
 }
 
 .hotspot-main strong {
@@ -2757,12 +2767,16 @@ html[lang="ur"] .feedback-card h1 {
 }
 
 .hotspot-values {
+  flex: 0 1 46%;
   justify-items: end;
   text-align: end;
 }
 
 .hotspot-values bdi {
+  max-width: 100%;
   font-family: var(--font-jetbrains-mono), monospace;
+  overflow-wrap: anywhere;
+  text-align: end;
 }
 
 .hotspots-loading {
