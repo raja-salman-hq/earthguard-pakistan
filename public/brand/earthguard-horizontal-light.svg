@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 292 56" fill="none">
+  <path d="M28 4 48 12v14.4c0 11.7-8.2 20.5-20 26.2C16.2 46.9 8 38.1 8 26.4V12L28 4Z" fill="#FFFFFF" stroke="#087F66" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M14.5 24.7c4-5.6 8.5-8.4 13.5-8.4s9.5 2.8 13.5 8.4M28 16.3v23.2" stroke="#087F66" stroke-opacity=".7" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="m15.4 32.2 7.2-5.8 6.2 3 10.1-10.3" stroke="#087F66" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M34.8 19.1h4.1v4.1" stroke="#087F66" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="64" y="30" fill="#132033" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" letter-spacing="-.5">EarthGuard</text>
+  <text x="65" y="46" fill="#475A74" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" letter-spacing="2.3">PAKISTAN</text>
+</svg>
