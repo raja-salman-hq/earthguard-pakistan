@@ -5,7 +5,7 @@ export const siteUrl = new URL(
   process.env.SITE_URL ?? "https://earthguard-pakistan.example",
 );
 
-export type PageName = "home" | "explore" | "compare" | "about";
+export type PageName = "home" | "explore" | "compare" | "about" | "team";
 
 type PageMetadataConfig = {
   path: string;
@@ -33,6 +33,11 @@ const pageMetadata = {
     path: "/about",
     title: "seoAboutTitle",
     description: "seoAboutDescription",
+  },
+  team: {
+    path: "/team",
+    title: "seoTeamTitle",
+    description: "seoTeamDescription",
   },
 } satisfies Record<PageName, PageMetadataConfig>;
 

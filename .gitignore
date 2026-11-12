@@ -48,3 +48,21 @@ next-env.d.ts
 debug.log
 test-results/
 playwright-report/
+
+# raw scientific data: kept in Google Drive, never in Git
+data/raw_exports/*
+!data/raw_exports/.gitkeep
+*.hdf5
+*.HDF5
+*.h5
+*.hdf
+*.nc
+*.nc4
+*.tif
+*.tiff
+*.zip
+*.mp4
+*.mov
+.venv/
+__pycache__/
+.ipynb_checkpoints/

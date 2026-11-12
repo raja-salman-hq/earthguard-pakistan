@@ -7,6 +7,7 @@ import { isDemoMode } from "@/lib/api/client";
 import { getVariableLabel } from "@/lib/i18n";
 import { useUiStore } from "@/store/ui-store";
 import type { VariableId } from "@/types/api";
+import { TeamPreview } from "@/components/team/team-preview";
 
 const variableDescriptionKeys = {
   air_temperature: "aboutAirTemperatureDescription",
@@ -199,15 +200,7 @@ export default function AboutContent() {
         </ul>
       </section>
 
-      <section className="about-section" aria-labelledby="about-team-title">
-        <div className="about-section-heading">
-          <h2 id="about-team-title">{messages.aboutTeamTitle}</h2>
-        </div>
-        <div className="about-card about-team-card">
-          <p>{messages.aboutTeamPlaceholder}</p>
-          <p>{messages.aboutOpenSourcePlaceholder}</p>
-        </div>
-      </section>
+      <TeamPreview />
     </main>
   );
 }

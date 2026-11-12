@@ -22,6 +22,7 @@ import type { LucideIcon } from "lucide-react";
 import { getRegionLabel, getVariableLabel, messages } from "@/lib/i18n";
 import type { Language, MessageKey } from "@/lib/i18n";
 import type { RegionId, VariableId } from "@/types/api";
+import { TeamPreview } from "@/components/team/team-preview";
 
 type DemoDirection = "increasing" | "decreasing" | "no_change";
 
@@ -599,6 +600,7 @@ export default function HomeContent({
           </a>
         </div>
       </section>
+      <TeamPreview />
     </main>
   );
 }

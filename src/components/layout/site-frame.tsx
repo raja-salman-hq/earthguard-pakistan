@@ -41,6 +41,7 @@ export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>)
             <Link href="/explore">{messages.explore}</Link>
             <Link href="/compare">{messages.compare}</Link>
             <Link href="/about">{messages.about}</Link>
+            <Link href="/team">{messages.team}</Link>
           </nav>
 
           <div className="header-actions">
@@ -86,6 +87,7 @@ export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>)
                 {messages.footerBoundaries}
               </a>
               <Link href="/about">{messages.footerAbout}</Link>
+              <Link href="/team">{messages.team}</Link>
             </div>
             {isDemoMode && <p className="footer-note">{messages.syntheticNotice}</p>}
           </div>

@@ -6,6 +6,7 @@ const routes = [
   { path: "/explore", name: "explore", status: 200 },
   { path: "/compare", name: "compare", status: 200 },
   { path: "/about", name: "about", status: 200 },
+  { path: "/team", name: "team", status: 200 },
   { path: "/quality-check-404", name: "404", status: 404 },
 ] as const;
 
@@ -123,6 +124,97 @@ test.describe("production route smoke checks", () => {
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     await themeButton.click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  });
+
+  test("team cards open and close profile dialogs and protect external links", async ({ page }) => {
+    const errors = collectConsoleErrors(page);
+    await page.goto("/team", { waitUntil: "domcontentloaded" });
+
+    for (const name of ["Ayesha", "Hasnain", "Wani", "Sharjeel", "Salman", "Ali"]) {
+      await expect(page.getByRole("heading", { name, level: 3 })).toBeVisible();
+    }
+
+    const trigger = page.getByRole("button", { name: "View profile" }).first();
+    await trigger.click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("heading", { name: "Ayesha's profile" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).not.toBeVisible();
+    await expect(trigger).toBeFocused();
+
+    const salmanCard = page.locator(".team-member-card").filter({
+      has: page.getByRole("heading", { name: "Salman", level: 3 }),
+    });
+    const cardLink = salmanCard.locator(".team-card-actions a");
+    await expect(cardLink).toHaveCount(1);
+    await expect(cardLink).toHaveAttribute("href", "https://github.com/raja-salman-hq");
+    await expect(cardLink).toHaveAttribute("target", "_blank");
+    await expect(cardLink).toHaveAttribute("rel", "noopener noreferrer");
+
+    await salmanCard.getByRole("button", { name: "View profile" }).click();
+    const dialogLink = page.getByRole("dialog").locator("a[href^='https://']");
+    await expect(dialogLink).toHaveCount(1);
+    await expect(dialogLink).toHaveAttribute("target", "_blank");
+    await expect(dialogLink).toHaveAttribute("rel", "noopener noreferrer");
+    await page.getByRole("dialog").getByRole("button", { name: "Close profile" }).click();
+    expect(errors).toEqual([]);
+  });
+
+  test("primary navigation reaches each main page", async ({ page }) => {
+    await stubBasemap(page);
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+
+    for (const route of [
+      { name: "Explore", path: "/explore" },
+      { name: "Compare", path: "/compare" },
+      { name: "About", path: "/about" },
+      { name: "Team", path: "/team" },
+    ]) {
+      await page.getByRole("navigation", { name: "Main navigation" })
+        .getByRole("link", { name: route.name })
+        .click();
+      await expect(page).toHaveURL(new RegExp(route.path.replace("/", "\\/") + "$"));
+      await expect(page.locator("main h1").first()).toBeVisible();
+    }
+
+    await page.getByRole("link", { name: "EarthGuard PAKISTAN" }).first().click();
+    await expect(page).toHaveURL("/");
+  });
+
+  test("team layout has no horizontal overflow and keeps controls touch-sized", async ({ page }) => {
+    const viewports = [320, 390, 768, 1024, 1440, 1920];
+    for (const width of viewports) {
+      await page.setViewportSize({ width, height: 1000 });
+      for (const language of ["en", "ur"] as const) {
+        await page.goto("/team?language=" + language, { waitUntil: "domcontentloaded" });
+        await expect(page.locator("main h1")).toBeVisible();
+
+        const layout = await page.evaluate(() => ({
+          viewportWidth: window.innerWidth,
+          pageWidth: document.documentElement.scrollWidth,
+          columns: getComputedStyle(document.querySelector(".team-member-grid")!)
+            .gridTemplateColumns.split(" ").length,
+        }));
+        expect(layout.pageWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+        const expectedColumns = width < 640 ? 1 : width < 960 ? 2 : 3;
+        expect(layout.columns).toBe(expectedColumns);
+
+        const undersizedTargets = await page.locator(
+          ".team-page button, .team-page a, .primary-nav a, .header-actions button, .footer-credit-links a",
+        ).evaluateAll((targets) =>
+          targets
+            .filter((target) => target.getBoundingClientRect().height > 0)
+            .map((target) => ({
+              label: target.textContent?.trim() || target.getAttribute("aria-label") || target.className,
+              height: Math.round(target.getBoundingClientRect().height),
+              display: getComputedStyle(target).display,
+            }))
+            .filter(({ height }) => height < 44),
+        );
+        expect(undersizedTargets).toEqual([]);
+      }
+    }
   });
 
   test("hotspot selection updates the selected region on desktop and mobile", async ({ page }) => {
