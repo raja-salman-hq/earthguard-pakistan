@@ -9,6 +9,7 @@ import { useMessages } from "@/hooks/use-messages";
 import { useUiStore } from "@/store/ui-store";
 import { getRegionLabel } from "@/lib/i18n";
 import { regionIdSchema } from "@/types/api";
+import { requestCoverageDialog } from "@/components/ui/CoverageDialog";
 
 export function RegionPicker() {
   const selectId = useId();
@@ -59,12 +60,19 @@ export function RegionPicker() {
               (area) => area.id === value,
             );
             if (!isDemoMode && selectedAreaOption) {
-              setArea(selectedAreaOption.id);
+              if (selectedAreaOption.status === "available") {
+                setArea(selectedAreaOption.id);
+              } else {
+                requestCoverageDialog("no-data", selectedAreaOption.name);
+              }
               return;
             }
             const parsedRegion = regionIdSchema.safeParse(value);
             if (parsedRegion.success) {
               setRegion(parsedRegion.data);
+              if (!isDemoMode && parsedRegion.data !== "punjab") {
+                requestCoverageDialog("no-data", getRegionLabel(parsedRegion.data, language));
+              }
             }
           }}
         >

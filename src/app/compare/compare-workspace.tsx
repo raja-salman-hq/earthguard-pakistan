@@ -1,22 +1,23 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo, useState, useSyncExternalStore } from "react";
 import type { KeyboardEvent } from "react";
+import { ArrowDown, ArrowRight, ArrowUp, ChevronLeft, ChevronRight, CloudRain, Leaf, Plus, Table2, ThermometerSun } from "lucide-react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { ExportMenu } from "@/components/layout/ExportMenu";
 import { VariableSelect } from "@/components/filters/VariableSelect";
 import { YearRangeSlider } from "@/components/filters/YearRangeSlider";
-import { RegionPicker } from "@/components/filters/RegionPicker";
 import { SignificanceBadge } from "@/components/insights/SignificanceBadge";
 import { TrendTakeaway } from "@/components/insights/TrendTakeaway";
 import { ComponentErrorBoundary } from "@/components/ui/component-error-boundary";
 import { useMessages } from "@/hooks/use-messages";
-import { getRegions, getTimeSeries, getTrend, getVariables } from "@/lib/api";
+import { getAreaIndicators, getRegions, getTimeSeries, getTrend, getVariables } from "@/lib/api";
 import { isDemoMode } from "@/lib/api/client";
 import { getRegionLabel, getVariableLabel } from "@/lib/i18n";
 import { useUiStore } from "@/store/ui-store";
-import type { ExportSeries } from "@/lib/utils/data-export";
+import type { ComparisonExportRow, ExportSeries } from "@/lib/utils/data-export";
+import { requestCoverageDialog } from "@/components/ui/CoverageDialog";
 import { regionIdSchema } from "@/types/api";
 import type { CompareMode, RegionId, VariableId } from "@/types/api";
 
@@ -27,9 +28,9 @@ const CompareLineChart = dynamic(
     loading: () => <div className="trend-chart-loading" role="status" />,
   },
 );
-const TrendChart = dynamic(
-  () => import("@/components/charts/TrendChart").then((module) => module.TrendChart),
-  { ssr: false, loading: () => <div className="trend-chart-loading" role="status" /> },
+const YearComparisonBarChart = dynamic(
+  () => import("@/components/charts/YearComparisonBarChart").then((module) => module.YearComparisonBarChart),
+  { ssr: false, loading: () => <div className="compare-bar-chart-skeleton" role="status" aria-label="Loading comparison chart" /> },
 );
 
 type ComparisonItem = {
@@ -44,6 +45,19 @@ function formatNumber(value: number | null | undefined): string {
     return "—";
   }
   return new Intl.NumberFormat("en", { maximumSignificantDigits: 4 }).format(value);
+}
+
+function formatIndicatorValue(indicatorId: VariableId | undefined, value: number | null): string {
+  if (value === null) return "—";
+  const maximumFractionDigits =
+    indicatorId === "land_surface_temperature" ? 2 : indicatorId === "vegetation_index" ? 4 : 1;
+  return new Intl.NumberFormat("en", { minimumFractionDigits: maximumFractionDigits, maximumFractionDigits }).format(value);
+}
+
+function indicatorIcon(indicatorId: VariableId) {
+  if (indicatorId === "land_surface_temperature") return ThermometerSun;
+  if (indicatorId === "precipitation") return CloudRain;
+  return Leaf;
 }
 
 function SelectionSkeleton({ label }: { label: string }) {
@@ -88,7 +102,6 @@ export default function CompareWorkspace() {
   const language = useUiStore((state) => state.language);
   const variable = useUiStore((state) => state.variable);
   const region = useUiStore((state) => state.region);
-  const area = useUiStore((state) => state.area);
   const yearRange = useUiStore((state) => state.yearRange);
   const mode = useUiStore((state) => state.compareMode);
   const selectedRegions = useUiStore((state) => state.compareRegions);
@@ -97,10 +110,22 @@ export default function CompareWorkspace() {
   const setRegions = useUiStore((state) => state.setCompareRegions);
   const setVariables = useUiStore((state) => state.setCompareVariables);
   const setRegion = useUiStore((state) => state.setRegion);
-  const setArea = useUiStore((state) => state.setArea);
   const [selectorsOpen, setSelectorsOpen] = useState(false);
+  const [compareYear, setCompareYear] = useState(2024);
+  const [tablesOpen, setTablesOpen] = useState<Record<string, boolean>>({});
+  const hydrated = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  );
   const regionSelectId = useId();
   const variablesQuery = useQuery({ queryKey: ["variables"], queryFn: getVariables });
+  const areaIndicatorsQuery = useQuery({
+    queryKey: ["area-indicators", "faisalabad"],
+    queryFn: () => getAreaIndicators("faisalabad"),
+    enabled: !isDemoMode,
+    staleTime: Infinity,
+  });
   const regionsQuery = useQuery({ queryKey: ["regions"], queryFn: getRegions });
   const variableData = variablesQuery.data ?? [];
   const selectedVariableData = variableData.find((item) => item.id === variable);
@@ -177,58 +202,6 @@ export default function CompareWorkspace() {
     "precipitation",
     "vegetation_index",
   ] as const satisfies readonly VariableId[];
-  const realSeriesQueries = useQueries({
-    queries:
-      !isDemoMode && area
-        ? realIndicatorIds.map((indicatorId) => ({
-            queryKey: [
-              "timeseries",
-              indicatorId,
-              "punjab",
-              area,
-              yearRange[0],
-              yearRange[1],
-              "yearly",
-            ],
-            queryFn: () =>
-              getTimeSeries({
-                variable: indicatorId,
-                region: "punjab",
-                area,
-                start: yearRange[0],
-                end: yearRange[1],
-                resolution: "yearly",
-              }),
-            staleTime: 60_000,
-          }))
-        : [],
-  });
-  const realTrendQueries = useQueries({
-    queries:
-      !isDemoMode && area
-        ? realIndicatorIds.map((indicatorId) => ({
-            queryKey: [
-              "trend",
-              indicatorId,
-              "punjab",
-              area,
-              yearRange[0],
-              yearRange[1],
-              language,
-            ],
-            queryFn: () =>
-              getTrend({
-                variable: indicatorId,
-                region: "punjab",
-                area,
-                start: yearRange[0],
-                end: yearRange[1],
-                lang: language,
-              }),
-            staleTime: 60_000,
-          }))
-        : [],
-  });
   const queryResults = [...trendQueries, ...seriesQueries];
   const failedQueries = queryResults.filter((query) => query.isError && !query.data);
   const loading =
@@ -287,15 +260,30 @@ export default function CompareWorkspace() {
   const compareFileName = `compare-${mode}-${items.map((item) => item.key.split(":")[1]).join("-")}-${yearRange[0]}-${yearRange[1]}`;
 
   if (!isDemoMode) {
-    const realSeries = realSeriesQueries.map((query) => query.data);
-    const realLoading =
-      variablesQuery.isPending ||
-      realSeriesQueries.some((query) => query.isPending) ||
-      realTrendQueries.some((query) => query.isPending);
-    const realError =
-      variablesQuery.isError ||
-      realSeriesQueries.some((query) => query.isError && !query.data) ||
-      realTrendQueries.some((query) => query.isError && !query.data);
+    const previousYear = compareYear - 1;
+    const areaLabel = messages.areaFaisalabad;
+    const status = areaIndicatorsQuery.data?.meta.status ?? "draft";
+    const statusLabel = status === "verified" ? messages.verifiedDataBadge : messages.draftDataBadge;
+    const rows = (areaIndicatorsQuery.data?.indicators ?? [])
+      .filter((indicator) => (realIndicatorIds as readonly string[]).includes(indicator.id))
+      .map((indicator): ComparisonExportRow => {
+        const previous = indicator.series.find((point) => point.year === previousYear)?.value ?? null;
+        const current = indicator.series.find((point) => point.year === compareYear)?.value ?? null;
+        const difference = previous !== null && current !== null ? current - previous : null;
+        return {
+          area: areaLabel,
+          indicator: indicator.name,
+          previousYear,
+          previousValue: previous,
+          year: compareYear,
+          value: current,
+          difference,
+          percentDifference: difference !== null && previous !== null && previous !== 0 ? (difference / previous) * 100 : null,
+          unit: indicator.unit,
+          source: indicator.source,
+          status: statusLabel,
+        };
+      });
 
     return (
       <main className="compare-page">
@@ -303,125 +291,100 @@ export default function CompareWorkspace() {
           <div>
             <span className="eyebrow">{messages.areaFaisalabad}</span>
             <h1>{messages.compareTitle}</h1>
-            <p>{messages.compareAreaSmallMultiples}</p>
+            <p>{messages.compareYearDescription}</p>
           </div>
-          <div className="compare-export">
-            <RegionPicker />
+          <div className="compare-heading-actions">
+            <span className={`data-status-badge is-${status}`}>{statusLabel}</span>
+            <ExportMenu
+              metadata={{
+              fileName: `faisalabad-comparison-${previousYear}-${compareYear}`,
+              title: messages.compareTitle,
+              variableLabel: messages.compareIndicators,
+              regionLabel: "Punjab",
+              areaLabel,
+              unitLabel: messages.compareMixedUnits,
+              yearRangeLabel: `${previousYear}–${compareYear}`,
+              source: areaIndicatorsQuery.data?.indicators[0]?.source ?? messages.exportSourceUnavailable,
+              demoLabel: messages.exportSyntheticCredit,
+              statusLabel,
+              }}
+              series={[]}
+              comparisonRows={rows}
+            />
           </div>
         </header>
-        <div className="compare-mode-tabs" role="group" aria-label={messages.compareModes}>
-          <button type="button" aria-pressed={mode === "variables"} onClick={() => setMode("variables")}>
-            {messages.compareVariablesMode}
+        <section className="compare-toolbar" aria-label={messages.compareYearSelector}>
+          <div className="compare-year-controls">
+            <button type="button" aria-label={messages.comparePreviousYear} onClick={() => setCompareYear((year) => Math.max(2002, year - 1))} disabled={compareYear === 2002}>
+              <ChevronLeft aria-hidden="true" />
+            </button>
+            <label>
+              <span>{messages.compareYearSelector}</span>
+              <select value={compareYear} onChange={(event) => setCompareYear(Number(event.currentTarget.value))}>
+                {Array.from({ length: 23 }, (_, index) => 2002 + index).map((year) => (
+                  <option key={year} value={year}>{year - 1} vs {year}</option>
+                ))}
+              </select>
+            </label>
+            <button type="button" aria-label={messages.compareNextYear} onClick={() => setCompareYear((year) => Math.min(2024, year + 1))} disabled={compareYear === 2024}>
+              <ChevronRight aria-hidden="true" />
+            </button>
+          </div>
+          <button className="compare-add-region" type="button" onClick={() => requestCoverageDialog("no-data", undefined, messages.compareRegionsUnavailable)}>
+            <Plus aria-hidden="true" /> {messages.compareAddRegion}
           </button>
-          <button type="button" disabled aria-disabled="true">
-            {messages.compareRegionsMode} · {messages.compareMoreAreas}
-          </button>
-        </div>
-        <section className="compare-filters" aria-label={messages.filterPanelTitle}>
-          <VariableSelect />
-          <YearRangeSlider
-            variable={selectedVariableData}
-            loading={variablesQuery.isPending}
-            error={variablesQuery.error?.message}
-          />
         </section>
-        {!area ? (
-          <div className="no-data-notice" role="status">
-            <p>{messages.noDataYet.replace("{area}", messages.areaFaisalabad)}</p>
-            <button type="button" onClick={() => setArea("faisalabad")}>
-              {messages.selectFaisalabad}
-            </button>
-          </div>
-        ) : realLoading ? (
+        {!hydrated || areaIndicatorsQuery.isPending ? (
           <div className="compare-selection-skeleton" role="status" aria-label={messages.trendLoading}>
-            <div className="skeleton skeleton-line" />
-            <div className="skeleton skeleton-line" />
-            <div className="skeleton skeleton-line-short" />
+            <div className="skeleton skeleton-line" /><div className="skeleton skeleton-line" /><div className="skeleton skeleton-line-short" />
           </div>
-        ) : realError ? (
-          <div className="trend-error-state" role="alert">
-            <p>{messages.compareError}</p>
-            <button
-              type="button"
-              onClick={() => {
-                realSeriesQueries.forEach((query) => void query.refetch());
-                realTrendQueries.forEach((query) => void query.refetch());
-                void variablesQuery.refetch();
-              }}
-            >
-              {messages.compareRetry}
-            </button>
-          </div>
+        ) : areaIndicatorsQuery.isError ? (
+          <div className="trend-error-state" role="alert"><p>{messages.compareError}</p><button type="button" onClick={() => void areaIndicatorsQuery.refetch()}>{messages.compareRetry}</button></div>
         ) : (
-          <>
-            <p className="compare-axis-note">{messages.compareCorrelationCaveat}</p>
-            <section className="area-small-multiples" aria-label={messages.compareAreaSmallMultiples}>
-              {realIndicatorIds.map((indicatorId, index) => {
-                const indicator = variableData.find((candidate) => candidate.id === indicatorId);
-                const series = realSeries[index];
-                const trend = realTrendQueries[index]?.data;
-                if (!indicator || !series) {
-                  return null;
-                }
-                const chartId = `compare-${indicatorId}`;
-                const areaLabel = messages.areaFaisalabad;
-                const statusLabel =
-                  series.dataStatus === "verified"
-                    ? messages.verifiedDataBadge
-                    : series.dataStatus === "placeholder"
-                      ? messages.placeholderDataBadge
-                      : messages.draftDataBadge;
-                return (
-                  <article className="area-small-multiple-card" key={indicatorId}>
-                    <div className="area-small-multiple-heading">
-                      <h2>{getVariableLabel(indicatorId, language)}</h2>
-                      <ExportMenu
-                        chartId={chartId}
-                        metadata={{
-                          fileName: `faisalabad-${indicatorId}-${yearRange[0]}-${yearRange[1]}`,
-                          title: messages.trendChartTitle
-                            .replace("{variable}", getVariableLabel(indicatorId, language))
-                            .replace("{region}", areaLabel),
-                          variableLabel: getVariableLabel(indicatorId, language),
-                          regionLabel: getRegionLabel("punjab", language),
-                          areaLabel,
-                          unitLabel: series.unit,
-                          yearRangeLabel: `${yearRange[0]}–${yearRange[1]}`,
-                          source: series.source ?? indicator.source,
-                          demoLabel: messages.exportSyntheticCredit,
-                          statusLabel,
-                        }}
-                        series={[{
-                          label: areaLabel,
-                          unit: series.unit,
-                          points: series.points,
-                        }]}
-                      />
-                    </div>
-                    <ComponentErrorBoundary
-                      title={messages.componentErrorTitle}
-                      description={messages.componentErrorDescription}
-                      retryLabel={messages.errorRetry}
-                    >
-                      <TrendChart
-                        variable={indicatorId}
-                        region="punjab"
-                        area={area}
-                        start={yearRange[0]}
-                        end={yearRange[1]}
-                        trendLine={trend?.trendLine}
-                        trendLineLoaded={Boolean(trend)}
-                        resolution="yearly"
-                        showResolutionSelector={false}
-                        exportId={chartId}
-                      />
-                    </ComponentErrorBoundary>
-                  </article>
-                );
-              })}
-            </section>
-            <p className="compare-more-areas">{messages.compareMoreAreas}</p>
-          </>
+          <section className="area-small-multiples compare-year-cards" aria-label={messages.compareIndicators}>
+            {rows.map((row) => {
+              const indicator = areaIndicatorsQuery.data?.indicators.find((item) => item.name === row.indicator);
+              return (
+                <article className="area-small-multiple-card compare-year-card" key={row.indicator}>
+                  {(() => {
+                    const indicatorId = indicator?.id;
+                    const Icon = indicatorId ? indicatorIcon(indicatorId) : Leaf;
+                    const isOpen = Boolean(tablesOpen[row.indicator]);
+                    const direction = row.difference === null ? "no_change" : row.difference > 0 ? "increasing" : row.difference < 0 ? "decreasing" : "no_change";
+                    const DirectionIcon = direction === "increasing" ? ArrowUp : direction === "decreasing" ? ArrowDown : ArrowRight;
+                    const directionLabel = direction === "increasing" ? messages.trendIncreasing : direction === "decreasing" ? messages.trendDecreasing : messages.trendNoChange;
+                    return (
+                      <>
+                  <div className="area-small-multiple-heading"><div className="compare-indicator-title"><Icon aria-hidden="true" /><h2>{row.indicator}</h2></div><span className={`data-status-badge is-${status}`}>{statusLabel}</span></div>
+                  <div className="compare-value-grid">
+                    <div><span>{previousYear}</span><strong><bdi dir="ltr">{formatIndicatorValue(indicatorId, row.previousValue)}</bdi></strong><small>{indicatorId === "vegetation_index" ? "index (no unit)" : row.unit}</small></div>
+                    <div><span>{compareYear}</span><strong><bdi dir="ltr">{formatIndicatorValue(indicatorId, row.value)}</bdi></strong><small>{indicatorId === "vegetation_index" ? "index (no unit)" : row.unit}</small></div>
+                  </div>
+                  <div className="compare-difference" data-direction={direction}>
+                    <DirectionIcon aria-hidden="true" /><strong>{directionLabel}</strong>
+                    <span>{messages.compareDifference}: <bdi dir="ltr">{formatIndicatorValue(indicatorId, row.difference)}</bdi> {indicatorId === "vegetation_index" ? "" : row.unit}</span>
+                    <span>{messages.comparePercentDifference}: <bdi dir="ltr">{row.percentDifference === null ? "—" : row.percentDifference.toFixed(1)}%</bdi></span>
+                  </div>
+                  <YearComparisonBarChart title={row.indicator} unit={row.unit} previousYear={previousYear} previousValue={row.previousValue} year={compareYear} value={row.value} />
+                  <p className="compare-year-sentence">
+                    {messages.compareYearSentence
+                      .replace("{indicator}", row.indicator)
+                      .replace("{previousYear}", String(previousYear))
+                      .replace("{previous}", `${formatNumber(row.previousValue)} ${row.unit}`)
+                      .replace("{year}", String(compareYear))
+                      .replace("{current}", `${formatNumber(row.value)} ${row.unit}`)
+                      .replace("{difference}", `${formatIndicatorValue(indicatorId, row.difference)} ${row.unit}`)}
+                  </p>
+                  <button className="compare-table-toggle" type="button" aria-expanded={isOpen} onClick={() => setTablesOpen((open) => ({ ...open, [row.indicator]: !isOpen }))}><Table2 aria-hidden="true" /> {messages.compareViewTable}</button>
+                  {isOpen && <div className="compare-year-table-wrap"><table className="compare-year-table"><caption>{messages.compareDifferenceHelper}</caption><thead><tr><th>{messages.compareYearColumn}</th><th>{messages.compareValueColumn}</th><th>{messages.compareUnitColumn}</th><th>{messages.compareSourceColumn}</th></tr></thead><tbody><tr><th>{previousYear}</th><td><bdi dir="ltr">{formatIndicatorValue(indicatorId, row.previousValue)}</bdi></td><td>{row.unit}</td><td>{indicator?.source ?? "—"}</td></tr><tr><th>{compareYear}</th><td><bdi dir="ltr">{formatIndicatorValue(indicatorId, row.value)}</bdi></td><td>{row.unit}</td><td>{indicator?.source ?? "—"}</td></tr></tbody></table></div>}
+                  {indicator?.description && <p className="compare-axis-note">{indicator.description}</p>}
+                      </>
+                    );
+                  })()}
+                </article>
+              );
+            })}
+          </section>
         )}
       </main>
     );
@@ -741,9 +704,9 @@ export default function CompareWorkspace() {
                   end={yearRange[1]}
                 />
               </ComponentErrorBoundary>
-              <div className="compare-table-wrap" role="region" aria-label={messages.compareTableCaption} tabIndex={0}>
+              <div className="compare-table-wrap" role="region" aria-label={messages.compareDifferenceHelper} tabIndex={0}>
                 <table className="compare-table">
-                  <caption>{messages.compareTableCaption}</caption>
+                  <caption>{messages.compareDifferenceHelper}</caption>
                   <thead>
                     <tr>
                       <th scope="col">

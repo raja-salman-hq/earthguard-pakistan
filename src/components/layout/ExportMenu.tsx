@@ -8,17 +8,20 @@ import {
   downloadSeriesCsv,
   type ExportMetadata,
   type ExportSeries,
+  downloadComparisonCsv,
+  type ComparisonExportRow,
 } from "@/lib/utils/data-export";
 
 type ExportMenuProps = {
   metadata: Omit<ExportMetadata, "isDemo">;
   series: ExportSeries[];
   chartId?: string;
+  comparisonRows?: ComparisonExportRow[];
 };
 
 type ExportStatus = "png" | "csv" | "link" | "error" | null;
 
-export function ExportMenu({ metadata, series, chartId }: ExportMenuProps) {
+export function ExportMenu({ metadata, series, chartId, comparisonRows }: ExportMenuProps) {
   const messages = useMessages();
   const [status, setStatus] = useState<ExportStatus>(null);
   const hasData = series.some((item) => item.points.length > 0);
@@ -66,6 +69,11 @@ export function ExportMenu({ metadata, series, chartId }: ExportMenuProps) {
 
   function exportCsv() {
     try {
+      if (comparisonRows) {
+        downloadComparisonCsv(comparisonRows, metadata.fileName);
+        setStatus("csv");
+        return;
+      }
       downloadSeriesCsv(
         {
           ...exportMetadata,

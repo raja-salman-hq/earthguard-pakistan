@@ -137,6 +137,7 @@ export default function ExploreWorkspace() {
           label: selectedArea ? messages.areaFaisalabad : getRegionLabel(selectedRegion, language),
           unit: exportSeriesQuery.data.unit,
           points: exportSeriesQuery.data.points,
+          resolution: chartResolution,
         }]
       : [];
   const trendChartProps = {
@@ -234,7 +235,9 @@ export default function ExploreWorkspace() {
         <div className="explore-heading-actions">
           <ExportMenu
             metadata={{
-              fileName: `${variableId}-${selectedArea ?? selectedRegion}-${yearRange[0]}-${yearRange[1]}`,
+              fileName: isDemoMode
+                ? `${variableId}-${selectedArea ?? selectedRegion}-${yearRange[0]}-${yearRange[1]}`
+                : `faisalabad_${shortExportVariable(variableId)}_${yearRange[0]}-${yearRange[1]}_${exportSeriesQuery.data?.dataStatus ?? "draft"}`,
               title: messages.trendChartTitle
                 .replace("{variable}", getVariableLabel(variableId, language))
                 .replace(
@@ -422,4 +425,14 @@ function yearRangeKey(
 ): string {
   const variable = variables?.find((item) => item.id === variableId);
   return variable ? `${variable.availableFrom}-${variable.availableTo}` : "loading";
+}
+
+function shortExportVariable(variableId: string): string {
+  return variableId === "land_surface_temperature"
+    ? "lst"
+    : variableId === "vegetation_index"
+      ? "ndvi"
+      : variableId === "precipitation"
+        ? "rainfall"
+        : variableId;
 }

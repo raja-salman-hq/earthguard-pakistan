@@ -2,20 +2,21 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin } from "lucide-react";
 import { isDemoMode } from "@/lib/api/client";
 import { getAreaIndicators } from "@/lib/api";
 import { useMessages } from "@/hooks/use-messages";
 import { useUiStore } from "@/store/ui-store";
 import { LocalizedMetadataSync } from "@/components/layout/localized-metadata-sync";
+import { CoverageDialog, type CoverageRequest } from "@/components/ui/CoverageDialog";
 
 export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>) {
   const messages = useMessages();
   const pathname = usePathname();
-  const coverageDialogRef = useRef<HTMLDialogElement>(null);
+  const router = useRouter();
+  const [coverageRequest, setCoverageRequest] = useState<CoverageRequest>({ variant: "welcome" });
   const coverageAutoShown = useRef(false);
   const dataQuery = useQuery({
     queryKey: ["area-indicators", "faisalabad"],
@@ -30,6 +31,20 @@ export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>)
     language === "en" ? messages.languageToggleEnglish : messages.languageToggleUrdu;
   const setTheme = useUiStore((state) => state.setTheme);
   const setLanguage = useUiStore((state) => state.setLanguage);
+  function showCoverageDialog() {
+    const dialog = document.querySelector<HTMLDialogElement>(".data-coverage-dialog");
+    if (dialog && !dialog.open) dialog.showModal();
+  }
+  useEffect(() => {
+    const handleCoverageRequest = (event: Event) => {
+      const request = (event as CustomEvent<CoverageRequest>).detail;
+      setCoverageRequest(request);
+      showCoverageDialog();
+    };
+    window.addEventListener("earthguard:coverage", handleCoverageRequest);
+    return () => window.removeEventListener("earthguard:coverage", handleCoverageRequest);
+  }, []);
+
   useEffect(() => {
     if (
       coverageAutoShown.current ||
@@ -49,14 +64,15 @@ export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>)
       alreadyShown = false;
     }
 
-    if (!alreadyShown && coverageDialogRef.current && !coverageDialogRef.current.open) {
-      coverageDialogRef.current.showModal();
+    if (!alreadyShown) {
+      showCoverageDialog();
     }
   }, [pathname]);
 
   function openCoverageDialog() {
-    const dialog = coverageDialogRef.current;
+    const dialog = document.querySelector<HTMLDialogElement>(".data-coverage-dialog");
     if (dialog && !dialog.open) {
+      setCoverageRequest({ variant: "welcome" });
       dialog.showModal();
     }
   }
@@ -138,31 +154,15 @@ export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>)
         </div>
       </header>
 
-      <dialog
-        className="data-coverage-dialog"
-        ref={coverageDialogRef}
-        aria-labelledby="data-coverage-title"
-        aria-describedby="data-coverage-description"
-      >
-        <div className="data-coverage-dialog-content" lang={language} dir={language === "ur" ? "rtl" : "ltr"}>
-          <div className="data-coverage-eyebrow">
-            <MapPin aria-hidden="true" size={16} />
-            <span>{messages.dataCoverageEyebrow}</span>
-          </div>
-          <h2 id="data-coverage-title">{messages.dataCoverageTitle}</h2>
-          <p id="data-coverage-description">{messages.dataCoverageText}</p>
-          <div className="data-coverage-location">
-            {messages.dataCoverageArea}
-          </div>
-          <button
-            className="primary-button"
-            type="button"
-            onClick={() => coverageDialogRef.current?.close()}
-          >
-            {messages.dataCoverageClose}
-          </button>
-        </div>
-      </dialog>
+      <CoverageDialog
+        variant={coverageRequest.variant}
+        region={coverageRequest.region}
+        message={coverageRequest.message}
+        onExplore={() => {
+          router.push("/explore?area=faisalabad&province=punjab&region=punjab");
+        }}
+        onClose={() => undefined}
+      />
 
       <div className="site-content">{children}</div>
 

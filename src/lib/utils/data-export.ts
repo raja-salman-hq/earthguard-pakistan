@@ -8,6 +8,21 @@ export type ExportSeries = {
   label: string;
   unit: string;
   points: ExportPoint[];
+  resolution?: "monthly" | "yearly";
+};
+
+export type ComparisonExportRow = {
+  area: string;
+  indicator: string;
+  previousYear: number;
+  previousValue: number | null;
+  year: number;
+  value: number | null;
+  difference: number | null;
+  percentDifference: number | null;
+  unit: string;
+  source: string;
+  status: string;
 };
 
 export type ExportMetadata = {
@@ -29,7 +44,7 @@ function safeFileName(value: string): string {
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/[^a-z0-9_]+/g, "-")
     .replace(/^-|-$/g, "");
 
   return slug || "earthguard-export";
@@ -66,6 +81,39 @@ export function downloadSeriesCsv(
     area: string;
   },
 ): void {
+  if (!metadata.isDemo) {
+    const source = metadata.source;
+    const area = metadata.areaLabel ?? metadata.regionLabel;
+    const status = metadata.statusLabel ?? "";
+    const rows: Array<Array<string | number>> = [
+      ["area", "indicator", "year", "month", "value", "unit", "valid_months", "source file", "status"],
+    ];
+    for (const item of series) {
+      for (const point of item.points) {
+        const [year, month] = point.date.split("-");
+        rows.push([
+          area,
+          item.label,
+          Number(year),
+          item.resolution === "monthly" ? Number(month) : "",
+          point.value ?? "",
+          item.unit,
+          point.valid_months ?? "",
+          source,
+          status,
+        ]);
+      }
+
+    }
+
+    const content = `\uFEFF${rows.map((row) => row.map(quoteCsvCell).join(",")).join("\r\n")}`;
+    downloadBlob(
+      new Blob([content], { type: "text/csv;charset=utf-8" }),
+      `${safeFileName(metadata.fileName)}.csv`,
+    );
+    return;
+  }
+
   const validityColumns = series.map((item) =>
     item.points.some((point) => point.valid_months !== undefined),
   );
@@ -140,6 +188,39 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
       }
     }, "image/png");
   });
+}
+
+export function downloadComparisonCsv(rows: ComparisonExportRow[], fileName: string): void {
+  const header = [
+    "area",
+    "indicator",
+    "previous_year",
+    "previous_value",
+    "year",
+    "value",
+    "difference",
+    "percent_difference",
+    "unit",
+    "source file",
+    "status",
+  ];
+  const content = `\uFEFF${[
+    header,
+    ...rows.map((row) => [
+      row.area,
+      row.indicator,
+      row.previousYear,
+      row.previousValue ?? "",
+      row.year,
+      row.value ?? "",
+      row.difference ?? "",
+      row.percentDifference ?? "",
+      row.unit,
+      row.source,
+      row.status,
+    ]),
+  ].map((row) => row.map(quoteCsvCell).join(",")).join("\r\n")}`;
+  downloadBlob(new Blob([content], { type: "text/csv;charset=utf-8" }), `${safeFileName(fileName)}.csv`);
 }
 
 export async function downloadChartPng(

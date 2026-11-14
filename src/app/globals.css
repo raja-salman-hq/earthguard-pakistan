@@ -370,12 +370,68 @@ html[dir="rtl"] .map-floating-panel > summary::after {
   padding: 0;
   overflow: auto;
   border: 1px solid color-mix(in srgb, var(--primary) 36%, var(--border));
-  border-radius: 20px;
+  border-radius: 16px;
   background:
     radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 54%),
     var(--surface);
   color: var(--text);
   box-shadow: 0 32px 100px rgb(1 7 19 / 58%);
+}
+
+.coverage-dialog {
+  animation: coverage-dialog-in 160ms ease-out;
+}
+
+.coverage-dialog-no-data {
+  border-color: color-mix(in srgb, var(--heat) 48%, var(--border));
+}
+
+.coverage-dialog-no-data .coverage-dialog-icon {
+  color: var(--heat);
+  border-color: color-mix(in srgb, var(--heat) 45%, var(--border));
+  background: color-mix(in srgb, var(--heat) 12%, var(--surface));
+}
+
+.coverage-dialog-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--border));
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  color: var(--primary);
+}
+
+.coverage-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.coverage-indicator-chips,
+.city-card-indicators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.coverage-indicator-chip,
+.city-card-indicators span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font-size: 11px;
+}
+
+@keyframes coverage-dialog-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .data-coverage-dialog::backdrop {
@@ -1481,6 +1537,102 @@ html[lang="ur"] .feedback-card h1 {
     font-size: 11px;
   }
 
+  .indicator-cards {
+    display: grid;
+    gap: 8px;
+  }
+
+  .indicator-card {
+    display: flex;
+    min-height: 76px;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    text-align: start;
+  }
+
+  .indicator-card:hover,
+  .indicator-card.is-selected {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  }
+
+  .indicator-card-icon {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    place-items: center;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--accent) 16%, var(--surface-raised));
+    color: var(--primary);
+  }
+
+  .indicator-card-copy {
+    display: grid;
+    min-width: 0;
+    gap: 2px;
+    font-size: 10px;
+  }
+
+  .indicator-card-copy strong {
+    overflow: hidden;
+    color: var(--text);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .indicator-card-latest {
+    color: var(--primary);
+    font-family: var(--font-jetbrains-mono), monospace;
+    font-size: 11px;
+  }
+
+  .finding-values {
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.5;
+  }
+
+  .finding-sentence {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.5;
+  }
+
+  .hotspot-main .indicator-status-badge {
+    display: inline-flex;
+    width: fit-content;
+    padding: 3px 6px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 9px;
+  }
+
+  .hotspot-main .indicator-status-badge.is-draft {
+    border-color: color-mix(in srgb, var(--heat) 45%, var(--border));
+    color: var(--heat);
+  }
+
+  .hotspot-main .indicator-status-badge.is-verified {
+    border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+    color: var(--primary);
+  }
+
+  .hotspot-main .data-status-badge {
+    width: fit-content;
+    margin-top: 3px;
+    font-size: 9px;
+  }
+
   .map-field select:focus-visible,
   .map-region-list button:focus-visible,
   .map-navigation-controls button:focus-visible {
@@ -1650,25 +1802,62 @@ html[lang="ur"] .feedback-card h1 {
     list-style: none;
   }
 
-  .map-province-panel button {
-    display: flex;
+  .map-province-panel button.city-card {
+    display: grid;
     width: 100%;
     min-height: 38px;
-    align-items: center;
-    justify-content: space-between;
+    align-items: start;
+    justify-content: start;
     gap: 8px;
-    padding: 6px 8px;
+    padding: 12px;
     border: 1px solid var(--border);
     border-radius: 9px;
     background: var(--surface-raised);
     color: var(--text);
     cursor: pointer;
+    text-align: start;
     font-size: 11px;
   }
 
-  .map-province-panel button:disabled {
-    cursor: not-allowed;
+  .map-province-panel button.city-card.is-coming_soon {
+    color: var(--muted);
     opacity: 0.65;
+  }
+
+  .city-card-heading,
+  .city-card-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 7px;
+  }
+
+  .city-card-heading strong {
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  .city-card-status {
+    justify-content: start;
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  .city-card-status.is-available {
+    color: var(--primary);
+  }
+
+  .city-card-meta {
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  .city-card-action {
+    width: fit-content;
+    min-height: 30px;
+    padding: 6px 10px;
+    font-size: 11px;
+    pointer-events: none;
   }
 
   .map-area-status {
@@ -1697,6 +1886,10 @@ html[lang="ur"] .feedback-card h1 {
 
   .map-available-marker svg {
     color: var(--primary);
+  }
+
+  .map-available-marker.is-study-area-marker {
+    border-color: var(--cool);
   }
 
   .map-study-area-error {
@@ -3447,6 +3640,295 @@ html[lang="ur"] .compare-page :is(h1, h2) {
   font-size: 13px;
 }
 
+.compare-heading-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.compare-heading-actions .export-menu {
+  margin: 0;
+}
+
+.compare-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-block-end: 22px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.compare-year-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.compare-year-controls > button,
+.compare-add-region,
+.compare-table-toggle {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.compare-year-controls > button svg,
+.compare-add-region svg,
+.compare-table-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.compare-year-controls > button:hover,
+.compare-add-region:hover,
+.compare-table-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.compare-year-controls > button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.compare-year-controls label {
+  display: grid;
+  gap: 3px;
+  min-width: 155px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.compare-year-controls select {
+  min-height: 44px;
+  padding: 0 34px 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: 600 14px var(--font-inter), sans-serif;
+}
+
+.compare-add-region {
+  padding-inline: 16px;
+  border-color: var(--primary);
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.compare-year-cards {
+  gap: 18px;
+}
+
+.compare-year-card {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.compare-indicator-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+}
+
+.compare-indicator-title svg {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  color: var(--primary);
+}
+
+.compare-indicator-title h2 {
+  overflow-wrap: anywhere;
+}
+
+.compare-value-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-block: 4px 16px;
+}
+
+.compare-value-grid > div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-raised) 72%, transparent);
+}
+
+.compare-value-grid span,
+.compare-value-grid small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.compare-value-grid strong {
+  display: block;
+  margin-block: 5px 2px;
+  color: var(--text);
+  font: 700 clamp(18px, 2vw, 24px) var(--font-jetbrains), monospace;
+  white-space: nowrap;
+}
+
+.compare-value-grid small {
+  min-height: 1.2em;
+}
+
+.compare-difference {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 8px;
+  margin-block-end: 14px;
+  padding: 11px 12px;
+  border-inline-start: 3px solid var(--primary);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  font-size: 12px;
+}
+
+.compare-difference svg {
+  grid-row: span 2;
+  width: 19px;
+  height: 19px;
+  color: var(--primary);
+}
+
+.compare-difference strong {
+  font-size: 13px;
+}
+
+.compare-difference > span {
+  color: var(--muted);
+}
+
+.compare-difference > span:last-child {
+  grid-column: 2;
+}
+
+.compare-bar-chart {
+  margin: 0 0 14px;
+}
+
+.compare-bar-chart figcaption {
+  margin-block-end: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.compare-bar-chart figcaption span {
+  font-weight: 400;
+}
+
+.compare-bar-chart-plot,
+.compare-bar-chart-skeleton {
+  min-height: 180px;
+  height: 180px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-raised) 58%, transparent);
+}
+
+.compare-bar-chart-skeleton {
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.compare-year-sentence {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.compare-table-toggle {
+  align-self: flex-start;
+  min-height: 40px;
+  padding-inline: 11px;
+  border-color: var(--border);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.compare-year-table-wrap {
+  max-width: 100%;
+  margin-block-start: 10px;
+  overflow-x: auto;
+}
+
+.compare-year-table {
+  width: 100%;
+  min-width: 400px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.compare-year-table caption {
+  margin-block-end: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: start;
+}
+
+.compare-year-table th,
+.compare-year-table td {
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+}
+
+.compare-year-table thead th {
+  color: var(--text);
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  font-weight: 700;
+}
+
+.compare-year-table tbody th,
+.compare-year-table td {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.compare-year-table td bdi,
+.compare-value-grid bdi,
+.compare-difference bdi {
+  direction: ltr;
+  font-family: var(--font-jetbrains), monospace;
+}
+
+.compare-year-card > .compare-axis-note {
+  margin-block-start: auto;
+  padding-block-start: 12px;
+}
+
 .compare-filters {
   display: grid;
   grid-template-columns: minmax(190px, 0.7fr) minmax(300px, 1.3fr);
@@ -3843,6 +4325,48 @@ html[lang="ur"] .compare-page :is(h1, h2) {
     gap: 10px;
   }
 
+  .compare-heading-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .compare-heading-actions .data-status-badge,
+  .compare-heading-actions .export-menu {
+    flex: 1 1 100%;
+  }
+
+  .compare-heading-actions .export-menu details > summary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .compare-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 14px;
+  }
+
+  .compare-year-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .compare-year-controls label {
+    flex: 1;
+  }
+
+  .compare-year-controls select {
+    width: 100%;
+  }
+
+  .compare-add-region {
+    width: 100%;
+  }
+
+  .compare-year-card {
+    padding: 16px;
+  }
+
   .compare-filters,
   .area-small-multiples {
     grid-template-columns: minmax(0, 1fr);
@@ -4130,6 +4654,30 @@ html[lang="ur"] .compare-page :is(h1, h2) {
   .trend-error-state button,
   .map-inline-error button {
     min-height: 44px;
+  }
+
+  @media (max-width: 640px) {
+    .data-coverage-dialog {
+      width: 100%;
+      max-width: none;
+      max-height: min(86dvh, 640px);
+      margin: auto 0 0;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .coverage-dialog-actions {
+      display: grid;
+    }
+
+    .coverage-dialog-actions > button {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .coverage-dialog {
+      animation: none;
+    }
   }
 }
 

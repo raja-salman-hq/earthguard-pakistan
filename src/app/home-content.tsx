@@ -44,6 +44,15 @@ type LandingInsight = {
   changePercent: number;
 };
 
+type RealFact = {
+  id: VariableId;
+  name: string;
+  unit: string;
+  latest: number | null;
+  year: number;
+  status: "draft" | "verified" | "placeholder";
+};
+
 type HeroProvinceShape = {
   regionId: RegionId;
   path: string;
@@ -66,6 +75,7 @@ type HomeContentProps = {
   heroSparklineValues: number[];
   heroTrend: Pick<LandingInsight, "direction" | "significant"> | null;
   insights: LandingInsight[];
+  realFacts?: RealFact[];
 };
 
 const variableIcons: Record<VariableId, LucideIcon> = {
@@ -88,7 +98,10 @@ const variableDescriptionKeys: Record<VariableId, MessageKey> = {
   land_surface_temperature: "aboutLandSurfaceTemperatureDescription",
 };
 
-function formatNumber(value: number): string {
+function formatNumber(value: number | null): string {
+  if (value === null) {
+    return "—";
+  }
   return new Intl.NumberFormat("en", { maximumFractionDigits: 1 }).format(value);
 }
 
@@ -190,6 +203,7 @@ export default function HomeContent({
   heroSparklineValues,
   heroTrend,
   insights,
+  realFacts = [],
 }: HomeContentProps) {
   const sparklinePoints = isDemoMode ? getSparklinePoints(heroSparklineValues) : "";
   const questions: Array<{ title: MessageKey; description: MessageKey; href: string; Icon: LucideIcon }> = isDemoMode ? [
@@ -522,6 +536,26 @@ export default function HomeContent({
           })}
         </div>
       </section>
+
+      {!isDemoMode && (
+        <section className="home-section page-shell" aria-labelledby="home-facts-title">
+          <div className="home-section-heading">
+            <span className="eyebrow">{messages.en.homePilotEyebrow}</span>
+            <h2 id="home-facts-title">Faisalabad pilot coverage</h2>
+            <p>Three indicators, 2001 to 2024, for Faisalabad District and the 10 km surrounding zone.</p>
+          </div>
+          <div className="home-variable-grid">
+            {realFacts.map((fact) => (
+              <article className="home-variable-card" key={fact.id}>
+                <span className="home-variable-card-title">{fact.name}</span>
+                <strong dir="ltr"><bdi>{formatNumber(fact.latest)}</bdi> {fact.unit}</strong>
+                <span className="home-variable-description">Latest value: <bdi dir="ltr">{fact.year}</bdi></span>
+                <span className="data-status-badge">{fact.status === "verified" ? "Verified data" : "Draft data"}</span>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       {isDemoMode && (
       <section className="home-section page-shell" aria-labelledby="home-insights-title">

@@ -12,6 +12,7 @@ import {
 } from "@/components/landing/pakistan-hero-map-data";
 import type { RegionId, VariableId } from "@/types/api";
 import { isDemoMode } from "@/lib/api/client";
+import areaData from "../../public/data/areas/faisalabad/indicators.json";
 
 export const metadata = getPageMetadata("home");
 
@@ -37,6 +38,18 @@ export default function HomePage() {
         heroSparklineValues={[]}
         heroTrend={null}
         insights={[]}
+        realFacts={areaData.indicators.map((indicator) => {
+          const point = indicator.series.find((candidate) => candidate.value !== null && candidate.year === 2024)
+            ?? indicator.series.filter((candidate) => candidate.value !== null).at(-1);
+          return {
+            id: indicator.id as VariableId,
+            name: indicator.name,
+            unit: indicator.unit,
+            latest: point?.value ?? null,
+            year: point?.year ?? 2024,
+            status: areaData.meta.status === "verified" ? "verified" : "draft",
+          };
+        })}
       />
     );
   }

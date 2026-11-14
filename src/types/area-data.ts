@@ -28,15 +28,19 @@ export const areaConfigSchema = z.object({
   name: z.string().min(1),
   provinceId: areaProvinceIdSchema,
   status: z.enum(["available", "coming_soon"]),
-  center: z.tuple([z.number().finite(), z.number().finite()]),
+  center: z.tuple([z.number().finite(), z.number().finite()]).optional(),
   bounds: z.tuple([
     z.number().finite(),
     z.number().finite(),
     z.number().finite(),
     z.number().finite(),
-  ]),
+  ]).optional(),
   indicators: z.array(z.enum(VARIABLE_IDS)),
   dataPath: z.string().startsWith("/data/"),
+}).superRefine((area, context) => {
+  if (area.status === "available" && (!area.center || !area.bounds)) {
+    context.addIssue({ code: "custom", message: "Available areas require map coordinates.", path: ["center"] });
+  }
 });
 
 export const areasConfigSchema = z.object({

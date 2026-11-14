@@ -392,7 +392,7 @@ export function TrendChart({
                   name={messages.trendSeriesLabel}
                   stroke="var(--accent)"
                   strokeWidth={2}
-                  dot={false}
+                  dot={{ r: 2.5, strokeWidth: 1 }}
                   connectNulls={false}
                   isAnimationActive={false}
                 />

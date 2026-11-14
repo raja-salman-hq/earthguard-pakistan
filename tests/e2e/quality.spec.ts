@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { readFile } from "node:fs/promises";
 import { areaIndicatorsSchema } from "@/types/area-data";
 
 const routes = [
@@ -54,7 +55,7 @@ async function dismissCoverageDialog(page: Page, expectToOpen = true): Promise<v
     await expect(dialog).toBeVisible();
   }
   if (await dialog.isVisible()) {
-    await dialog.locator("button").click();
+    await dialog.getByRole("button", { name: "Close" }).click();
   }
 }
 
@@ -168,7 +169,7 @@ test.describe("production route smoke checks", () => {
     await expect(dialog).toBeVisible();
     await expect(dialog).toContainText("Faisalabad District");
     await expect(dialog.locator(".data-coverage-location")).toContainText("Punjab");
-    await expect(dialog).toHaveCSS("border-radius", "20px");
+    await expect(dialog).toHaveCSS("border-radius", "16px");
     await page.keyboard.press("Escape");
     await expect(dialog).not.toBeVisible();
     await page.goto("/team", { waitUntil: "domcontentloaded" });
@@ -177,6 +178,32 @@ test.describe("production route smoke checks", () => {
     await expect(dialog).toBeVisible();
     await dialog.getByRole("button", { name: "Close" }).click();
     await expect(dialog).not.toBeVisible();
+  });
+
+  test("real coverage hierarchy opens Punjab cities and Faisalabad study area", async ({ page }) => {
+    test.skip(!realDataMode, "Coverage hierarchy is specific to real mode.");
+    await stubBasemap(page);
+    await page.goto("/explore", { waitUntil: "domcontentloaded" });
+    await dismissCoverageDialog(page);
+
+    await page.locator("details.map-region-panel select").selectOption("punjab");
+    await expect(page.getByRole("heading", { name: "Punjab areas" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Lahore.*No data yet/ })).toBeVisible();
+    await page.getByRole("button", { name: /Open Faisalabad/ }).click();
+    await expect(page.locator(".map-breadcrumb")).toContainText("Faisalabad");
+    await expect(page.locator(".map-coverage-legend, .map-legend")).toBeVisible();
+  });
+
+  test("real mode shows no-data dialog for a coming-soon city", async ({ page }) => {
+    test.skip(!realDataMode, "Coverage hierarchy is specific to real mode.");
+    await stubBasemap(page);
+    await page.goto("/explore", { waitUntil: "domcontentloaded" });
+    await dismissCoverageDialog(page);
+    await page.getByRole("button", { name: "Data coverage" }).click();
+    await page.getByRole("button", { name: "Close" }).click();
+    await page.locator("details.map-region-panel select").selectOption("punjab");
+    await page.getByRole("button", { name: /Lahore.*No data yet/ }).click();
+    await expect(page.getByRole("dialog", { name: "Data not available yet" })).toContainText("Lahore has no data yet");
   });
 
   test("team cards open and close profile dialogs and protect external links", async ({ page }) => {
@@ -377,6 +404,8 @@ test.describe("production route smoke checks", () => {
     await page.goto("/explore?province=pakistan", { waitUntil: "domcontentloaded" });
     await dismissCoverageDialog(page);
     await expect(page.locator(".data-status-badge")).toContainText("Draft data");
+    await expect(page.locator(".indicator-card")).toHaveCount(3);
+    await expect(page.locator(".indicator-card").first()).toContainText("2024");
 
     const regionSelect = page.locator("details.map-region-panel select");
     await regionSelect.selectOption("punjab");
@@ -424,6 +453,14 @@ test.describe("production route smoke checks", () => {
       "Precipitation",
       "Vegetation index",
     ]);
+    const firstValueBeforeYearChange = await page.locator(".compare-year-card").first().locator(".compare-value-grid").innerText();
+    await page.locator(".compare-year-controls select").selectOption("2023");
+    await expect(page.locator(".compare-year-card").first().locator(".compare-value-grid")).not.toHaveText(firstValueBeforeYearChange);
+    await page.locator(".compare-year-card").first().getByRole("button", { name: /view table/i }).click();
+    await expect(page.locator(".compare-year-card").first().locator(".compare-year-table")).toBeVisible();
+    await page.getByRole("button", { name: /add another region/i }).click();
+    await expect(page.getByRole("dialog")).toContainText("Comparing regions");
+    await page.getByRole("dialog").getByRole("button", { name: "Close" }).click();
     const firstExport = page.locator(".area-small-multiple-heading").first();
     await firstExport.locator("summary").click();
     const [download] = await Promise.all([
@@ -431,6 +468,12 @@ test.describe("production route smoke checks", () => {
       firstExport.getByRole("button", { name: "Download visible data as CSV" }).click(),
     ]);
     expect(download.suggestedFilename()).toContain("faisalabad");
+    const csvPath = await download.path();
+    expect(csvPath).not.toBeNull();
+    const csv = await readFile(csvPath!, "utf8");
+    expect(csv).toContain("\uFEFF\"area\",\"indicator\",\"year\",\"month\",\"value\",\"unit\",\"valid_months\",\"source file\",\"status\"");
+    expect(csv).toContain("2001");
+    expect(csv).toContain("2024");
     const [pngDownload] = await Promise.all([
       page.waitForEvent("download"),
       firstExport.getByRole("button", { name: "Download chart as PNG" }).click(),

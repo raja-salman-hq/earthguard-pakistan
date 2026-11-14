@@ -8,8 +8,7 @@ import {
   type AreasConfig,
 } from "@/types/area-data";
 import { readStaticJson } from "./client";
-
-const AREAS_CONFIG_PATH = "/data/areas.json";
+import { areasConfig } from "@/lib/areas";
 
 export class NoDataError extends Error {
   readonly requestedLabel: string;
@@ -22,7 +21,7 @@ export class NoDataError extends Error {
 }
 
 export async function getAreasConfig(): Promise<AreasConfig> {
-  return areasConfigSchema.parse(await readStaticJson(AREAS_CONFIG_PATH));
+  return areasConfigSchema.parse(areasConfig);
 }
 
 export async function getAreaIndicators(areaId: string): Promise<AreaIndicators> {

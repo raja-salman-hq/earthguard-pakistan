@@ -11,7 +11,7 @@ import MapView, {
   Source,
 } from "react-map-gl/maplibre";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MapPin } from "lucide-react";
+import { CloudRain, Leaf, LockKeyhole, MapPin, Thermometer } from "lucide-react";
 import { getAreaStudyArea, getAreas, getMapLayer } from "@/lib/api";
 import { isDemoMode } from "@/lib/api/client";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -26,6 +26,7 @@ import {
 import { createMapLayerQuery } from "@/lib/map-layer-query";
 import { MapLegend } from "./MapLegend";
 import { getRegionLabel } from "@/lib/i18n";
+import { requestCoverageDialog } from "@/components/ui/CoverageDialog";
 
 const MAP_STYLE_URL =
   "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
@@ -382,7 +383,7 @@ export const PakistanMap = memo(function PakistanMap({
 
     if (selectedArea && areasQuery.data) {
       const selected = areasQuery.data.areas.find((area) => area.id === selectedArea);
-      if (selected) {
+      if (selected?.bounds) {
         mapRef.current?.fitBounds(
           [
             [selected.bounds[0], selected.bounds[1]],
@@ -472,15 +473,18 @@ export const PakistanMap = memo(function PakistanMap({
       if (result.success) {
         if (isDemoMode) {
           setRegion(result.data);
+        } else if (result.data === "punjab") {
+          setProvince("punjab");
         } else if (result.data === "faisalabad") {
           setProvince("punjab");
           setArea("faisalabad");
         } else {
           setProvince(result.data);
+          requestCoverageDialog("no-data", getRegionLabel(result.data, language));
         }
       }
     },
-    [setArea, setProvince, setRegion],
+    [language, setArea, setProvince, setRegion],
   );
 
   const handleMapError = useCallback(() => {
@@ -566,10 +570,10 @@ export const PakistanMap = memo(function PakistanMap({
         )}
         {!isDemoMode &&
           selectedProvince === "punjab" &&
-          !selectedArea &&
+          (!selectedArea || studyAreaQuery.isError) &&
           areasQuery.data?.areas
-            .filter((area) => area.id === "faisalabad")
-            .map((area) => (
+            .filter((area) => area.id === "faisalabad" && area.center)
+            .map((area) => area.center ? (
               <Marker
                 key={area.id}
                 longitude={area.center[0]}
@@ -588,7 +592,7 @@ export const PakistanMap = memo(function PakistanMap({
                   {messages.mapAvailableMarker}
                 </button>
               </Marker>
-            ))}
+            ) : null)}
       </MapView>
 
       {!isDemoMode && (
@@ -631,15 +635,40 @@ export const PakistanMap = memo(function PakistanMap({
                       <li key={area.id}>
                         <button
                           type="button"
-                          disabled={area.status !== "available"}
-                          onClick={() => setArea(area.id)}
+                          className={`city-card is-${area.status}`}
+                          onClick={() => {
+                            if (area.status === "available") {
+                              setArea(area.id);
+                            } else {
+                              requestCoverageDialog("no-data", area.name);
+                            }
+                          }}
                         >
-                          <span>{area.name}</span>
-                          <span className={`map-area-status is-${area.status}`}>
-                            {area.status === "available"
-                              ? messages.mapAvailableStatus
-                              : messages.mapComingSoonStatus}
+                          <span className="city-card-heading">
+                            <strong>{area.name}</strong>
+                            {area.status === "available" ? (
+                              <span className="city-card-status is-available">
+                                <MapPin aria-hidden="true" size={14} />
+                                {messages.dataAvailable}
+                              </span>
+                            ) : (
+                              <span className="city-card-status">
+                                <LockKeyhole aria-hidden="true" size={14} />
+                                {messages.noDataYetShort}
+                              </span>
+                            )}
                           </span>
+                          {area.status === "available" ? (
+                            <>
+                              <span className="city-card-indicators">
+                                <span><Thermometer aria-hidden="true" size={13} /> {messages.indicatorLST}</span>
+                                <span><CloudRain aria-hidden="true" size={13} /> {messages.indicatorRainfall}</span>
+                                <span><Leaf aria-hidden="true" size={13} /> {messages.indicatorNDVI}</span>
+                              </span>
+                              <span className="city-card-meta">2001 to 2024 · District + 10 km zone</span>
+                              <span className="primary-button city-card-action">{messages.openFaisalabad}</span>
+                            </>
+                          ) : null}
                         </button>
                       </li>
                     ))}

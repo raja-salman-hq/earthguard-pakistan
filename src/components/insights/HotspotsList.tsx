@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { getHotspots, getTrend, getVariables } from "@/lib/api";
+import { getAreaIndicators, getHotspots, getTrend, getVariables } from "@/lib/api";
 import { isDemoMode } from "@/lib/api/client";
 import { useMessages } from "@/hooks/use-messages";
 import { useUiStore } from "@/store/ui-store";
@@ -37,6 +37,12 @@ export function HotspotsList({ variable }: HotspotsListProps) {
     queryFn: getVariables,
     enabled: !isDemoMode,
   });
+  const areaData = useQuery({
+    queryKey: ["area-indicators", "faisalabad"],
+    queryFn: () => getAreaIndicators("faisalabad"),
+    enabled: !isDemoMode,
+    staleTime: Infinity,
+  });
   const realTrends = useQueries({
     queries:
       !isDemoMode && selectedArea
@@ -64,8 +70,8 @@ export function HotspotsList({ variable }: HotspotsListProps) {
       "precipitation",
       "vegetation_index",
     ] as const;
-    const loading = realVariables.isPending || realTrends.some((query) => query.isPending);
-    const failed = realVariables.isError || realTrends.some((query) => query.isError && !query.data);
+    const loading = realVariables.isPending || areaData.isPending || realTrends.some((query) => query.isPending);
+    const failed = realVariables.isError || areaData.isError || realTrends.some((query) => query.isError && !query.data);
     return (
       <section className="hotspots-section" aria-labelledby="key-findings-heading">
         <div className="hotspots-heading">
@@ -99,6 +105,11 @@ export function HotspotsList({ variable }: HotspotsListProps) {
               const trend = realTrends[index]?.data;
               const selected = indicatorId === variable;
               const indicator = realVariables.data?.find((item) => item.id === indicatorId);
+              const indicatorData = areaData.data?.indicators.find((item) => item.id === indicatorId);
+              const values = indicatorData?.series.filter((point) => point.value !== null) ?? [];
+              const latest = values.at(-1);
+              const highest = values.reduce((best, point) => point.value! > best.value! ? point : best, values[0]);
+              const lowest = values.reduce((best, point) => point.value! < best.value! ? point : best, values[0]);
               const magnitude =
                 typeof trend?.slope === "number"
                   ? `${formatNumber(trend.slope)} ${trend.unit ?? indicator?.unit ?? ""}`
@@ -123,6 +134,28 @@ export function HotspotsList({ variable }: HotspotsListProps) {
                   >
                     <span className="hotspot-main">
                       <strong>{getVariableLabel(indicatorId, language)}</strong>
+                      {latest && highest && lowest && (
+                        <>
+                        <span className="finding-values">
+                          {messages.latestValue}: <bdi dir="ltr">{formatNumber(latest.value!)} {indicator?.unit}</bdi> ({latest.year}) ·{" "}
+                          {messages.highestValue}: <bdi dir="ltr">{formatNumber(highest.value!)} ({highest.year})</bdi> ·{" "}
+                          {messages.lowestValue}: <bdi dir="ltr">{formatNumber(lowest.value!)} ({lowest.year})</bdi>
+                        </span>
+                        <span className="finding-sentence" lang={language} dir={language === "ur" ? "rtl" : "ltr"}>
+                          {messages.findingSentence
+                            .replace("{indicator}", getVariableLabel(indicatorId, language))
+                            .replace("{latest}", `${formatNumber(latest.value!)} ${indicator?.unit ?? ""}`)
+                            .replace("{latestYear}", String(latest.year))
+                            .replace("{highest}", `${formatNumber(highest.value!)} ${indicator?.unit ?? ""}`)
+                            .replace("{highestYear}", String(highest.year))
+                            .replace("{lowest}", `${formatNumber(lowest.value!)} ${indicator?.unit ?? ""}`)
+                            .replace("{lowestYear}", String(lowest.year))}
+                        </span>
+                        </>
+                      )}
+                      <span className={`indicator-status-badge is-${areaData.data?.meta.status}`}>
+                        {areaData.data?.meta.status === "verified" ? messages.verifiedDataBadge : messages.draftDataBadge}
+                      </span>
                       {direction ? (
                         <span className="hotspot-direction">
                           <span aria-hidden="true">
