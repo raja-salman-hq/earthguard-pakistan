@@ -44,6 +44,7 @@ export function TrendTakeaway({
   const messages = useMessages();
   const language = useUiStore((state) => state.language);
   if (
+    !trend.available ||
     !trend.direction ||
     typeof trend.changeTotal !== "number" ||
     typeof trend.changePercent !== "number"

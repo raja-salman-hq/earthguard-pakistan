@@ -91,7 +91,11 @@ function readUrlState(): UrlState {
     !params.has("area") && !params.has("province") && !params.has("region");
   const parsed = urlStateSchema.safeParse({
     variable: params.get("variable"),
-    region: legacyFaisalabadRegion ? "punjab" : rawRegion,
+    region:
+      legacyFaisalabadRegion
+        ? "punjab"
+        : rawRegion ??
+          (params.get("province") === "pakistan" ? null : params.get("province")),
     province:
       params.get("province") ??
       (legacyFaisalabadRegion ? "punjab" : rawRegion),

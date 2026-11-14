@@ -181,6 +181,7 @@ type SyntheticTrend = TrendResponse &
 
 const syntheticTrends: Record<VariableId, SyntheticTrend> = {
   air_temperature: {
+    available: true,
     slope: 0.035,
     unit: "°C/year",
     pValue: 0.03,
@@ -192,6 +193,7 @@ const syntheticTrends: Record<VariableId, SyntheticTrend> = {
     summary: "Demo only: this generated series has a gentle upward pattern.",
   },
   precipitation: {
+    available: true,
     slope: -0.12,
     unit: "mm/month/year",
     pValue: 0.38,
@@ -203,6 +205,7 @@ const syntheticTrends: Record<VariableId, SyntheticTrend> = {
     summary: "Demo only: this generated series varies seasonally with a slight downward pattern.",
   },
   vegetation_index: {
+    available: true,
     slope: 0.002,
     unit: "index/year",
     pValue: 0.04,
@@ -214,6 +217,7 @@ const syntheticTrends: Record<VariableId, SyntheticTrend> = {
     summary: "Demo only: this generated series has a small upward pattern.",
   },
   snow_cover: {
+    available: true,
     slope: -12,
     unit: "km²/year",
     pValue: 0.12,
@@ -225,6 +229,7 @@ const syntheticTrends: Record<VariableId, SyntheticTrend> = {
     summary: "Demo only: this generated series has a slight downward pattern.",
   },
   soil_moisture: {
+    available: true,
     slope: -0.0004,
     unit: "m³/m³/year",
     pValue: 0.22,
@@ -236,6 +241,7 @@ const syntheticTrends: Record<VariableId, SyntheticTrend> = {
     summary: "Demo only: this generated series has a small downward pattern.",
   },
   evapotranspiration: {
+    available: true,
     slope: 0.006,
     unit: "mm/day/year",
     pValue: 0.08,
@@ -247,6 +253,7 @@ const syntheticTrends: Record<VariableId, SyntheticTrend> = {
     summary: "Demo only: this generated series has a gentle upward pattern.",
   },
   land_surface_temperature: {
+    available: true,
     slope: 0.04,
     unit: "°C/year",
     pValue: 0.02,

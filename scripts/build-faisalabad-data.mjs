@@ -431,6 +431,16 @@ async function buildIndicators() {
     new Map(annualNdviHasnainCopy.map(({ year, value }) => [year, value])),
   ));
   addWarning(formatDifferenceWarning(
+    `Hasnain annual master NDVI (${sourceFiles.annualMaster}) vs dedicated annual file (${sourceFiles.annualNdviHasnain})`,
+    new Map(annualMaster.map(({ year, ndvi }) => [year, ndvi])),
+    new Map(annualNdviHasnain.map(({ year, value }) => [year, value])),
+  ));
+  addWarning(formatDifferenceWarning(
+    `Hasnain annual master NDVI (${sourceFiles.annualMaster}) vs duplicate dedicated annual file (${sourceFiles.annualNdviHasnainCopy})`,
+    new Map(annualMaster.map(({ year, ndvi }) => [year, ndvi])),
+    new Map(annualNdviHasnainCopy.map(({ year, value }) => [year, value])),
+  ));
+  addWarning(formatDifferenceWarning(
     `Dedicated annual NDVI files (${sourceFiles.annualNdviHasnain} vs ${sourceFiles.annualNdviHasnainCopy})`,
     new Map(annualNdviHasnain.map(({ year, value }) => [year, value])),
     new Map(annualNdviHasnainCopy.map(({ year, value }) => [year, value])),
@@ -660,3 +670,13 @@ console.log("Built Faisalabad data (status: draft).");
 console.log(`- indicators: ${indicators.indicators.length}`);
 console.log(`- annual years: ${indicators.meta.period.start}-${indicators.meta.period.end}`);
 console.log(`- study-area.geojson: ${Buffer.byteLength(JSON.stringify(studyArea))} bytes`);
+console.log(`- warnings: ${indicators.meta.warnings.length}`);
+for (const warning of indicators.meta.warnings) {
+  console.log(`  warning: ${warning}`);
+}
+for (const indicator of indicators.indicators) {
+  const preview = [...indicator.series.slice(0, 3), ...indicator.series.slice(-3)]
+    .map(({ year, value }) => `${year}=${value ?? "null"}`)
+    .join(", ");
+  console.log(`- ${indicator.id} annual preview: ${preview}`);
+}

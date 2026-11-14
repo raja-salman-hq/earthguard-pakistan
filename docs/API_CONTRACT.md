@@ -4,12 +4,12 @@ This contract is used by the frontend and its backend integration checker.
 Request and response validation is defined in `src/types/api.ts`; all HTTP calls
 pass through `src/lib/api/`. No trend statistics are calculated in the browser.
 
-Set `NEXT_PUBLIC_USE_MOCK=true` for synthetic demo responses. Set it to `false`
-to read the draft Faisalabad pilot JSON from `public/data/areas/`; this build has
-no live backend, so `NEXT_PUBLIC_API_URL` is reserved for a future integration.
-The switch lives in `src/lib/api/client.ts`. Every response, including mock and
-static-file responses, is validated with its endpoint Zod schema before it is
-returned.
+Set `NEXT_PUBLIC_USE_MOCK=true` only for synthetic demo responses. When unset
+or `false`, the app reads the draft Faisalabad pilot JSON from
+`public/data/areas/`; this build has no live backend, so `NEXT_PUBLIC_API_URL`
+is reserved for a future integration. The switch lives in
+`src/lib/api/client.ts`. Every response, including mock and static-file
+responses, is validated with its endpoint Zod schema before it is returned.
 
 The examples below are illustrative and are **not NASA observations**. The mock
 regions have no geometries. The explore map uses the local
@@ -30,6 +30,9 @@ The real pilot covers only Faisalabad District and the supplied surrounding
 study area, 2001–2024, for land surface temperature, rainfall, and NDVI. Data
 status is available from the validated area indicators file. `draft` must not
 be described as verified, and mock values must never be shown in real mode.
+The query-region ID `faisalabad` is valid and has parent `punjab`, but the
+province-boundary response continues to contain only the seven provinces and
+territories.
 
 ## `GET /api/variables`
 
@@ -118,7 +121,9 @@ Response:
 `value` may be `null`; the chart preserves the gap. `valid_months` is optional
 and may be null when monthly coverage has not been confirmed.
 `availableResolutions` lists only resolutions present in the selected indicator
-file.
+file. Faisalabad annual values use the preferred combined GEE CSV. Monthly LST
+and rainfall use the specified Hasnain files. The NDVI monthly candidate has
+only January–March 2024, so the pilot exposes annual NDVI only.
 
 Demo monthly series are generated for every month from 2000 through 2025 with
 illustrative seasonal cycles and gentle trends. Demo yearly points use a
@@ -141,6 +146,7 @@ Response:
 
 ```json
 {
+  "available": true,
   "slope": 0.035,
   "unit": "°C/year",
   "pValue": 0.03,
@@ -158,9 +164,11 @@ Response:
 ```
 
 In static pilot mode the response contains only fields present in a matching
-team trend file. If no such file exists, the adapter returns `null` and the UI
-shows “Trend statistics not available yet.” It never derives a result from the
-time series. The optional schema fields are `test`, `tau`, `z`, `pValue`,
+team trend file. If no such file exists, the adapter returns
+`{ "available": false }` and the UI shows “Trend statistics not available
+yet.” It never derives a result from the time series. Available results have
+`available: true`; its schema default preserves older backend and mock objects.
+The optional schema fields are `test`, `tau`, `z`, `pValue`,
 `significant`, `direction`, `slope`, `unit`, `senSlope`, `slopeCi95`, `nYears`,
 `trendLine`, and `notes`.
 
@@ -256,4 +264,5 @@ records with IDs, names, status, center, bounds, indicator IDs, and `dataPath`.
 The detailed file shape and null/status rules are in
 [DATA_CONTRACT.md](./DATA_CONTRACT.md). The URL store adds `province` and
 `area`; legacy `region` remains accepted and is used as the province fallback
-when the new parameters are absent.
+when the new parameters are absent. A legacy `region=faisalabad` link resolves
+to `province=punjab&area=faisalabad` and is normalized to that shareable form.

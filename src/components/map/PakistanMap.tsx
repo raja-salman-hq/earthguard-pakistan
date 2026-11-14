@@ -472,12 +472,15 @@ export const PakistanMap = memo(function PakistanMap({
       if (result.success) {
         if (isDemoMode) {
           setRegion(result.data);
+        } else if (result.data === "faisalabad") {
+          setProvince("punjab");
+          setArea("faisalabad");
         } else {
           setProvince(result.data);
         }
       }
     },
-    [setProvince, setRegion],
+    [setArea, setProvince, setRegion],
   );
 
   const handleMapError = useCallback(() => {

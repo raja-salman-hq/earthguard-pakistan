@@ -118,6 +118,7 @@ export const trendQuerySchema = z
   });
 
 export const trendResponseSchema = z.object({
+  available: z.boolean().default(true),
   slope: z.number().finite().optional(),
   unit: z.string().min(1).optional(),
   pValue: z.number().min(0).max(1).nullable().optional(),

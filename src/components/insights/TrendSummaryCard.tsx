@@ -60,7 +60,7 @@ export function TrendSummaryCard({
     );
   }
 
-  if (!trend) {
+  if (!trend || !trend.available) {
     return (
       <section className="trend-summary-card" aria-labelledby={headingId}>
         <h2 id={headingId}>{messages.trendSummaryTitle}</h2>

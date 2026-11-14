@@ -15,11 +15,10 @@ Copy-Item .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Mock mode is enabled by
-default only when `NEXT_PUBLIC_USE_MOCK=true`; every demo value is synthetic
-and clearly labeled. Real Faisalabad static data is the default when the
-variable is unset or set to `false`. It is marked `draft` pending data-team
-verification.
+Open [http://localhost:3000](http://localhost:3000). Real Faisalabad static data
+is used when `NEXT_PUBLIC_USE_MOCK` is unset or `false`. Set it to `true` only
+to enable clearly labeled synthetic demo data. The real data is marked `draft`
+pending data-team verification.
 
 ## Faisalabad data
 

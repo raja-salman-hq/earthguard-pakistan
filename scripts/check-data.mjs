@@ -28,8 +28,11 @@ for (const area of areas.areas) {
   const areaFile = path.join(root, "public", area.dataPath.replace(/^\//, ""));
   const indicatorData = areaIndicatorsSchema.parse(await readJson(areaFile));
   console.log(
-    `${area.id}: status=${indicatorData.meta.status}; years=${indicatorData.meta.period.start}-${indicatorData.meta.period.end}`,
+    `${area.id}: status=${indicatorData.meta.status}; years=${indicatorData.meta.period.start}-${indicatorData.meta.period.end}; warnings=${indicatorData.meta.warnings.length}`,
   );
+  for (const warning of indicatorData.meta.warnings) {
+    console.log(`  warning: ${warning}`);
+  }
   for (const indicator of indicatorData.indicators) {
     const firstYear = indicator.series[0]?.year ?? "none";
     const lastYear = indicator.series.at(-1)?.year ?? "none";

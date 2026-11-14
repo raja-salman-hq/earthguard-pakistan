@@ -144,7 +144,7 @@ export function getTrend(query: TrendQuery) {
 
   return requestValidated({
     path: "api/trend",
-    schema: trendResponseSchema.nullable(),
+    schema: trendResponseSchema,
     mock: () => getMockTrendForVariable(validQuery),
     real: async () => {
       const areaId =
@@ -160,11 +160,12 @@ export function getTrend(query: TrendQuery) {
         throw new NoDataError(data.meta.areaName);
       }
       if (!indicator.trend) {
-        return null;
+        return { available: false };
       }
 
       const trend = indicator.trend;
       return {
+        available: true,
         slope: trend.sen_slope ?? undefined,
         unit: trend.slope_unit ?? undefined,
         pValue: trend.p_value,

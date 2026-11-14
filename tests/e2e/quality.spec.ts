@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { areaIndicatorsSchema } from "@/types/area-data";
 
 const routes = [
   { path: "/", name: "home", status: 200 },
@@ -321,6 +322,55 @@ test.describe("production route smoke checks", () => {
     expect(mobileRegionLabel).toBeTruthy();
   });
 
+  test("preferred annual sources, monthly coverage and trends match the data contract", async ({ page }) => {
+    test.skip(!realDataMode, "This data contract is exercised in real mode.");
+    await page.goto("/explore", { waitUntil: "domcontentloaded" });
+    await dismissCoverageDialog(page);
+    const response = await page.request.get(
+      new URL("/data/areas/faisalabad/indicators.json", page.url()).toString(),
+    );
+    expect(response.ok()).toBe(true);
+    const data = areaIndicatorsSchema.parse(await response.json());
+    const sourceFile =
+      "data/annual/gee2024/Faisalabad_LST_Rainfall_NDVI_Annual_2001_2024.csv";
+
+    expect(data.meta.status).toBe("draft");
+    expect(data.meta.warnings.length).toBeGreaterThan(0);
+    expect(data.indicators.map((indicator) => indicator.id)).toEqual([
+      "land_surface_temperature",
+      "precipitation",
+      "vegetation_index",
+    ]);
+    expect(data.indicators.every((indicator) => indicator.source === sourceFile)).toBe(true);
+    expect(data.indicators[0].monthly_series).toHaveLength(288);
+    expect(data.indicators[1].monthly_series).toHaveLength(288);
+    expect(data.indicators[2].monthly_series).toBeUndefined();
+    expect(data.indicators.every((indicator) => indicator.trend === null)).toBe(true);
+  });
+
+  test("legacy Faisalabad region URL resolves to its Punjab area and other regions show no data", async ({ page }) => {
+    test.skip(!realDataMode, "This area URL flow is exercised in real mode.");
+    await stubBasemap(page);
+    await page.goto(
+      "/explore?region=faisalabad&variable=land_surface_temperature&start=2001&end=2024",
+      { waitUntil: "domcontentloaded" },
+    );
+    await dismissCoverageDialog(page);
+    await expect(page).toHaveURL(/region=punjab/);
+    await expect(page).toHaveURL(/province=punjab/);
+    await expect(page).toHaveURL(/area=faisalabad/);
+    await expect(page.locator("details.map-region-panel select")).toHaveValue("faisalabad");
+    await expect(page.locator(".trend-chart-content h3")).toContainText("Faisalabad");
+
+    await page.goto("/explore?province=sindh&variable=land_surface_temperature", {
+      waitUntil: "domcontentloaded",
+    });
+    const noDataNotice = page.locator(".no-data-notice:visible");
+    await expect(noDataNotice).toHaveCount(1);
+    await noDataNotice.getByRole("button").click();
+    await expect(page.locator("details.map-region-panel select")).toHaveValue("faisalabad");
+  });
+
   test("real pilot map, indicators, compare, exports, Urdu and mobile flow", async ({ page }) => {
     test.skip(!realDataMode, "This flow is exercised with NEXT_PUBLIC_USE_MOCK=false.");
     await stubBasemap(page);
@@ -348,13 +398,12 @@ test.describe("production route smoke checks", () => {
     for (const variable of ["land_surface_temperature", "precipitation", "vegetation_index"]) {
       await page.getByLabel("Environmental variable").selectOption(variable);
       await expect(page.locator(".trend-chart-plot svg").first()).toBeVisible();
-      if (variable === "land_surface_temperature") {
+      if (variable === "land_surface_temperature" || variable === "precipitation") {
+        await expect(page.locator(".trend-resolution-control select")).toBeVisible();
+      } else {
         await expect(page.locator(".trend-resolution-control")).toHaveCount(0);
       }
-      if (variable === "precipitation" || variable === "vegetation_index") {
-        await expect(page.locator(".trend-resolution-control select")).toBeVisible();
-      }
-      if (variable === "precipitation") {
+      if (variable === "land_surface_temperature" || variable === "precipitation") {
         await page.locator(".trend-view-toggle button").nth(1).click();
         await expect(page.locator(".trend-data-table tbody tr")).toHaveCount(24);
         await expect(page.locator(".trend-data-table thead")).toContainText("Valid months");
