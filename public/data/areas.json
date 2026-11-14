@@ -1,0 +1,56 @@
+{
+  "provinces": [
+    {
+      "id": "punjab",
+      "name": "Punjab"
+    },
+    {
+      "id": "sindh",
+      "name": "Sindh"
+    },
+    {
+      "id": "khyber-pakhtunkhwa",
+      "name": "Khyber Pakhtunkhwa"
+    },
+    {
+      "id": "balochistan",
+      "name": "Balochistan"
+    },
+    {
+      "id": "gilgit-baltistan",
+      "name": "Gilgit-Baltistan"
+    },
+    {
+      "id": "azad-kashmir",
+      "name": "Azad Kashmir"
+    },
+    {
+      "id": "islamabad",
+      "name": "Islamabad"
+    }
+  ],
+  "areas": [
+    {
+      "id": "faisalabad",
+      "name": "Faisalabad",
+      "provinceId": "punjab",
+      "status": "available",
+      "center": [
+        73.19163228649819,
+        31.230950622396065
+      ],
+      "bounds": [
+        72.59720331218332,
+        30.584880923958803,
+        73.78606126081307,
+        31.877020320833328
+      ],
+      "indicators": [
+        "land_surface_temperature",
+        "precipitation",
+        "vegetation_index"
+      ],
+      "dataPath": "/data/areas/faisalabad/indicators.json"
+    }
+  ]
+}

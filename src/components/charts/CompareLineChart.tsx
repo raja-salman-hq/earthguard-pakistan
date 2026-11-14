@@ -48,7 +48,7 @@ export function CompareLineChart({
   const language = useUiStore((state) => state.language);
   const summaryId = useId();
   const data = useMemo(() => {
-    const valuesByDate = new Map<string, Record<string, string | number>>();
+    const valuesByDate = new Map<string, Record<string, string | number | null>>();
     for (const [index, item] of series.entries()) {
       for (const point of item.points) {
         const values = valuesByDate.get(point.date) ?? { date: point.date };
@@ -157,7 +157,12 @@ export function CompareLineChart({
               labelFormatter={(value) => formatDate(String(value), language)}
               formatter={(value, name) => {
                 const item = series.find((candidate) => candidate.label === String(name));
-                return [`${formatNumber(Number(value))} ${item?.unit ?? ""}`, String(name)];
+                return [
+                  value === null || value === undefined
+                    ? "—"
+                    : `${formatNumber(Number(value))} ${item?.unit ?? ""}`,
+                  String(name),
+                ];
               }}
               contentStyle={{
                 background: "var(--surface)",
@@ -178,7 +183,7 @@ export function CompareLineChart({
                 strokeDasharray={lineStyles[index % lineStyles.length]}
                 dot={{ r: 2.5 }}
                 activeDot={{ r: 4 }}
-                connectNulls
+                connectNulls={false}
                 isAnimationActive={false}
               />
             ))}

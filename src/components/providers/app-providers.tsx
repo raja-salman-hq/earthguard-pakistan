@@ -4,26 +4,47 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import {
+  type CompareMode,
+  type RegionId,
+  type VariableId,
   compareModeSchema,
   compareRegionsSchema,
   compareVariablesSchema,
+  PROVINCE_IDS,
   REGION_IDS,
   VARIABLE_IDS,
 } from "@/types/api";
 import { useUiStore } from "@/store/ui-store";
+import type { ChangeBasis, LayerId, MapLayerType, ProvinceId, Theme } from "@/store/ui-store";
+import type { Language } from "@/lib/i18n";
 import { ApiWakeupNotice } from "./api-wakeup-notice";
+import { areaIdSchema } from "@/types/area-data";
+import { isDemoMode } from "@/lib/api/client";
+import type { AreaId } from "@/types/area-data";
 
 const defaultCompareRegions = ["punjab", "sindh"] as const;
-const defaultCompareVariables = ["air_temperature", "precipitation"] as const;
+const defaultCompareVariables = isDemoMode
+  ? ["air_temperature", "precipitation"] as const
+  : ["land_surface_temperature", "precipitation", "vegetation_index"] as const;
+const defaultVariable = isDemoMode ? "air_temperature" : "land_surface_temperature";
+const defaultStart = isDemoMode ? 2000 : 2001;
+const defaultEnd = isDemoMode ? 2025 : 2024;
+const realVariableSchema = z.enum([
+  "land_surface_temperature",
+  "precipitation",
+  "vegetation_index",
+]);
 
 const urlStateSchema = z
   .object({
-    variable: z.enum(VARIABLE_IDS).catch("air_temperature"),
+    variable: z.enum(VARIABLE_IDS).catch(defaultVariable),
     region: z.enum(REGION_IDS).catch("punjab"),
-    start: z.coerce.number().int().min(2000).max(2025).catch(2000),
-    end: z.coerce.number().int().min(2000).max(2025).catch(2025),
-    year: z.coerce.number().int().min(2000).max(2025).catch(2025),
-    layer: z.enum(["none", ...VARIABLE_IDS]).catch("air_temperature"),
+    province: z.enum(["pakistan", ...PROVINCE_IDS]).catch("punjab"),
+    area: areaIdSchema.nullable().catch(null),
+    start: z.coerce.number().int().min(2000).max(2025).catch(defaultStart),
+    end: z.coerce.number().int().min(2000).max(2025).catch(defaultEnd),
+    year: z.coerce.number().int().min(2000).max(2025).catch(defaultEnd),
+    layer: z.enum(["none", ...VARIABLE_IDS]).catch(defaultVariable),
     mapLayerType: z.enum(["absolute", "change"]).catch("absolute"),
     changeBasis: z.enum(["previous-year", "range-start", "backend"]).catch("previous-year"),
     language: z.enum(["en", "ur"]).catch("en"),
@@ -44,11 +65,41 @@ function listsMatch(left: readonly string[], right: readonly string[]): boolean 
   return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
-function readUrlState() {
+type UrlState = {
+  variable: VariableId;
+  region: RegionId;
+  province: ProvinceId;
+  area: AreaId | null;
+  start: number;
+  end: number;
+  year: number;
+  layer: LayerId;
+  mapLayerType: MapLayerType;
+  changeBasis: ChangeBasis;
+  language: Language;
+  theme: Theme;
+  compareMode: CompareMode;
+  compareRegions: RegionId[];
+  compareVariables: VariableId[];
+};
+
+function readUrlState(): UrlState {
   const params = new URLSearchParams(window.location.search);
+  const rawRegion = params.get("region");
+  const legacyFaisalabadRegion = rawRegion === "faisalabad";
+  const noAreaSelection =
+    !params.has("area") && !params.has("province") && !params.has("region");
   const parsed = urlStateSchema.safeParse({
     variable: params.get("variable"),
-    region: params.get("region"),
+    region: legacyFaisalabadRegion ? "punjab" : rawRegion,
+    province:
+      params.get("province") ??
+      (legacyFaisalabadRegion ? "punjab" : rawRegion),
+    area:
+      params.get("area") ??
+      (legacyFaisalabadRegion || (noAreaSelection && !isDemoMode)
+        ? "faisalabad"
+        : null),
     start: params.get("start"),
     end: params.get("end"),
     year: params.get("year"),
@@ -65,12 +116,14 @@ function readUrlState() {
   if (!parsed.success) {
     console.error("Invalid UI state in URL search parameters.", parsed.error);
     return {
-      variable: "air_temperature" as const,
+      variable: defaultVariable,
       region: "punjab" as const,
-      start: 2000,
-      end: 2025,
-      year: 2025,
-      layer: "air_temperature" as const,
+      province: "punjab" as const,
+      area: isDemoMode ? null : "faisalabad" as const,
+      start: defaultStart,
+      end: defaultEnd,
+      year: defaultEnd,
+      layer: defaultVariable,
       mapLayerType: "absolute" as const,
       changeBasis: "previous-year" as const,
       language: "en" as const,
@@ -82,10 +135,36 @@ function readUrlState() {
   }
 
   const { start, end } = parsed.data;
-  const validRange = start <= end ? [start, end] as const : [2000, 2025] as const;
+  const validRange = start <= end ? [start, end] as const : [defaultStart, defaultEnd] as const;
+  const parsedRealVariable = realVariableSchema.safeParse(parsed.data.variable);
+  const selectedVariable: VariableId = isDemoMode
+    ? parsed.data.variable
+    : parsedRealVariable.success
+      ? parsedRealVariable.data
+      : "land_surface_temperature";
+  const parsedRealLayer = realVariableSchema.safeParse(parsed.data.layer);
+  const selectedLayer: LayerId =
+    isDemoMode || parsed.data.layer === "none"
+      ? parsed.data.layer
+      : parsedRealLayer.success
+        ? parsedRealLayer.data
+        : "land_surface_temperature";
+  const availableRealVariables = new Set<string>(realVariableSchema.options);
+  const selectedCompareVariables = isDemoMode
+    ? parsed.data.compareVariables
+    : parsed.data.compareVariables.filter((variable) =>
+        availableRealVariables.has(variable),
+      );
 
   return {
     ...parsed.data,
+    variable: selectedVariable,
+    compareMode: isDemoMode ? parsed.data.compareMode : "variables",
+    compareVariables:
+      selectedCompareVariables.length > 0
+        ? selectedCompareVariables
+        : [...defaultCompareVariables],
+    layer: selectedLayer,
     start: validRange[0],
     end: validRange[1],
     year: Math.min(validRange[1], Math.max(validRange[0], parsed.data.year)),
@@ -98,6 +177,12 @@ function writeUrlState(): void {
 
   url.searchParams.set("variable", state.variable);
   url.searchParams.set("region", state.region);
+  url.searchParams.set("province", state.province);
+  if (state.area) {
+    url.searchParams.set("area", state.area);
+  } else {
+    url.searchParams.delete("area");
+  }
   url.searchParams.set("start", String(state.yearRange[0]));
   url.searchParams.set("end", String(state.yearRange[1]));
   url.searchParams.set("year", String(state.currentYear));
@@ -124,6 +209,8 @@ function UrlStateSync() {
       const stateMatchesUrl =
         current.variable === values.variable &&
         current.region === values.region &&
+        current.province === values.province &&
+        current.area === values.area &&
         current.yearRange[0] === values.start &&
         current.yearRange[1] === values.end &&
         current.currentYear === values.year &&
@@ -143,6 +230,8 @@ function UrlStateSync() {
       useUiStore.setState({
         variable: values.variable,
         region: values.region,
+        province: values.province,
+        area: values.area,
         yearRange: [values.start, values.end],
         currentYear: values.year,
         layer: values.layer,

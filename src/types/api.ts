@@ -10,7 +10,7 @@ export const VARIABLE_IDS = [
   "land_surface_temperature",
 ] as const;
 
-export const REGION_IDS = [
+export const PROVINCE_IDS = [
   "punjab",
   "sindh",
   "khyber-pakhtunkhwa",
@@ -19,8 +19,10 @@ export const REGION_IDS = [
   "azad-kashmir",
   "islamabad",
 ] as const;
+export const REGION_IDS = [...PROVINCE_IDS, "faisalabad"] as const;
 
 export const variableIdSchema = z.enum(VARIABLE_IDS);
+export const provinceIdSchema = z.enum(PROVINCE_IDS);
 export const regionIdSchema = z.enum(REGION_IDS);
 export const compareModeSchema = z.enum(["regions", "variables"]);
 export const compareRegionsSchema = z
@@ -29,7 +31,7 @@ export const compareRegionsSchema = z
   .refine((regions) => new Set(regions).size === regions.length);
 export const compareVariablesSchema = z
   .array(variableIdSchema)
-  .max(2)
+  .max(3)
   .refine((variables) => new Set(variables).size === variables.length);
 
 export const variableSchema = z.object({
@@ -78,6 +80,7 @@ export const timeSeriesQuerySchema = z
     start: z.number().int().min(2000).max(2025),
     end: z.number().int().min(2000).max(2025),
     resolution: z.enum(["monthly", "yearly"]),
+    area: z.string().min(1).optional(),
   })
   .refine((query) => query.start <= query.end, {
     message: "The start year must not be after the end year.",
@@ -91,9 +94,13 @@ export const timeSeriesResponseSchema = z.object({
   points: z.array(
     z.object({
       date: z.string().date(),
-      value: z.number().finite(),
+      value: z.number().finite().nullable(),
+      valid_months: z.number().int().min(0).max(12).nullable().optional(),
     }),
   ),
+  availableResolutions: z.array(z.enum(["monthly", "yearly"])).optional(),
+  source: z.string().min(1).optional(),
+  dataStatus: z.enum(["draft", "verified", "placeholder"]).optional(),
 });
 
 export const trendQuerySchema = z
@@ -103,6 +110,7 @@ export const trendQuerySchema = z
     start: z.number().int().min(2000).max(2025),
     end: z.number().int().min(2000).max(2025),
     lang: z.enum(["en", "ur"]),
+    area: z.string().min(1).optional(),
   })
   .refine((query) => query.start <= query.end, {
     message: "The start year must not be after the end year.",
@@ -110,15 +118,21 @@ export const trendQuerySchema = z
   });
 
 export const trendResponseSchema = z.object({
-  slope: z.number().finite(),
-  unit: z.string().min(1),
-  pValue: z.number().min(0).max(1),
-  significant: z.boolean(),
-  direction: z.enum(["increasing", "decreasing", "no_change"]),
-  changeTotal: z.number().finite(),
-  changePercent: z.number().finite(),
-  confidence: z.number().min(0).max(1),
-  summary: z.string().min(1),
+  slope: z.number().finite().optional(),
+  unit: z.string().min(1).optional(),
+  pValue: z.number().min(0).max(1).nullable().optional(),
+  significant: z.boolean().nullable().optional(),
+  direction: z.enum(["increasing", "decreasing", "no_change"]).nullable().optional(),
+  changeTotal: z.number().finite().optional(),
+  changePercent: z.number().finite().optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  summary: z.string().min(1).optional(),
+  test: z.string().min(1).optional(),
+  tau: z.number().finite().nullable().optional(),
+  z: z.number().finite().nullable().optional(),
+  senSlope: z.number().finite().nullable().optional(),
+  slopeCi95: z.tuple([z.number().finite(), z.number().finite()]).nullable().optional(),
+  nYears: z.number().int().min(1).nullable().optional(),
   trendLine: z
     .array(
       z.object({
@@ -126,8 +140,8 @@ export const trendResponseSchema = z.object({
         value: z.number().finite(),
       }),
     )
-    .min(2)
     .optional(),
+  notes: z.array(z.string()).optional(),
 });
 
 export const mapLayerQuerySchema = z
@@ -190,6 +204,7 @@ export const hotspotsResponseSchema = z.array(
 );
 
 export type VariableId = z.infer<typeof variableIdSchema>;
+export type ProvinceId = z.infer<typeof provinceIdSchema>;
 export type RegionId = z.infer<typeof regionIdSchema>;
 export type CompareMode = z.infer<typeof compareModeSchema>;
 export type Variable = z.infer<typeof variableSchema>;

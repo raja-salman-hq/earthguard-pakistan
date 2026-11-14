@@ -140,6 +140,7 @@ html[dir="rtl"] .home-page a:hover .home-link-arrow {
 .home-province-shape[data-color-step="3"] { fill: var(--map-sequential-3); }
 .home-province-shape[data-color-step="4"] { fill: var(--map-sequential-4); }
 .home-province-shape[data-color-step="5"] { fill: var(--map-sequential-5); }
+.home-province-shape.is-neutral { fill: var(--map-no-data); }
 
 .home-province-shape:hover {
   filter: brightness(1.18) drop-shadow(0 0 5px color-mix(in srgb, var(--primary) 45%, transparent));
@@ -174,6 +175,31 @@ html[dir="rtl"] .home-page a:hover .home-link-arrow {
   height: 7px;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--map-sequential-1), var(--map-sequential-2), var(--map-sequential-3), var(--map-sequential-4), var(--map-sequential-5));
+}
+
+.home-pilot-map-label {
+  position: absolute;
+  inset-block-start: 14px;
+  inset-inline-start: 16px;
+  display: inline-flex;
+  max-width: calc(100% - 32px);
+  min-height: 36px;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--text);
+  font-size: 0.68rem;
+  box-shadow: var(--shadow);
+}
+
+.home-pilot-map-label svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  color: var(--primary);
 }
 
 .home-floating-card,

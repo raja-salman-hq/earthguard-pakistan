@@ -2,16 +2,24 @@
 
 import { create } from "zustand";
 import type { Language } from "@/lib/i18n";
-import type { CompareMode, RegionId, VariableId } from "@/types/api";
+import type { CompareMode, ProvinceId as ApiProvinceId, RegionId, VariableId } from "@/types/api";
+import { isDemoMode } from "@/lib/api/client";
+import type { AreaId } from "@/types/area-data";
 
 export type Theme = "dark" | "light";
 export type LayerId = "none" | VariableId;
 export type MapLayerType = "absolute" | "change";
 export type ChangeBasis = "previous-year" | "range-start" | "backend";
+export type ProvinceId = "pakistan" | ApiProvinceId;
+
+const initialVariable: VariableId = isDemoMode ? "air_temperature" : "land_surface_temperature";
+const initialYearRange: [number, number] = isDemoMode ? [2000, 2025] : [2001, 2024];
 
 type UiState = {
   variable: VariableId;
   region: RegionId;
+  province: ProvinceId;
+  area: AreaId | null;
   yearRange: [number, number];
   currentYear: number;
   layer: LayerId;
@@ -24,6 +32,8 @@ type UiState = {
   compareVariables: VariableId[];
   setVariable: (variable: VariableId) => void;
   setRegion: (region: RegionId) => void;
+  setProvince: (province: ProvinceId) => void;
+  setArea: (area: AreaId | null) => void;
   setYearRange: (yearRange: [number, number]) => void;
   setCurrentYear: (year: number) => void;
   setLayer: (layer: LayerId) => void;
@@ -37,20 +47,38 @@ type UiState = {
 };
 
 export const useUiStore = create<UiState>()((set) => ({
-  variable: "air_temperature",
+  variable: initialVariable,
   region: "punjab",
-  yearRange: [2000, 2025],
-  currentYear: 2025,
-  layer: "air_temperature",
+  province: "punjab",
+  area: isDemoMode ? null : "faisalabad",
+  yearRange: initialYearRange,
+  currentYear: initialYearRange[1],
+  layer: initialVariable,
   mapLayerType: "absolute",
   changeBasis: "previous-year",
   language: "en",
   theme: "dark",
-  compareMode: "regions",
+  compareMode: isDemoMode ? "regions" : "variables",
   compareRegions: ["punjab", "sindh"],
-  compareVariables: ["air_temperature", "precipitation"],
+  compareVariables: isDemoMode
+    ? ["air_temperature", "precipitation"]
+    : ["land_surface_temperature", "precipitation", "vegetation_index"],
   setVariable: (variable) => set({ variable }),
-  setRegion: (region) => set({ region }),
+  setRegion: (region) =>
+    region === "faisalabad"
+      ? set({ region: "punjab", province: "punjab", area: "faisalabad" })
+      : set({ region, province: region, area: null }),
+  setProvince: (province) =>
+    set({
+      province,
+      area: null,
+      ...(province === "pakistan" ? {} : { region: province }),
+    }),
+  setArea: (area) =>
+    set({
+      area,
+      ...(area === "faisalabad" ? { province: "punjab", region: "punjab" } : {}),
+    }),
   setYearRange: (yearRange) => set({ yearRange }),
   setCurrentYear: (currentYear) => set({ currentYear }),
   setLayer: (layer) => set({ layer }),

@@ -5,6 +5,7 @@ import type { MapLayerType } from "@/store/ui-store";
 import { useMessages } from "@/hooks/use-messages";
 import { getVariableLabel } from "@/lib/i18n";
 import { useUiStore } from "@/store/ui-store";
+import { isDemoMode } from "@/lib/api/client";
 
 type MapLegendProps = {
   variable: Variable | undefined;
@@ -20,7 +21,22 @@ export function MapLegend({ variable, values, layerType }: MapLegendProps) {
   const messages = useMessages();
   const language = useUiStore((state) => state.language);
 
-  if (!variable || !values || values.length === 0) {
+  if (!variable) {
+    return null;
+  }
+
+  if (!isDemoMode) {
+    return (
+      <aside className="map-legend glass-panel" aria-label={messages.mapLegend}>
+        <div className="map-legend-heading">
+          <strong>{messages.mapCoverageLegend}</strong>
+        </div>
+        <p>{messages.mapNoSpatialLayers}</p>
+      </aside>
+    );
+  }
+
+  if (!values || values.length === 0) {
     return null;
   }
 

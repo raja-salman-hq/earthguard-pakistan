@@ -7,11 +7,13 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { ExportMenu } from "@/components/layout/ExportMenu";
 import { VariableSelect } from "@/components/filters/VariableSelect";
 import { YearRangeSlider } from "@/components/filters/YearRangeSlider";
+import { RegionPicker } from "@/components/filters/RegionPicker";
 import { SignificanceBadge } from "@/components/insights/SignificanceBadge";
 import { TrendTakeaway } from "@/components/insights/TrendTakeaway";
 import { ComponentErrorBoundary } from "@/components/ui/component-error-boundary";
 import { useMessages } from "@/hooks/use-messages";
 import { getRegions, getTimeSeries, getTrend, getVariables } from "@/lib/api";
+import { isDemoMode } from "@/lib/api/client";
 import { getRegionLabel, getVariableLabel } from "@/lib/i18n";
 import { useUiStore } from "@/store/ui-store";
 import type { ExportSeries } from "@/lib/utils/data-export";
@@ -25,6 +27,10 @@ const CompareLineChart = dynamic(
     loading: () => <div className="trend-chart-loading" role="status" />,
   },
 );
+const TrendChart = dynamic(
+  () => import("@/components/charts/TrendChart").then((module) => module.TrendChart),
+  { ssr: false, loading: () => <div className="trend-chart-loading" role="status" /> },
+);
 
 type ComparisonItem = {
   key: string;
@@ -33,7 +39,10 @@ type ComparisonItem = {
   label: string;
 };
 
-function formatNumber(value: number): string {
+function formatNumber(value: number | null | undefined): string {
+  if (typeof value !== "number") {
+    return "—";
+  }
   return new Intl.NumberFormat("en", { maximumSignificantDigits: 4 }).format(value);
 }
 
@@ -79,6 +88,7 @@ export default function CompareWorkspace() {
   const language = useUiStore((state) => state.language);
   const variable = useUiStore((state) => state.variable);
   const region = useUiStore((state) => state.region);
+  const area = useUiStore((state) => state.area);
   const yearRange = useUiStore((state) => state.yearRange);
   const mode = useUiStore((state) => state.compareMode);
   const selectedRegions = useUiStore((state) => state.compareRegions);
@@ -87,6 +97,7 @@ export default function CompareWorkspace() {
   const setRegions = useUiStore((state) => state.setCompareRegions);
   const setVariables = useUiStore((state) => state.setCompareVariables);
   const setRegion = useUiStore((state) => state.setRegion);
+  const setArea = useUiStore((state) => state.setArea);
   const [selectorsOpen, setSelectorsOpen] = useState(false);
   const regionSelectId = useId();
   const variablesQuery = useQuery({ queryKey: ["variables"], queryFn: getVariables });
@@ -161,6 +172,63 @@ export default function CompareWorkspace() {
         }))
       : [],
   });
+  const realIndicatorIds = [
+    "land_surface_temperature",
+    "precipitation",
+    "vegetation_index",
+  ] as const satisfies readonly VariableId[];
+  const realSeriesQueries = useQueries({
+    queries:
+      !isDemoMode && area
+        ? realIndicatorIds.map((indicatorId) => ({
+            queryKey: [
+              "timeseries",
+              indicatorId,
+              "punjab",
+              area,
+              yearRange[0],
+              yearRange[1],
+              "yearly",
+            ],
+            queryFn: () =>
+              getTimeSeries({
+                variable: indicatorId,
+                region: "punjab",
+                area,
+                start: yearRange[0],
+                end: yearRange[1],
+                resolution: "yearly",
+              }),
+            staleTime: 60_000,
+          }))
+        : [],
+  });
+  const realTrendQueries = useQueries({
+    queries:
+      !isDemoMode && area
+        ? realIndicatorIds.map((indicatorId) => ({
+            queryKey: [
+              "trend",
+              indicatorId,
+              "punjab",
+              area,
+              yearRange[0],
+              yearRange[1],
+              language,
+            ],
+            queryFn: () =>
+              getTrend({
+                variable: indicatorId,
+                region: "punjab",
+                area,
+                start: yearRange[0],
+                end: yearRange[1],
+                lang: language,
+              }),
+            staleTime: 60_000,
+          }))
+        : [],
+  });
   const queryResults = [...trendQueries, ...seriesQueries];
   const failedQueries = queryResults.filter((query) => query.isError && !query.data);
   const loading =
@@ -217,6 +285,147 @@ export default function CompareWorkspace() {
           getRegionLabel(region, language),
         );
   const compareFileName = `compare-${mode}-${items.map((item) => item.key.split(":")[1]).join("-")}-${yearRange[0]}-${yearRange[1]}`;
+
+  if (!isDemoMode) {
+    const realSeries = realSeriesQueries.map((query) => query.data);
+    const realLoading =
+      variablesQuery.isPending ||
+      realSeriesQueries.some((query) => query.isPending) ||
+      realTrendQueries.some((query) => query.isPending);
+    const realError =
+      variablesQuery.isError ||
+      realSeriesQueries.some((query) => query.isError && !query.data) ||
+      realTrendQueries.some((query) => query.isError && !query.data);
+
+    return (
+      <main className="compare-page">
+        <header className="compare-heading">
+          <div>
+            <span className="eyebrow">{messages.areaFaisalabad}</span>
+            <h1>{messages.compareTitle}</h1>
+            <p>{messages.compareAreaSmallMultiples}</p>
+          </div>
+          <div className="compare-export">
+            <RegionPicker />
+          </div>
+        </header>
+        <div className="compare-mode-tabs" role="group" aria-label={messages.compareModes}>
+          <button type="button" aria-pressed={mode === "variables"} onClick={() => setMode("variables")}>
+            {messages.compareVariablesMode}
+          </button>
+          <button type="button" disabled aria-disabled="true">
+            {messages.compareRegionsMode} · {messages.compareMoreAreas}
+          </button>
+        </div>
+        <section className="compare-filters" aria-label={messages.filterPanelTitle}>
+          <VariableSelect />
+          <YearRangeSlider
+            variable={selectedVariableData}
+            loading={variablesQuery.isPending}
+            error={variablesQuery.error?.message}
+          />
+        </section>
+        {!area ? (
+          <div className="no-data-notice" role="status">
+            <p>{messages.noDataYet.replace("{area}", messages.areaFaisalabad)}</p>
+            <button type="button" onClick={() => setArea("faisalabad")}>
+              {messages.selectFaisalabad}
+            </button>
+          </div>
+        ) : realLoading ? (
+          <div className="compare-selection-skeleton" role="status" aria-label={messages.trendLoading}>
+            <div className="skeleton skeleton-line" />
+            <div className="skeleton skeleton-line" />
+            <div className="skeleton skeleton-line-short" />
+          </div>
+        ) : realError ? (
+          <div className="trend-error-state" role="alert">
+            <p>{messages.compareError}</p>
+            <button
+              type="button"
+              onClick={() => {
+                realSeriesQueries.forEach((query) => void query.refetch());
+                realTrendQueries.forEach((query) => void query.refetch());
+                void variablesQuery.refetch();
+              }}
+            >
+              {messages.compareRetry}
+            </button>
+          </div>
+        ) : (
+          <>
+            <p className="compare-axis-note">{messages.compareCorrelationCaveat}</p>
+            <section className="area-small-multiples" aria-label={messages.compareAreaSmallMultiples}>
+              {realIndicatorIds.map((indicatorId, index) => {
+                const indicator = variableData.find((candidate) => candidate.id === indicatorId);
+                const series = realSeries[index];
+                const trend = realTrendQueries[index]?.data;
+                if (!indicator || !series) {
+                  return null;
+                }
+                const chartId = `compare-${indicatorId}`;
+                const areaLabel = messages.areaFaisalabad;
+                const statusLabel =
+                  series.dataStatus === "verified"
+                    ? messages.verifiedDataBadge
+                    : series.dataStatus === "placeholder"
+                      ? messages.placeholderDataBadge
+                      : messages.draftDataBadge;
+                return (
+                  <article className="area-small-multiple-card" key={indicatorId}>
+                    <div className="area-small-multiple-heading">
+                      <h2>{getVariableLabel(indicatorId, language)}</h2>
+                      <ExportMenu
+                        chartId={chartId}
+                        metadata={{
+                          fileName: `faisalabad-${indicatorId}-${yearRange[0]}-${yearRange[1]}`,
+                          title: messages.trendChartTitle
+                            .replace("{variable}", getVariableLabel(indicatorId, language))
+                            .replace("{region}", areaLabel),
+                          variableLabel: getVariableLabel(indicatorId, language),
+                          regionLabel: getRegionLabel("punjab", language),
+                          areaLabel,
+                          unitLabel: series.unit,
+                          yearRangeLabel: `${yearRange[0]}–${yearRange[1]}`,
+                          source: series.source ?? indicator.source,
+                          demoLabel: messages.exportSyntheticCredit,
+                          statusLabel,
+                        }}
+                        series={[{
+                          label: areaLabel,
+                          unit: series.unit,
+                          points: series.points,
+                        }]}
+                      />
+                    </div>
+                    <ComponentErrorBoundary
+                      title={messages.componentErrorTitle}
+                      description={messages.componentErrorDescription}
+                      retryLabel={messages.errorRetry}
+                    >
+                      <TrendChart
+                        variable={indicatorId}
+                        region="punjab"
+                        area={area}
+                        start={yearRange[0]}
+                        end={yearRange[1]}
+                        trendLine={trend?.trendLine}
+                        trendLineLoaded={Boolean(trend)}
+                        resolution="yearly"
+                        showResolutionSelector={false}
+                        exportId={chartId}
+                      />
+                    </ComponentErrorBoundary>
+                  </article>
+                );
+              })}
+            </section>
+            <p className="compare-more-areas">{messages.compareMoreAreas}</p>
+          </>
+        )}
+      </main>
+    );
+  }
 
   function toggleRegion(regionId: RegionId, checked: boolean) {
     if (checked && selectedRegions.length < 4) {
@@ -554,7 +763,7 @@ export default function CompareWorkspace() {
                       <tr key={item.key}>
                         <th scope="row">{item.label}</th>
                         <td><bdi dir="ltr">{formatNumber(trend.slope)}</bdi></td>
-                        <td><bdi dir="ltr">{trend.unit}</bdi></td>
+                        <td><bdi dir="ltr">{trend.unit ?? variableInfo.unit}</bdi></td>
                         <td>
                           <bdi dir="ltr">
                             {formatNumber(trend.changeTotal)} {variableInfo.unit}
@@ -563,12 +772,16 @@ export default function CompareWorkspace() {
                         <td><bdi dir="ltr">{formatNumber(trend.changePercent)}%</bdi></td>
                         <td><bdi dir="ltr">{formatNumber(trend.pValue)}</bdi></td>
                         <td>
-                          <SignificanceBadge
-                            compact
-                            significant={trend.significant}
-                            pValue={trend.pValue}
-                            confidence={trend.confidence}
-                          />
+                          {typeof trend.significant === "boolean" ? (
+                            <SignificanceBadge
+                              compact
+                              significant={trend.significant}
+                              pValue={trend.pValue}
+                              confidence={trend.confidence}
+                            />
+                          ) : (
+                            messages.trendStatisticsUnavailable
+                          )}
                         </td>
                         <td>
                           <TrendTakeaway

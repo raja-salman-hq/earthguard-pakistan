@@ -1,6 +1,7 @@
 export type ExportPoint = {
   date: string;
-  value: number;
+  value: number | null;
+  valid_months?: number | null;
 };
 
 export type ExportSeries = {
@@ -18,6 +19,8 @@ export type ExportMetadata = {
   yearRangeLabel: string;
   source: string;
   demoLabel: string;
+  areaLabel?: string;
+  statusLabel?: string;
   isDemo: boolean;
 };
 
@@ -58,14 +61,32 @@ export function downloadSeriesCsv(
     unit: string;
     yearRange: string;
     date: string;
+    validMonths: string;
+    status: string;
+    area: string;
   },
 ): void {
+  const validityColumns = series.map((item) =>
+    item.points.some((point) => point.valid_months !== undefined),
+  );
+  const columnOffsets = validityColumns.map((_, index) =>
+    validityColumns.slice(0, index).reduce((count, hasValidity) => count + (hasValidity ? 2 : 1), 0),
+  );
+  const valueColumnCount = validityColumns.reduce(
+    (count, hasValidity) => count + (hasValidity ? 2 : 1),
+    0,
+  );
   const valuesByDate = new Map<string, Array<number | string>>();
 
   for (const [seriesIndex, item] of series.entries()) {
     for (const point of item.points) {
-      const values = valuesByDate.get(point.date) ?? Array.from({ length: series.length }, () => "");
-      values[seriesIndex] = point.value;
+      const values =
+        valuesByDate.get(point.date) ?? Array.from({ length: valueColumnCount }, () => "");
+      const offset = columnOffsets[seriesIndex] ?? 0;
+      values[offset] = point.value ?? "";
+      if (validityColumns[seriesIndex]) {
+        values[offset + 1] = point.valid_months ?? "";
+      }
       valuesByDate.set(point.date, values);
     }
   }
@@ -74,12 +95,20 @@ export function downloadSeriesCsv(
   const rows: Array<Array<string | number>> = [
     [labels.metadata, metadata.title],
     [labels.source, source],
+    ...(metadata.areaLabel ? [[labels.area, metadata.areaLabel]] : []),
+    ...(metadata.statusLabel ? [[labels.status, metadata.statusLabel]] : []),
     [labels.variable, metadata.variableLabel],
     [labels.region, metadata.regionLabel],
     [labels.unit, metadata.unitLabel],
     [labels.yearRange, metadata.yearRangeLabel],
     [],
-    [labels.date, ...series.map((item) => `${item.label} (${item.unit})`)],
+    [
+      labels.date,
+      ...series.flatMap((item, index) => [
+        `${item.label} (${item.unit})`,
+        ...(validityColumns[index] ? [`${item.label} — ${labels.validMonths}`] : []),
+      ]),
+    ],
     ...Array.from(valuesByDate.entries())
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([date, values]) => [date, ...values]),
@@ -124,6 +153,8 @@ export async function downloadChartPng(
     region: string;
     unit: string;
     variable: string;
+    area?: string;
+    status?: string;
   },
 ): Promise<void> {
   const bounds = svg.getBoundingClientRect();
@@ -170,7 +201,7 @@ export async function downloadChartPng(
   try {
     const image = await waitForImage(svgUrl);
     const scale = 2;
-    const headerHeight = 224;
+    const headerHeight = 256;
     const canvas = document.createElement("canvas");
     canvas.width = Math.ceil(width * scale);
     canvas.height = Math.ceil((height + headerHeight) * scale);
@@ -189,9 +220,11 @@ export async function downloadChartPng(
     const details = [
       `${labels.variable}: ${metadata.variableLabel}`,
       `${labels.region}: ${metadata.regionLabel}`,
+      ...(metadata.areaLabel ? [`${labels.area ?? "Area"}: ${metadata.areaLabel}`] : []),
       `${labels.unit}: ${metadata.unitLabel}`,
       `${labels.period}: ${metadata.yearRangeLabel}`,
       `${labels.dataCredit}: ${metadata.isDemo ? metadata.demoLabel : metadata.source}`,
+      ...(metadata.statusLabel ? [`${labels.status ?? "Data status"}: ${metadata.statusLabel}`] : []),
     ];
     context.font = `12px ${getComputedStyle(document.body).fontFamily}`;
     context.fillStyle = rootStyle.getPropertyValue("--muted").trim();
@@ -200,7 +233,7 @@ export async function downloadChartPng(
     });
     const dashPatterns: number[][] = [[], [6, 4], [2, 3], [8, 3, 2, 3]];
     series.forEach((item, index) => {
-      const y = 148 + index * 16;
+      const y = 180 + index * 16;
       context.beginPath();
       context.strokeStyle = rootStyle
         .getPropertyValue(`--chart-series-${(index % 4) + 1}`)

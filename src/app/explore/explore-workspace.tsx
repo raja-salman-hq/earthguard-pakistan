@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
 import { getPakistanProvinceRegions, getTimeSeries, getTrend, getVariables } from "@/lib/api";
+import { isDemoMode } from "@/lib/api/client";
 import { useMessages } from "@/hooks/use-messages";
 import { useUiStore } from "@/store/ui-store";
 import type { PakistanMapProps } from "@/components/map/PakistanMap";
@@ -11,7 +12,7 @@ import { YearRangeSlider } from "@/components/filters/YearRangeSlider";
 import { LayerToggle } from "@/components/filters/LayerToggle";
 import { RegionPicker } from "@/components/filters/RegionPicker";
 import { TimelineControl } from "@/components/filters/TimelineControl";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { TrendSummaryCard } from "@/components/insights/TrendSummaryCard";
 import { HotspotsList } from "@/components/insights/HotspotsList";
 import type { TrendChartView } from "@/components/charts/TrendChart";
@@ -51,6 +52,8 @@ export default function ExploreWorkspace() {
   const messages = useMessages();
   const language = useUiStore((state) => state.language);
   const selectedRegion = useUiStore((state) => state.region);
+  const selectedArea = useUiStore((state) => state.area);
+  const setArea = useUiStore((state) => state.setArea);
   const setRegion = useUiStore((state) => state.setRegion);
   const variableId = useUiStore((state) => state.variable);
   const yearRange = useUiStore((state) => state.yearRange);
@@ -64,8 +67,28 @@ export default function ExploreWorkspace() {
   const [mobileInsightTab, setMobileInsightTab] = useState<"summary" | TrendChartView>("summary");
   const [chartOpen, setChartOpen] = useState(true);
   const [chartExpanded, setChartExpanded] = useState(false);
-  const [chartResolution, setChartResolution] =
-    useState<TimeSeriesQuery["resolution"]>("monthly");
+  const [chartResolutions, setChartResolutions] = useState<
+    Partial<Record<Variable["id"], TimeSeriesQuery["resolution"]>>
+  >({});
+  const chartResolution = chartResolutions[variableId] ?? (isDemoMode ? "monthly" : "yearly");
+  const changeChartResolution = useCallback(
+    (resolution: TimeSeriesQuery["resolution"]) => {
+      setChartResolutions((current) =>
+        current[variableId] === resolution
+          ? current
+          : { ...current, [variableId]: resolution },
+      );
+    },
+    [variableId],
+  );
+  const onTimelineYearChange = useCallback(
+    () => {
+      if (!isDemoMode) {
+        changeChartResolution("yearly");
+      }
+    },
+    [changeChartResolution],
+  );
   const variablesQuery = useQuery({
     queryKey: ["variables"],
     queryFn: getVariables,
@@ -79,7 +102,7 @@ export default function ExploreWorkspace() {
     (item) => item.id === variableId,
   );
   const trendQuery = useQuery({
-    queryKey: ["trend", variableId, selectedRegion, yearRange[0], yearRange[1], language],
+    queryKey: ["trend", variableId, selectedRegion, selectedArea, yearRange[0], yearRange[1], language],
     queryFn: () =>
       getTrend({
         variable: variableId,
@@ -87,12 +110,13 @@ export default function ExploreWorkspace() {
         start: yearRange[0],
         end: yearRange[1],
         lang: language,
+        area: selectedArea ?? undefined,
       }),
     staleTime: 60_000,
-    placeholderData: (previousData) => previousData,
+    placeholderData: isDemoMode ? (previousData) => previousData : undefined,
   });
   const exportSeriesQuery = useQuery({
-    queryKey: ["timeseries", variableId, selectedRegion, yearRange[0], yearRange[1], chartResolution],
+    queryKey: ["timeseries", variableId, selectedRegion, selectedArea, yearRange[0], yearRange[1], chartResolution],
     queryFn: () =>
       getTimeSeries({
         variable: variableId,
@@ -100,16 +124,17 @@ export default function ExploreWorkspace() {
         start: yearRange[0],
         end: yearRange[1],
         resolution: chartResolution,
+        area: selectedArea ?? undefined,
       }),
     enabled: Boolean(variable),
     staleTime: 60_000,
-    placeholderData: (previousData) => previousData,
+    placeholderData: isDemoMode ? (previousData) => previousData : undefined,
   });
   const exportSeries =
     exportSeriesQuery.data?.variable === variableId &&
     exportSeriesQuery.data.region === selectedRegion
       ? [{
-          label: getRegionLabel(selectedRegion, language),
+          label: selectedArea ? messages.areaFaisalabad : getRegionLabel(selectedRegion, language),
           unit: exportSeriesQuery.data.unit,
           points: exportSeriesQuery.data.points,
         }]
@@ -117,12 +142,13 @@ export default function ExploreWorkspace() {
   const trendChartProps = {
     variable: variableId,
     region: selectedRegion,
+    area: selectedArea,
     start: yearRange[0],
     end: yearRange[1],
     trendLine: trendQuery.data?.trendLine,
     trendLineLoaded: Boolean(trendQuery.data),
     resolution: chartResolution,
-    onResolutionChange: setChartResolution,
+    onResolutionChange: changeChartResolution,
   };
 
   function renderTrendSummary() {
@@ -134,7 +160,7 @@ export default function ExploreWorkspace() {
         start={yearRange[0]}
         end={yearRange[1]}
         loading={trendQuery.isPending}
-        error={trendQuery.error?.message}
+        error={trendQuery.error}
         onRetry={() => void trendQuery.refetch()}
       />
     );
@@ -185,7 +211,11 @@ export default function ExploreWorkspace() {
     }
 
     setVariable(defaults.id);
-    setRegion("punjab");
+    if (isDemoMode) {
+      setRegion("punjab");
+    } else {
+      setArea("faisalabad");
+    }
     setYearRange([defaults.availableFrom, defaults.availableTo]);
     setCurrentYear(defaults.availableTo);
     setLayer(defaults.id);
@@ -204,16 +234,27 @@ export default function ExploreWorkspace() {
         <div className="explore-heading-actions">
           <ExportMenu
             metadata={{
-              fileName: `${variableId}-${selectedRegion}-${yearRange[0]}-${yearRange[1]}`,
+              fileName: `${variableId}-${selectedArea ?? selectedRegion}-${yearRange[0]}-${yearRange[1]}`,
               title: messages.trendChartTitle
                 .replace("{variable}", getVariableLabel(variableId, language))
-                .replace("{region}", getRegionLabel(selectedRegion, language)),
+                .replace(
+                  "{region}",
+                  selectedArea ? messages.areaFaisalabad : getRegionLabel(selectedRegion, language),
+                ),
               variableLabel: getVariableLabel(variableId, language),
               regionLabel: getRegionLabel(selectedRegion, language),
-              unitLabel: variable?.unit ?? messages.mapUnitUnavailable,
+              areaLabel: selectedArea ? messages.areaFaisalabad : undefined,
+              unitLabel: exportSeriesQuery.data?.unit ?? variable?.unit ?? messages.mapUnitUnavailable,
               yearRangeLabel: `${yearRange[0]}–${yearRange[1]}`,
-              source: variable?.source ?? messages.exportSourceUnavailable,
+              source: exportSeriesQuery.data?.source ?? variable?.source ?? messages.exportSourceUnavailable,
               demoLabel: messages.exportSyntheticCredit,
+              statusLabel: exportSeriesQuery.data?.dataStatus
+                ? exportSeriesQuery.data.dataStatus === "verified"
+                  ? messages.verifiedDataBadge
+                  : exportSeriesQuery.data.dataStatus === "draft"
+                    ? messages.draftDataBadge
+                    : messages.placeholderDataBadge
+                : undefined,
             }}
             series={exportSeries}
           />
@@ -343,28 +384,31 @@ export default function ExploreWorkspace() {
           </div>
         </section>
 
-        <section
-          className={`map-floating-panel explore-chart-panel${chartExpanded ? " is-expanded" : ""}${chartOpen ? "" : " is-collapsed"}`}
-          aria-label={messages.trendPanelTitle}
-        >
-          <div className="explore-chart-panel-heading">
-            <h2>{messages.trendPanelTitle}</h2>
-            <button type="button" onClick={() => setChartOpen((open) => !open)}>
-              {chartOpen ? messages.trendCollapse : messages.trendOpen}
-            </button>
-          </div>
-          {chartOpen && (
-            <div className="explore-chart-panel-content">
-              {renderTrendChart()}
+        {(isDemoMode || selectedArea !== null) && (
+          <section
+            className={`map-floating-panel explore-chart-panel${chartExpanded ? " is-expanded" : ""}${chartOpen ? "" : " is-collapsed"}`}
+            aria-label={messages.trendPanelTitle}
+          >
+            <div className="explore-chart-panel-heading">
+              <h2>{messages.trendPanelTitle}</h2>
+              <button type="button" onClick={() => setChartOpen((open) => !open)}>
+                {chartOpen ? messages.trendCollapse : messages.trendOpen}
+              </button>
             </div>
-          )}
-        </section>
+            {chartOpen && (
+              <div className="explore-chart-panel-content">
+                {renderTrendChart()}
+              </div>
+            )}
+          </section>
+        )}
 
         <div className="timeline-bar" dir="ltr">
           <TimelineControl
             variable={variable}
             loading={variablesQuery.isPending}
             error={variablesQuery.error?.message}
+            onTimelineYearChange={onTimelineYearChange}
           />
         </div>
       </section>

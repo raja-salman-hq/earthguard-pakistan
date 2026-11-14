@@ -11,10 +11,36 @@ import {
   pakistanHeroProvincePaths,
 } from "@/components/landing/pakistan-hero-map-data";
 import type { RegionId, VariableId } from "@/types/api";
+import { isDemoMode } from "@/lib/api/client";
 
 export const metadata = getPageMetadata("home");
 
 export default function HomePage() {
+  if (!isDemoMode) {
+    const variables: Array<{ id: VariableId; unit: string }> = [
+      { id: "land_surface_temperature", unit: "°C" },
+      { id: "precipitation", unit: "mm/year" },
+      { id: "vegetation_index", unit: "NDVI (unitless)" },
+    ];
+    return (
+      <HomeContent
+        variables={variables}
+        heroMap={{
+          viewBox: HERO_MAP_VIEWBOX,
+          shapes: pakistanHeroProvincePaths.map((shape) => ({ ...shape, colorStep: 0 })),
+          value: null,
+          unit: "",
+          variable: "land_surface_temperature",
+          region: "punjab",
+          year: 2024,
+        }}
+        heroSparklineValues={[]}
+        heroTrend={null}
+        insights={[]}
+      />
+    );
+  }
+
   const variables = getMockVariables();
   const mapVariable = variables.find((variable) => variable.id === "land_surface_temperature");
   if (!mapVariable) {
@@ -65,6 +91,14 @@ export default function HomePage() {
     end: temperatureVariable.availableTo,
     lang: "en",
   });
+  if (
+    !heroTrend.direction ||
+    typeof heroTrend.significant !== "boolean" ||
+    typeof heroTrend.changeTotal !== "number" ||
+    typeof heroTrend.changePercent !== "number"
+  ) {
+    throw new Error("The landing demo trend is missing required synthetic fields.");
+  }
   const insightSetups = [
     { variable: "air_temperature", region: "punjab" },
     { variable: "precipitation", region: "sindh" },
@@ -83,6 +117,14 @@ export default function HomePage() {
       end: definition.availableTo,
       lang: "en",
     });
+    if (
+      !trend.direction ||
+      typeof trend.significant !== "boolean" ||
+      typeof trend.changeTotal !== "number" ||
+      typeof trend.changePercent !== "number"
+    ) {
+      throw new Error(`The landing demo trend is incomplete for ${variable}.`);
+    }
     return {
       variable,
       region,
@@ -111,7 +153,9 @@ export default function HomePage() {
     <HomeContent
       variables={variableCards}
       heroMap={heroMap}
-      heroSparklineValues={heroSeries.points.map((point) => point.value)}
+      heroSparklineValues={heroSeries.points
+        .map((point) => point.value)
+        .filter((value): value is number => value !== null)}
       heroTrend={{
         direction: heroTrend.direction,
         significant: heroTrend.significant,

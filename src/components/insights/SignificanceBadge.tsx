@@ -5,8 +5,8 @@ import { useMessages } from "@/hooks/use-messages";
 
 type SignificanceBadgeProps = {
   significant: boolean;
-  pValue: number;
-  confidence: number;
+  pValue?: number | null;
+  confidence?: number;
   compact?: boolean;
 };
 
@@ -43,11 +43,18 @@ export function SignificanceBadge({
       {!compact && (
         <div className="significance-values">
           <span>
-            {messages.trendPValue}: <bdi dir="ltr">{formatNumber(pValue)}</bdi>
+            {messages.trendPValue}:{" "}
+            {pValue === null || pValue === undefined ? (
+              messages.trendPValueUnavailable
+            ) : (
+              <bdi dir="ltr">{formatNumber(pValue)}</bdi>
+            )}
           </span>
-          <span>
-            {messages.trendConfidence}: <bdi dir="ltr">{formatPercent(confidence)}</bdi>
-          </span>
+          {confidence !== undefined && (
+            <span>
+              {messages.trendConfidence}: <bdi dir="ltr">{formatPercent(confidence)}</bdi>
+            </span>
+          )}
         </div>
       )}
       <span className="significance-tooltip-wrap">

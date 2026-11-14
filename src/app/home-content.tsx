@@ -23,6 +23,7 @@ import { getRegionLabel, getVariableLabel, messages } from "@/lib/i18n";
 import type { Language, MessageKey } from "@/lib/i18n";
 import type { RegionId, VariableId } from "@/types/api";
 import { TeamPreview } from "@/components/team/team-preview";
+import { isDemoMode } from "@/lib/api/client";
 
 type DemoDirection = "increasing" | "decreasing" | "no_change";
 
@@ -52,7 +53,7 @@ type HeroProvinceShape = {
 type LandingHeroMap = {
   viewBox: string;
   shapes: HeroProvinceShape[];
-  value: number;
+  value: number | null;
   unit: string;
   variable: VariableId;
   region: RegionId;
@@ -63,7 +64,7 @@ type HomeContentProps = {
   variables: LandingVariable[];
   heroMap: LandingHeroMap;
   heroSparklineValues: number[];
-  heroTrend: Pick<LandingInsight, "direction" | "significant">;
+  heroTrend: Pick<LandingInsight, "direction" | "significant"> | null;
   insights: LandingInsight[];
 };
 
@@ -190,8 +191,8 @@ export default function HomeContent({
   heroTrend,
   insights,
 }: HomeContentProps) {
-  const sparklinePoints = getSparklinePoints(heroSparklineValues);
-  const questions = [
+  const sparklinePoints = isDemoMode ? getSparklinePoints(heroSparklineValues) : "";
+  const questions: Array<{ title: MessageKey; description: MessageKey; href: string; Icon: LucideIcon }> = isDemoMode ? [
     {
       title: "homeQuestionChangingTitle",
       description: "homeQuestionChangingText",
@@ -216,22 +217,59 @@ export default function HomeContent({
       href: "/about#about-methods-title",
       Icon: BadgeCheck,
     },
-  ] satisfies Array<{ title: MessageKey; description: MessageKey; href: string; Icon: LucideIcon }>;
+  ] : [
+    {
+      title: "homeQuestionChangingTitle",
+      description: "homePilotInsightText",
+      href: "/explore?variable=land_surface_temperature&province=punjab&area=faisalabad",
+      Icon: Activity,
+    },
+    {
+      title: "homeQuestionWhereTitle",
+      description: "homePilotDescription",
+      href: "/explore?variable=land_surface_temperature&province=punjab&area=faisalabad",
+      Icon: MapPin,
+    },
+    {
+      title: "homeQuestionHowMuchTitle",
+      description: "homePilotInsightText",
+      href: "/explore?variable=precipitation&province=punjab&area=faisalabad",
+      Icon: Ruler,
+    },
+    {
+      title: "homeQuestionSignificanceTitle",
+      description: "trendStatisticsUnavailable",
+      href: "/about#about-methods-title",
+      Icon: BadgeCheck,
+    },
+  ];
   return (
     <main className="home-page">
       <section className="home-hero page-shell">
         <div className="home-hero-copy">
           <span className="eyebrow">
-            <LocalizedText english={messages.en.homeHeroEyebrow} urdu={messages.ur.homeHeroEyebrow} />
+            <LocalizedText
+              english={isDemoMode ? messages.en.homeHeroEyebrow : messages.en.homePilotEyebrow}
+              urdu={isDemoMode ? messages.ur.homeHeroEyebrow : messages.ur.homePilotEyebrow}
+            />
           </span>
           <h1>
-            <LocalizedText english={messages.en.homeHeroTitle} urdu={messages.ur.homeHeroTitle} />
+            <LocalizedText
+              english={isDemoMode ? messages.en.homeHeroTitle : messages.en.homePilotTitle}
+              urdu={isDemoMode ? messages.ur.homeHeroTitle : messages.ur.homePilotTitle}
+            />
           </h1>
           <p>
-            <LocalizedText english={messages.en.homeHeroSubtitle} urdu={messages.ur.homeHeroSubtitle} />
+            <LocalizedText
+              english={isDemoMode ? messages.en.homeHeroSubtitle : messages.en.homePilotDescription}
+              urdu={isDemoMode ? messages.ur.homeHeroSubtitle : messages.ur.homePilotDescription}
+            />
           </p>
           <a className="primary-button home-primary-button" href="/explore">
-            <LocalizedText english={messages.en.homePrimaryCta} urdu={messages.ur.homePrimaryCta} />
+            <LocalizedText
+              english={isDemoMode ? messages.en.homePrimaryCta : messages.en.homePilotExplore}
+              urdu={isDemoMode ? messages.ur.homePrimaryCta : messages.ur.homePilotExplore}
+            />
             <ArrowRight aria-hidden="true" className="home-link-arrow" />
           </a>
         </div>
@@ -239,10 +277,16 @@ export default function HomeContent({
         <div className="home-hero-visual">
           <figure className="home-map-stage">
             <span id="home-map-accessible-title" className="sr-only">
-              <LocalizedText english={messages.en.homeMapTitle} urdu={messages.ur.homeMapTitle} />
+              <LocalizedText
+                english={isDemoMode ? messages.en.homeMapTitle : messages.en.homePilotMapTitle}
+                urdu={isDemoMode ? messages.ur.homeMapTitle : messages.ur.homePilotMapTitle}
+              />
             </span>
             <span id="home-map-accessible-description" className="sr-only">
-              <LocalizedText english={messages.en.homeMapDescription} urdu={messages.ur.homeMapDescription} />
+              <LocalizedText
+                english={isDemoMode ? messages.en.homeMapDescription : messages.en.homePilotMapDescription}
+                urdu={isDemoMode ? messages.ur.homeMapDescription : messages.ur.homePilotMapDescription}
+              />
             </span>
             <svg
               className="home-pakistan-map"
@@ -264,7 +308,7 @@ export default function HomeContent({
                 {heroMap.shapes.map((shape) => (
                   <path
                     key={shape.regionId}
-                    className="home-province-shape"
+                    className={`home-province-shape${isDemoMode ? "" : " is-neutral"}`}
                     d={shape.path}
                     data-color-step={shape.colorStep}
                   >
@@ -275,24 +319,44 @@ export default function HomeContent({
             </svg>
             <figcaption className="home-map-caption">
               <span>
-                <LocalizedText english={messages.en.homeMapCaption} urdu={messages.ur.homeMapCaption} />
+                <LocalizedText
+                  english={isDemoMode ? messages.en.homeMapCaption : messages.en.homePilotMapCaption}
+                  urdu={isDemoMode ? messages.ur.homeMapCaption : messages.ur.homePilotMapCaption}
+                />
               </span>
+              {isDemoMode && (
+                <span className="demo-badge">
+                  <LocalizedText english={messages.en.homeDemoBadge} urdu={messages.ur.homeDemoBadge} />
+                </span>
+              )}
+            </figcaption>
+            {isDemoMode ? (
+              <div className="home-map-legend" aria-hidden="true">
+                <span className="home-map-legend-bar" aria-hidden="true" />
+                <span>
+                  <LocalizedText english={messages.en.homeMapLegend} urdu={messages.ur.homeMapLegend} />
+                </span>
+              </div>
+            ) : (
+              <div className="home-pilot-map-label">
+                <MapPin aria-hidden="true" />
+                <span>
+                  <LocalizedText
+                    english={messages.en.mapAvailableMarker}
+                    urdu={messages.ur.mapAvailableMarker}
+                  />
+                </span>
+              </div>
+            )}
+          </figure>
+
+          {isDemoMode && heroTrend && (
+          <article className="home-floating-card home-floating-trend">
+            {isDemoMode && (
               <span className="demo-badge">
                 <LocalizedText english={messages.en.homeDemoBadge} urdu={messages.ur.homeDemoBadge} />
               </span>
-            </figcaption>
-            <div className="home-map-legend" aria-hidden="true">
-              <span className="home-map-legend-bar" aria-hidden="true" />
-              <span>
-                <LocalizedText english={messages.en.homeMapLegend} urdu={messages.ur.homeMapLegend} />
-              </span>
-            </div>
-          </figure>
-
-          <article className="home-floating-card home-floating-trend">
-            <span className="demo-badge">
-              <LocalizedText english={messages.en.homeDemoBadge} urdu={messages.ur.homeDemoBadge} />
-            </span>
+            )}
             <span className="home-floating-title">
               <LocalizedText
                 english={getVariableLabel("air_temperature", "en")}
@@ -343,7 +407,9 @@ export default function HomeContent({
               </span>
             </span>
           </article>
+          )}
 
+          {isDemoMode && heroMap.value !== null && (
           <article className="home-floating-card home-floating-value">
             <span className="demo-badge">
               <LocalizedText english={messages.en.homeDemoBadge} urdu={messages.ur.homeDemoBadge} />
@@ -366,6 +432,7 @@ export default function HomeContent({
               />
             </span>
           </article>
+          )}
         </div>
       </section>
 
@@ -375,10 +442,16 @@ export default function HomeContent({
             <LocalizedText english={messages.en.homeQuestionsEyebrow} urdu={messages.ur.homeQuestionsEyebrow} />
           </span>
           <h2 id="home-questions-title">
-            <LocalizedText english={messages.en.homeQuestionsTitle} urdu={messages.ur.homeQuestionsTitle} />
+            <LocalizedText
+              english={isDemoMode ? messages.en.homeQuestionsTitle : messages.en.homePilotQuestionsTitle}
+              urdu={isDemoMode ? messages.ur.homeQuestionsTitle : messages.ur.homePilotQuestionsTitle}
+            />
           </h2>
           <p>
-            <LocalizedText english={messages.en.homeQuestionsSubtitle} urdu={messages.ur.homeQuestionsSubtitle} />
+            <LocalizedText
+              english={isDemoMode ? messages.en.homeQuestionsSubtitle : messages.en.homePilotQuestionsSubtitle}
+              urdu={isDemoMode ? messages.ur.homeQuestionsSubtitle : messages.ur.homePilotQuestionsSubtitle}
+            />
           </p>
         </div>
         <div className="home-question-grid">
@@ -410,7 +483,10 @@ export default function HomeContent({
               <LocalizedText english={messages.en.homeVariablesTitle} urdu={messages.ur.homeVariablesTitle} />
             </h2>
             <p>
-              <LocalizedText english={messages.en.homeVariablesSubtitle} urdu={messages.ur.homeVariablesSubtitle} />
+              <LocalizedText
+                english={isDemoMode ? messages.en.homeVariablesSubtitle : messages.en.homePilotVariablesSubtitle}
+                urdu={isDemoMode ? messages.ur.homeVariablesSubtitle : messages.ur.homePilotVariablesSubtitle}
+              />
             </p>
           </div>
           <span className="demo-badge">
@@ -447,6 +523,7 @@ export default function HomeContent({
         </div>
       </section>
 
+      {isDemoMode && (
       <section className="home-section page-shell" aria-labelledby="home-insights-title">
         <div className="home-section-heading home-section-heading-inline">
           <div>
@@ -522,6 +599,7 @@ export default function HomeContent({
           })}
         </div>
       </section>
+      )}
 
       <section className="home-section page-shell home-how-section" aria-labelledby="how-title">
         <div className="home-section-heading">
@@ -548,14 +626,24 @@ export default function HomeContent({
               <LocalizedText english={messages.en.homeStepTwoLabel} urdu={messages.ur.homeStepTwoLabel} />
             </span>
             <h3><LocalizedText english={messages.en.homeStepTwoTitle} urdu={messages.ur.homeStepTwoTitle} /></h3>
-            <p><LocalizedText english={messages.en.homeStepTwoText} urdu={messages.ur.homeStepTwoText} /></p>
+            <p>
+              <LocalizedText
+                english={isDemoMode ? messages.en.homeStepTwoText : messages.en.homePilotQuestionsSubtitle}
+                urdu={isDemoMode ? messages.ur.homeStepTwoText : messages.ur.homePilotQuestionsSubtitle}
+              />
+            </p>
           </article>
           <article className="home-step-card">
             <span className="home-step-number">
               <LocalizedText english={messages.en.homeStepThreeLabel} urdu={messages.ur.homeStepThreeLabel} />
             </span>
             <h3><LocalizedText english={messages.en.homeStepThreeTitle} urdu={messages.ur.homeStepThreeTitle} /></h3>
-            <p><LocalizedText english={messages.en.homeStepThreeText} urdu={messages.ur.homeStepThreeText} /></p>
+            <p>
+              <LocalizedText
+                english={isDemoMode ? messages.en.homeStepThreeText : messages.en.homePilotInsightText}
+                urdu={isDemoMode ? messages.ur.homeStepThreeText : messages.ur.homePilotInsightText}
+              />
+            </p>
           </article>
         </div>
       </section>
@@ -568,7 +656,12 @@ export default function HomeContent({
           <h2 id="home-credits-title">
             <LocalizedText english={messages.en.homeCreditsTitle} urdu={messages.ur.homeCreditsTitle} />
           </h2>
-          <p><LocalizedText english={messages.en.homeCreditsDemo} urdu={messages.ur.homeCreditsDemo} /></p>
+          <p>
+            <LocalizedText
+              english={isDemoMode ? messages.en.homeCreditsDemo : messages.en.homePilotCreditsText}
+              urdu={isDemoMode ? messages.ur.homeCreditsDemo : messages.ur.homePilotCreditsText}
+            />
+          </p>
         </div>
         <div className="home-credit-links">
           <a href="https://www.geoboundaries.org" target="_blank" rel="noopener noreferrer">
@@ -588,7 +681,12 @@ export default function HomeContent({
           <h2 id="home-cta-title">
             <LocalizedText english={messages.en.homeCtaTitle} urdu={messages.ur.homeCtaTitle} />
           </h2>
-          <p><LocalizedText english={messages.en.homeCtaText} urdu={messages.ur.homeCtaText} /></p>
+          <p>
+            <LocalizedText
+              english={isDemoMode ? messages.en.homeCtaText : messages.en.homePilotCtaText}
+              urdu={isDemoMode ? messages.ur.homeCtaText : messages.ur.homePilotCtaText}
+            />
+          </p>
         </div>
         <div className="home-cta-actions">
           <a className="primary-button" href="/explore">

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { REGION_IDS, regionsResponseSchema, type RegionId, type RegionsResponse } from "@/types/api";
+import { PROVINCE_IDS, regionsResponseSchema, type RegionId, type RegionsResponse } from "@/types/api";
 
 const positionSchema = z.tuple([z.number(), z.number()]).rest(z.number());
 const ringSchema = z.array(positionSchema).min(4);
@@ -69,7 +69,7 @@ export async function getPakistanProvinceBoundaries(): Promise<RegionsResponse> 
     };
   });
 
-  const missingRegions = REGION_IDS.filter((regionId) => !seen.has(regionId));
+  const missingRegions = PROVINCE_IDS.filter((regionId) => !seen.has(regionId));
   if (missingRegions.length > 0) {
     throw new Error(
       `Pakistan boundaries are missing mock regions: ${missingRegions.join(", ")}.`,

@@ -13,11 +13,12 @@ import {
 type ExportMenuProps = {
   metadata: Omit<ExportMetadata, "isDemo">;
   series: ExportSeries[];
+  chartId?: string;
 };
 
 type ExportStatus = "png" | "csv" | "link" | "error" | null;
 
-export function ExportMenu({ metadata, series }: ExportMenuProps) {
+export function ExportMenu({ metadata, series, chartId }: ExportMenuProps) {
   const messages = useMessages();
   const [status, setStatus] = useState<ExportStatus>(null);
   const hasData = series.some((item) => item.points.length > 0);
@@ -27,7 +28,7 @@ export function ExportMenu({ metadata, series }: ExportMenuProps) {
     try {
       const charts = Array.from(
         document.querySelectorAll<SVGSVGElement>("[data-export-chart] svg"),
-      );
+      ).filter((chart) => !chartId || chart.closest("[data-export-chart]")?.getAttribute("data-export-chart") === chartId);
       const availableCharts = charts.filter((chart) => {
         const bounds = chart.getBoundingClientRect();
         return bounds.width > 0 && bounds.height > 0;
@@ -53,6 +54,8 @@ export function ExportMenu({ metadata, series }: ExportMenuProps) {
         region: messages.exportRegion,
         unit: messages.exportUnit,
         variable: messages.exportVariable,
+        area: messages.exportArea,
+        status: messages.exportStatus,
       });
       setStatus("png");
     } catch (error) {
@@ -76,6 +79,9 @@ export function ExportMenu({ metadata, series }: ExportMenuProps) {
           unit: messages.exportUnit,
           yearRange: messages.exportPeriod,
           date: messages.trendTableDate,
+          validMonths: messages.validMonths,
+          status: messages.exportStatus,
+          area: messages.exportArea,
         },
       );
       setStatus("csv");

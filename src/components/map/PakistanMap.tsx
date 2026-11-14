@@ -5,12 +5,14 @@ import { useQuery } from "@tanstack/react-query";
 import type { ExpressionSpecification, StyleSpecification } from "maplibre-gl";
 import MapView, {
   Layer,
+  Marker,
   type MapLayerMouseEvent,
   type MapRef,
   Source,
 } from "react-map-gl/maplibre";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getMapLayer } from "@/lib/api";
+import { MapPin } from "lucide-react";
+import { getAreaStudyArea, getAreas, getMapLayer } from "@/lib/api";
 import { isDemoMode } from "@/lib/api/client";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useMessages } from "@/hooks/use-messages";
@@ -23,6 +25,7 @@ import {
 } from "@/types/api";
 import { createMapLayerQuery } from "@/lib/map-layer-query";
 import { MapLegend } from "./MapLegend";
+import { getRegionLabel } from "@/lib/i18n";
 
 const MAP_STYLE_URL =
   "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
@@ -34,6 +37,7 @@ const MAX_PAN_BOUNDS: [number, number, number, number] = [56, 19, 82, 41];
 
 type MapColors = {
   background: string;
+  cool: string;
   noData: string;
   outline: string;
   selected: string;
@@ -59,12 +63,43 @@ type HoveredRegion = {
   y: number;
 };
 
+function geometryBounds(
+  geometry: NonNullable<RegionsResponse["features"][number]["geometry"]>,
+): [[number, number], [number, number]] | null {
+  let west = Infinity;
+  let south = Infinity;
+  let east = -Infinity;
+  let north = -Infinity;
+
+  function visit(value: unknown): void {
+    if (!Array.isArray(value)) {
+      return;
+    }
+
+    if (typeof value[0] === "number" && typeof value[1] === "number") {
+      west = Math.min(west, value[0]);
+      south = Math.min(south, value[1]);
+      east = Math.max(east, value[0]);
+      north = Math.max(north, value[1]);
+      return;
+    }
+
+    value.forEach(visit);
+  }
+
+  visit(geometry.coordinates);
+  return Number.isFinite(west) && Number.isFinite(south) && Number.isFinite(east) && Number.isFinite(north)
+    ? [[west, south], [east, north]]
+    : null;
+}
+
 function readMapColors(): MapColors {
   const styles = getComputedStyle(document.documentElement);
   const token = (name: string) => styles.getPropertyValue(name).trim();
 
   return {
     background: token("--background"),
+    cool: token("--cool"),
     noData: token("--map-no-data"),
     outline: token("--map-outline"),
     selected: token("--map-selected"),
@@ -106,18 +141,35 @@ export const PakistanMap = memo(function PakistanMap({
   const mapRef = useRef<MapRef>(null);
   const previousHover = useRef<string | null>(null);
   const previousSelection = useRef<string | null>(null);
-  const selectedRegion = useUiStore((state) => state.region);
+  const selectedProvince = useUiStore((state) => state.province);
+  const selectedArea = useUiStore((state) => state.area);
+  const language = useUiStore((state) => state.language);
   const setRegion = useUiStore((state) => state.setRegion);
+  const setProvince = useUiStore((state) => state.setProvince);
+  const setArea = useUiStore((state) => state.setArea);
   const selectedVariable = useUiStore((state) => state.variable);
   const selectedYear = useUiStore((state) => state.currentYear);
   const startYear = useUiStore((state) => state.yearRange[0]);
   const layerType = useUiStore((state) => state.mapLayerType);
   const changeBasis = useUiStore((state) => state.changeBasis);
   const [fallbackStyle, setFallbackStyle] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const fallbackUpdateQueued = useRef(false);
   const [hoveredRegion, setHoveredRegion] = useState<HoveredRegion | null>(null);
   const colors = useMemo(() => readMapColors(), []);
   const mapLib = useMemo(() => import("maplibre-gl"), []);
+  const areasQuery = useQuery({
+    queryKey: ["areas-config"],
+    queryFn: getAreas,
+    enabled: !isDemoMode,
+    staleTime: Infinity,
+  });
+  const studyAreaQuery = useQuery({
+    queryKey: ["study-area-geometry", selectedArea],
+    queryFn: () => getAreaStudyArea("faisalabad"),
+    enabled: !isDemoMode && selectedArea === "faisalabad",
+    staleTime: Infinity,
+  });
 
   const request = useMemo(
     () =>
@@ -136,7 +188,7 @@ export const PakistanMap = memo(function PakistanMap({
   const layerQuery = useQuery({
     queryKey: ["map-layer", debouncedRequest],
     queryFn: () => getMapLayer(debouncedRequest),
-    enabled: canLoadPreviousYear,
+    enabled: isDemoMode && canLoadPreviousYear,
     placeholderData: (previousData, previousQuery) => {
       const previousRequest = mapLayerQuerySchema.safeParse(previousQuery?.queryKey[1]);
       const sameLayer =
@@ -248,15 +300,19 @@ export const PakistanMap = memo(function PakistanMap({
           colors.noData,
           fillColor,
         ] as ExpressionSpecification,
-        "fill-opacity": [
-          "case",
-          ["boolean", ["feature-state", "hover"], false],
-          0.88,
-          0.7,
-        ] as ExpressionSpecification,
+        "fill-opacity": (isDemoMode
+          ? ["case", ["boolean", ["feature-state", "hover"], false], 0.88, 0.7]
+          : [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              0.65,
+              selectedProvince === "pakistan"
+                ? 0.42
+                : ["case", ["==", ["get", "regionId"], selectedProvince], 0.6, 0.12],
+            ]) as ExpressionSpecification,
       },
     }),
-    [colors.noData, fillColor],
+    [colors.noData, fillColor, selectedProvince],
   );
   const outlineLayer = useMemo(
     () => ({
@@ -300,20 +356,63 @@ export const PakistanMap = memo(function PakistanMap({
         { selected: false },
       );
     }
-    map.setFeatureState(
-      { source: "pakistan-provinces", id: selectedRegion },
-      { selected: true },
-    );
-    previousSelection.current = selectedRegion;
-  }, [selectedRegion, mapData, fallbackStyle]);
+    if (selectedProvince !== "pakistan") {
+      map.setFeatureState(
+        { source: "pakistan-provinces", id: selectedProvince },
+        { selected: true },
+      );
+      previousSelection.current = selectedProvince;
+    } else {
+      previousSelection.current = null;
+    }
+  }, [selectedProvince, mapData, fallbackStyle]);
 
   const resetView = useCallback(() => {
     mapRef.current?.fitBounds(PAKISTAN_BOUNDS, {
       padding: 48,
-      duration: 650,
+      duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 650,
       maxZoom: 6,
     });
   }, []);
+
+  useEffect(() => {
+    if (!mapLoaded) {
+      return;
+    }
+
+    if (selectedArea && areasQuery.data) {
+      const selected = areasQuery.data.areas.find((area) => area.id === selectedArea);
+      if (selected) {
+        mapRef.current?.fitBounds(
+          [
+            [selected.bounds[0], selected.bounds[1]],
+            [selected.bounds[2], selected.bounds[3]],
+          ],
+          {
+            padding: 48,
+            duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700,
+            maxZoom: 9,
+          },
+        );
+      }
+      return;
+    }
+
+    if (selectedProvince === "pakistan") {
+      resetView();
+      return;
+    }
+
+    const provinceFeature = regions?.features.find((feature) => feature.id === selectedProvince);
+    const bounds = provinceFeature?.geometry ? geometryBounds(provinceFeature.geometry) : null;
+    if (bounds) {
+      mapRef.current?.fitBounds(bounds, {
+        padding: 48,
+        duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 650,
+        maxZoom: 7,
+      });
+    }
+  }, [areasQuery.data, mapLoaded, regions, resetView, selectedArea, selectedProvince]);
 
   const clearHover = useCallback(() => {
     const map = mapRef.current?.getMap();
@@ -371,10 +470,14 @@ export const PakistanMap = memo(function PakistanMap({
         event.features?.[0]?.properties?.regionId,
       );
       if (result.success) {
-        setRegion(result.data);
+        if (isDemoMode) {
+          setRegion(result.data);
+        } else {
+          setProvince(result.data);
+        }
       }
     },
-    [setRegion],
+    [setProvince, setRegion],
   );
 
   const handleMapError = useCallback(() => {
@@ -399,7 +502,7 @@ export const PakistanMap = memo(function PakistanMap({
         maxZoom={8}
         maxBounds={MAX_PAN_BOUNDS}
         interactiveLayerIds={mapData ? ["province-fill"] : []}
-        onLoad={resetView}
+        onLoad={() => setMapLoaded(true)}
         onError={handleMapError}
         onMouseMove={handleMouseMove}
         onMouseLeave={clearHover}
@@ -412,7 +515,143 @@ export const PakistanMap = memo(function PakistanMap({
             <Layer {...outlineLayer} />
           </Source>
         )}
+        {!isDemoMode && studyAreaQuery.data && (
+          <Source id="faisalabad-study-area" type="geojson" data={studyAreaQuery.data}>
+            <Layer
+              id="study-area-glow"
+              type="line"
+              paint={{
+                "line-color": colors.selected,
+                "line-width": 10,
+                "line-blur": 8,
+                "line-opacity": 0.55,
+              }}
+            />
+            <Layer
+              id="study-buffer-fill"
+              type="fill"
+              filter={["==", ["get", "kind"], "buffer"]}
+              paint={{ "fill-color": colors.cool, "fill-opacity": 0.1 }}
+            />
+            <Layer
+              id="study-district-fill"
+              type="fill"
+              filter={["==", ["get", "kind"], "district"]}
+              paint={{ "fill-color": colors.selected, "fill-opacity": 0.24 }}
+            />
+            <Layer
+              id="study-buffer-outline"
+              type="line"
+              filter={["==", ["get", "kind"], "buffer"]}
+              paint={{
+                "line-color": colors.cool,
+                "line-width": 2,
+                "line-opacity": 0.95,
+              }}
+            />
+            <Layer
+              id="study-district-outline"
+              type="line"
+              filter={["==", ["get", "kind"], "district"]}
+              paint={{
+                "line-color": colors.selected,
+                "line-width": 3,
+                "line-opacity": 1,
+              }}
+            />
+          </Source>
+        )}
+        {!isDemoMode &&
+          selectedProvince === "punjab" &&
+          !selectedArea &&
+          areasQuery.data?.areas
+            .filter((area) => area.id === "faisalabad")
+            .map((area) => (
+              <Marker
+                key={area.id}
+                longitude={area.center[0]}
+                latitude={area.center[1]}
+                anchor="bottom"
+              >
+                <button
+                  className="map-available-marker"
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setArea(area.id);
+                  }}
+                >
+                  <MapPin aria-hidden="true" size={16} />
+                  {messages.mapAvailableMarker}
+                </button>
+              </Marker>
+            ))}
       </MapView>
+
+      {!isDemoMode && (
+        <>
+          <nav className="map-breadcrumb" aria-label={messages.mapBreadcrumb}>
+            <button type="button" onClick={() => setProvince("pakistan")}>
+              {messages.mapPakistan}
+            </button>
+            {selectedProvince !== "pakistan" && (
+              <>
+                <span aria-hidden="true">›</span>
+                <button type="button" onClick={() => setArea(null)}>
+                  {getRegionLabel(selectedProvince, language)}
+                </button>
+              </>
+            )}
+            {selectedArea && (
+              <>
+                <span aria-hidden="true">›</span>
+                <span>{messages.areaFaisalabad}</span>
+              </>
+            )}
+          </nav>
+          {selectedProvince !== "pakistan" && !selectedArea && (
+            <section className="map-province-panel" aria-labelledby="map-province-panel-title">
+              <h2 id="map-province-panel-title">
+                {messages.mapProvinceAreas.replace(
+                  "{province}",
+                  getRegionLabel(selectedProvince, language),
+                )}
+              </h2>
+              {selectedProvince === "punjab" ? (
+                areasQuery.isError ? (
+                  <p role="alert">{areasQuery.error.message}</p>
+                ) : areasQuery.isPending ? (
+                  <p role="status">{messages.mapLoading}</p>
+                ) : (
+                  <ul>
+                    {areasQuery.data?.areas.map((area) => (
+                      <li key={area.id}>
+                        <button
+                          type="button"
+                          disabled={area.status !== "available"}
+                          onClick={() => setArea(area.id)}
+                        >
+                          <span>{area.name}</span>
+                          <span className={`map-area-status is-${area.status}`}>
+                            {area.status === "available"
+                              ? messages.mapAvailableStatus
+                              : messages.mapComingSoonStatus}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )
+              ) : (
+                <p>{messages.mapNoDataYet}</p>
+              )}
+            </section>
+          )}
+          {selectedArea && studyAreaQuery.isError && (
+            <p className="map-study-area-error" role="alert">{studyAreaQuery.error.message}</p>
+          )}
+        </>
+      )}
 
       <div className="map-navigation-controls" aria-label={messages.mapControls}>
         <button
@@ -485,7 +724,7 @@ export const PakistanMap = memo(function PakistanMap({
           </div>
         </div>
       )}
-      {!boundaryError && !boundaryLoading && canLoadPreviousYear && layerQuery.isPending && (
+      {isDemoMode && !boundaryError && !boundaryLoading && canLoadPreviousYear && layerQuery.isPending && (
         <div className="map-state-overlay map-state-overlay-light" role="status">
           <div className="map-state-card">
             <div className="skeleton skeleton-heading" />
@@ -493,12 +732,12 @@ export const PakistanMap = memo(function PakistanMap({
           </div>
         </div>
       )}
-      {!boundaryError && !boundaryLoading && !canLoadPreviousYear && (
+      {isDemoMode && !boundaryError && !boundaryLoading && !canLoadPreviousYear && (
         <div className="map-state-overlay map-state-overlay-light" role="status">
           <div className="map-state-card">{messages.mapPreviousYearUnavailable}</div>
         </div>
       )}
-      {!boundaryError && !boundaryLoading && layerQuery.isError && (
+      {isDemoMode && !boundaryError && !boundaryLoading && layerQuery.isError && (
         <div className="map-state-overlay map-state-overlay-light" role="alert">
           <div className="map-state-card">
             <strong>{messages.mapDataError}</strong>
@@ -506,7 +745,8 @@ export const PakistanMap = memo(function PakistanMap({
           </div>
         </div>
       )}
-      {!boundaryError &&
+      {isDemoMode &&
+        !boundaryError &&
         !boundaryLoading &&
         layerQuery.isSuccess &&
         (!layerQuery.data || layerQuery.data.length === 0) && (

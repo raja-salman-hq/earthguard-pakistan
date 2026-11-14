@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getMapLayer } from "@/lib/api";
+import { isDemoMode } from "@/lib/api/client";
 import { useMessages } from "@/hooks/use-messages";
 import { createMapLayerQuery } from "@/lib/map-layer-query";
 import { useUiStore } from "@/store/ui-store";
@@ -12,6 +13,7 @@ type TimelineControlProps = {
   variable: Variable | undefined;
   loading: boolean;
   error: string | undefined;
+  onTimelineYearChange?: () => void;
 };
 
 type PlaybackSpeed = 1 | 2;
@@ -26,7 +28,12 @@ function getMotionPreference(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-export function TimelineControl({ variable, loading, error }: TimelineControlProps) {
+export function TimelineControl({
+  variable,
+  loading,
+  error,
+  onTimelineYearChange,
+}: TimelineControlProps) {
   const messages = useMessages();
   const queryClient = useQueryClient();
   const yearRange = useUiStore((state) => state.yearRange);
@@ -60,6 +67,7 @@ export function TimelineControl({ variable, loading, error }: TimelineControlPro
               ? Math.max(state.yearRange[0], 2001)
               : state.yearRange[0];
           setCurrentYear(firstYear);
+          onTimelineYearChange?.();
         } else {
           setPlaying(false);
         }
@@ -67,10 +75,11 @@ export function TimelineControl({ variable, loading, error }: TimelineControlPro
       }
 
       setCurrentYear(Math.min(end, state.currentYear + speed));
+      onTimelineYearChange?.();
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, [loop, playing, reducedMotion, setCurrentYear, speed]);
+  }, [loop, onTimelineYearChange, playing, reducedMotion, setCurrentYear, speed]);
 
   useEffect(() => {
     const pauseWhenHidden = () => {
@@ -84,7 +93,7 @@ export function TimelineControl({ variable, loading, error }: TimelineControlPro
   }, []);
 
   const prefetchQueries = useMemo(() => {
-    if (!playing || !variable) {
+    if (!isDemoMode || !playing || !variable) {
       return [];
     }
 
@@ -146,7 +155,10 @@ export function TimelineControl({ variable, loading, error }: TimelineControlPro
           value={currentYear}
           aria-label={messages.timelineCurrentYear}
           aria-valuetext={`${messages.timelineCurrentYear}: ${currentYear}`}
-          onChange={(event) => setCurrentYear(Number(event.currentTarget.value))}
+          onChange={(event) => {
+            setCurrentYear(Number(event.currentTarget.value));
+            onTimelineYearChange?.();
+          }}
         />
       </label>
       <label className="timeline-option">

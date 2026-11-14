@@ -1,10 +1,11 @@
 # EarthGuard Pakistan
 
-An interactive foundation for exploring environmental change across Pakistan.
-The app includes an interactive Pakistan map, time-series and trend views,
-regional/variable comparisons, data export, Urdu/RTL support, and a synthetic
-demo mode. Backend-computed statistics are displayed by the frontend; trend
-statistics are never calculated in the browser.
+EarthGuard Pakistan is an interactive dashboard for the Faisalabad real-data
+pilot. The app includes a Pakistan map, time-series and trend views,
+indicator comparisons, data export, Urdu/RTL support, and a synthetic demo mode.
+Real observations currently cover Faisalabad District and the supplied
+surrounding study area for 2001–2024. The frontend displays team-provided
+statistics only; trend statistics are never calculated in the browser.
 
 ## Run locally
 
@@ -15,27 +16,33 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). Mock mode is enabled by
-default in `.env.example`; every demo value is synthetic and clearly labeled.
+default only when `NEXT_PUBLIC_USE_MOCK=true`; every demo value is synthetic
+and clearly labeled. Real Faisalabad static data is the default when the
+variable is unset or set to `false`. It is marked `draft` pending data-team
+verification.
 
-## Connect to the backend
+## Faisalabad data
 
-For local development, set these in `.env.local`:
+The selected source files and their provenance are listed in
+[data/README.md](data/README.md). The static data schema and build process are
+documented in [docs/DATA_CONTRACT.md](docs/DATA_CONTRACT.md). Rebuild and check
+the published JSON with:
 
-```env
-NEXT_PUBLIC_USE_MOCK=false
-NEXT_PUBLIC_API_URL=http://localhost:8000
+```bash
+npm run build:data
+npm run check:data
 ```
 
-The FastAPI service must implement
-[docs/API_CONTRACT.md](docs/API_CONTRACT.md). When calling it directly, configure
-its CORS policy to allow the frontend origin. Production deployments must use
-HTTPS for both the frontend and backend.
+There is no live backend connected in this phase. `NEXT_PUBLIC_API_URL` and the
+future FastAPI contract are retained for the backend integration; see
+[docs/API_CONTRACT.md](docs/API_CONTRACT.md). `NEXT_PUBLIC_USE_MOCK` is the
+single demo/real switch and is centralized in `src/lib/api/client.ts`.
 
-In Vercel, add `NEXT_PUBLIC_USE_MOCK` and `NEXT_PUBLIC_API_URL` to the project's
-Environment Variables for each environment, then redeploy. `NEXT_PUBLIC_*`
-values are embedded at build time; changing them does not update an existing
-deployment. The configured backend origin is added to the Content Security
-Policy `connect-src` at build time by [next.config.ts](next.config.ts).
+In Vercel, set `NEXT_PUBLIC_USE_MOCK=true` only when explicitly enabling the
+synthetic demo; unset or set it to `false` for real Faisalabad static data.
+Redeploy after changes.
+`NEXT_PUBLIC_*` values are embedded at build time; changing them does not update
+an existing deployment.
 
 To validate a running backend, set `NEXT_PUBLIC_API_URL` and run:
 
@@ -43,15 +50,8 @@ To validate a running backend, set `NEXT_PUBLIC_API_URL` and run:
 npm run check:api
 ```
 
-The checker validates all endpoints against the frontend Zod schemas and checks
-the seven supported variable and region IDs, map-layer region coverage, valid
-dates, and finite non-null data values.
-
-The current frontend calls the backend origin directly. This requires CORS and
-HTTPS configuration but is the simplest deployment. Next.js rewrites could
-avoid browser CORS configuration by making requests appear same-origin, but
-would not make the backend URL secret and would add a proxy layer. Choose direct
-requests or rewrites before any proxy implementation.
+The API checker remains for future live-backend integration; static pilot JSON
+is validated with Zod by `npm run check:data`.
 
 ## Project structure
 
@@ -61,7 +61,10 @@ requests or rewrites before any proxy implementation.
 - `src/lib/mock/` — synthetic demo response data
 - `src/store/` — Zustand UI state synchronized with URL search parameters
 - `src/types/` — API response types and Zod schemas
-- `docs/` — [design tokens](docs/DESIGN_SYSTEM.md) and [API contract](docs/API_CONTRACT.md)
+- `scripts/` — approved CSV-to-JSON data builder and data checker
+- `data/` — supplied source datasets; see [data/README.md](data/README.md)
+- `public/data/areas/` — generated static area data consumed by the app
+- `docs/` — [design tokens](docs/DESIGN_SYSTEM.md), [API contract](docs/API_CONTRACT.md), and [data contract](docs/DATA_CONTRACT.md)
 
 ## Checks
 
@@ -72,4 +75,6 @@ npm run dev
 npm run start
 npm run test:e2e
 npm run check:api
+npm run build:data
+npm run check:data
 ```

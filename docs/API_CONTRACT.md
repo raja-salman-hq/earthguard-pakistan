@@ -5,8 +5,11 @@ Request and response validation is defined in `src/types/api.ts`; all HTTP calls
 pass through `src/lib/api/`. No trend statistics are calculated in the browser.
 
 Set `NEXT_PUBLIC_USE_MOCK=true` for synthetic demo responses. Set it to `false`
-to call `NEXT_PUBLIC_API_URL`. Every response, including mock responses, is
-validated with its endpoint Zod schema before it is returned.
+to read the draft Faisalabad pilot JSON from `public/data/areas/`; this build has
+no live backend, so `NEXT_PUBLIC_API_URL` is reserved for a future integration.
+The switch lives in `src/lib/api/client.ts`. Every response, including mock and
+static-file responses, is validated with its endpoint Zod schema before it is
+returned.
 
 The examples below are illustrative and are **not NASA observations**. The mock
 regions have no geometries. The explore map uses the local
@@ -18,9 +21,15 @@ local file in both mock and live modes; it does not use `/api/regions` geometry.
 Keep the static file as the map-boundary fallback/source. `/api/regions` supplies
 region metadata and is validated independently.
 
-All required numeric response values must be finite JSON numbers, not `null`.
-Dates must be valid ISO `YYYY-MM-DD` dates. The only currently permitted null in
-the response schemas is `geometry` in `/api/regions`.
+Non-null numeric response values must be finite JSON numbers. Time-series
+observation values and valid-month counts may be `null`; dates must be valid ISO
+`YYYY-MM-DD` dates. Trend-result fields are optional and nullable when supplied
+by the data team. A missing trend object is not synthesized by the frontend.
+
+The real pilot covers only Faisalabad District and the supplied surrounding
+study area, 2001–2024, for land surface temperature, rainfall, and NDVI. Data
+status is available from the validated area indicators file. `draft` must not
+be described as verified, and mock values must never be shown in real mode.
 
 ## `GET /api/variables`
 
@@ -86,6 +95,8 @@ GET /api/timeseries?variable=air_temperature&region=punjab&start=2000&end=2000&r
 
 Parameters: `variable`, `region`, integer `start` and `end` years from 2000 to
 2025, and `resolution` (`monthly` or `yearly`). `start` must not exceed `end`.
+The optional `area` selects an area ID such as `faisalabad` in static pilot
+mode; region-only requests remain valid for mock/future backend use.
 
 Response:
 
@@ -96,10 +107,18 @@ Response:
   "unit": "°C",
   "points": [
     { "date": "2000-01-01", "value": 14.2 },
-    { "date": "2000-02-01", "value": 15.1 }
-  ]
+    { "date": "2000-02-01", "value": null, "valid_months": null }
+  ],
+  "availableResolutions": ["yearly"],
+  "source": "Source documented by the data team",
+  "dataStatus": "draft"
 }
 ```
+
+`value` may be `null`; the chart preserves the gap. `valid_months` is optional
+and may be null when monthly coverage has not been confirmed.
+`availableResolutions` lists only resolutions present in the selected indicator
+file.
 
 Demo monthly series are generated for every month from 2000 through 2025 with
 illustrative seasonal cycles and gentle trends. Demo yearly points use a
@@ -137,6 +156,13 @@ Response:
   ]
 }
 ```
+
+In static pilot mode the response contains only fields present in a matching
+team trend file. If no such file exists, the adapter returns `null` and the UI
+shows “Trend statistics not available yet.” It never derives a result from the
+time series. The optional schema fields are `test`, `tau`, `z`, `pValue`,
+`significant`, `direction`, `slope`, `unit`, `senSlope`, `slopeCi95`, `nYears`,
+`trendLine`, and `notes`.
 
 Optional `trendLine` points provide the backend-computed line to overlay on the
 time-series chart. Each point uses an ISO date and the same value unit as the
@@ -217,3 +243,17 @@ Response:
 
 Hotspot significance is supplied by the backend. Demo hotspot values and
 significance flags are synthetic and must never be presented as real findings.
+
+In real pilot mode, `/api/map-layer` and `/api/hotspots` do not supply spatial
+measurements. The map shows coverage boundaries only, and “Key findings” reads
+only team-provided trend fields from the selected area's data file. Unavailable
+areas or indicators raise a typed `NoDataError`; the UI offers Faisalabad.
+
+## Area configuration and shareable URLs
+
+The static area directory (`public/data/areas.json`) contains province and area
+records with IDs, names, status, center, bounds, indicator IDs, and `dataPath`.
+The detailed file shape and null/status rules are in
+[DATA_CONTRACT.md](./DATA_CONTRACT.md). The URL store adds `province` and
+`area`; legacy `region` remains accepted and is used as the province fallback
+when the new parameters are absent.

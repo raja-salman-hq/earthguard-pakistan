@@ -43,6 +43,13 @@ export function TrendTakeaway({
 }: TrendTakeawayProps) {
   const messages = useMessages();
   const language = useUiStore((state) => state.language);
+  if (
+    !trend.direction ||
+    typeof trend.changeTotal !== "number" ||
+    typeof trend.changePercent !== "number"
+  ) {
+    return null;
+  }
   const direction = {
     increasing: messages.trendIncreasing,
     decreasing: messages.trendDecreasing,

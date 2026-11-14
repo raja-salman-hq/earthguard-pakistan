@@ -125,6 +125,47 @@ export default function AboutContent() {
         </div>
       </section>
 
+      {!isDemoMode && (
+        <section className="about-section about-pilot-methods" aria-labelledby="about-pilot-methods-title">
+          <div className="about-section-heading">
+            <h2 id="about-pilot-methods-title">{messages.aboutPilotMethodsTitle}</h2>
+            <p>{messages.aboutPilotMethodsIntro}</p>
+          </div>
+          <div className="about-method-grid">
+            <article className="about-card">
+              <h3>{messages.aboutPilotLSTTitle}</h3>
+              <p>{messages.aboutPilotLSTText}</p>
+            </article>
+            <article className="about-card">
+              <h3>{messages.aboutPilotRainfallTitle}</h3>
+              <p>{messages.aboutPilotRainfallText}</p>
+            </article>
+            <article className="about-card">
+              <h3>{messages.aboutPilotNDVITitle}</h3>
+              <p>{messages.aboutPilotNDVIText}</p>
+            </article>
+            <article className="about-card">
+              <h3>{messages.aboutPilotQualityTitle}</h3>
+              <p>{messages.aboutPilotQualityText}</p>
+            </article>
+            <article className="about-card">
+              <h3>{messages.aboutPilotTrendTitle}</h3>
+              <p>{messages.aboutPilotTrendText}</p>
+            </article>
+            <p className="about-backend-note">{messages.aboutPilotUnknowns}</p>
+          </div>
+        </section>
+      )}
+
+      {!isDemoMode && (
+        <section className="about-section" aria-labelledby="about-lulc-title">
+          <div className="about-section-heading">
+            <h2 id="about-lulc-title">{messages.aboutLulcTitle}</h2>
+            <p>{messages.aboutLulcUnavailable}</p>
+          </div>
+        </section>
+      )}
+
       <section className="about-section" aria-labelledby="about-credits-title">
         <div className="about-section-heading">
           <h2 id="about-credits-title">{messages.aboutCreditsTitle}</h2>

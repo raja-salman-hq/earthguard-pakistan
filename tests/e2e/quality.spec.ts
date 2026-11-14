@@ -9,6 +9,7 @@ const routes = [
   { path: "/team", name: "team", status: 200 },
   { path: "/quality-check-404", name: "404", status: 404 },
 ] as const;
+const realDataMode = process.env.NEXT_PUBLIC_USE_MOCK !== "true";
 
 function collectConsoleErrors(page: Page): string[] {
   const errors: string[] = [];
@@ -44,6 +45,18 @@ async function stubBasemap(page: Page): Promise<void> {
   );
 }
 
+async function dismissCoverageDialog(page: Page, expectToOpen = true): Promise<void> {
+  const dialog = page.locator(".data-coverage-dialog");
+  const pathname = new URL(page.url()).pathname;
+  const shouldAutoOpen = pathname === "/" || pathname === "/explore";
+  if (expectToOpen && shouldAutoOpen) {
+    await expect(dialog).toBeVisible();
+  }
+  if (await dialog.isVisible()) {
+    await dialog.locator("button").click();
+  }
+}
+
 test.describe("production route smoke checks", () => {
   for (const route of routes) {
     test(route.name + " loads without browser errors", async ({ page }) => {
@@ -52,6 +65,7 @@ test.describe("production route smoke checks", () => {
         await stubBasemap(page);
       }
       const response = await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      await dismissCoverageDialog(page);
 
       expect(response?.status()).toBe(route.status);
       await expect(page.locator("main h1").first()).toBeVisible();
@@ -67,15 +81,24 @@ test.describe("production route smoke checks", () => {
     const errors = collectConsoleErrors(page);
     await stubBasemap(page);
     await page.goto("/explore", { waitUntil: "domcontentloaded" });
+    await dismissCoverageDialog(page);
 
     const regionSelect = page.locator("details.map-region-panel select");
     await expect(regionSelect).toBeVisible();
-    await regionSelect.selectOption("sindh");
-    await expect(regionSelect).toHaveValue("sindh");
-    await expect(page.locator(".trend-chart-content h3")).toContainText("Sindh");
+    const selectedLocation = realDataMode ? "faisalabad" : "sindh";
+    await regionSelect.selectOption(selectedLocation);
+    await expect(regionSelect).toHaveValue(selectedLocation);
+    await expect(page.locator(".trend-chart-content h3")).toContainText(
+      realDataMode ? "Faisalabad" : "Sindh",
+    );
 
     await page.getByLabel("Environmental variable").selectOption("precipitation");
-    await expect(page.locator(".map-legend strong")).toContainText("Precipitation");
+    if (realDataMode) {
+      await expect(page.locator(".map-legend strong")).toContainText("Faisalabad District");
+      await expect(page.locator(".data-status-badge")).toContainText("Draft data");
+    } else {
+      await expect(page.locator(".map-legend strong")).toContainText("Precipitation");
+    }
     await expect(page.locator(".trend-chart-plot svg").first()).toBeVisible();
 
     const playButton = page.locator(".timeline-play-button");
@@ -84,7 +107,9 @@ test.describe("production route smoke checks", () => {
     await playButton.click();
     await expect(playButton).toHaveAttribute("aria-label", "Play timeline");
 
-    const themeButton = page.locator(".header-actions .control-button").first();
+    const themeButton = page.locator(
+      ".header-actions .control-button:not(.data-coverage-button):not(.language-button)",
+    );
     await themeButton.click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     await themeButton.click();
@@ -104,6 +129,7 @@ test.describe("production route smoke checks", () => {
   test("landing variable cards open Explore with the selected variable", async ({ page }) => {
     await stubBasemap(page);
     await page.goto("/", { waitUntil: "domcontentloaded" });
+    await dismissCoverageDialog(page);
     const variableCard = page.locator(".home-variable-card").filter({ hasText: "Precipitation" });
     await expect(variableCard).toBeVisible();
     await variableCard.click();
@@ -113,24 +139,58 @@ test.describe("production route smoke checks", () => {
 
   test("landing language and theme toggles update the static page copy", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
+    await dismissCoverageDialog(page);
     const title = page.locator(".home-hero-copy h1");
-    await expect(title).toContainText("See how Pakistan's environment has changed");
+    await expect(title).toContainText(
+      realDataMode ? "Explore the Faisalabad data pilot" : "See how Pakistan's environment has changed",
+    );
     await page.locator(".language-button").click();
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-    await expect(title).toContainText("دیکھیں پاکستان کا ماحول وقت کے ساتھ کیسے بدلا ہے");
+    await expect(title).toContainText(
+      realDataMode
+        ? "فیصل آباد ڈیٹا پائلٹ دیکھیں"
+        : "دیکھیں پاکستان کا ماحول وقت کے ساتھ کیسے بدلا ہے",
+    );
 
-    const themeButton = page.locator(".header-actions .control-button").first();
+    const themeButton = page.locator(
+      ".header-actions .control-button:not(.data-coverage-button):not(.language-button)",
+    );
     await themeButton.click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     await themeButton.click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   });
 
+  test("data coverage dialog opens on direct entry, is dismissible once, and reopens from the header", async ({ page }) => {
+    await page.goto("/explore", { waitUntil: "domcontentloaded" });
+    const dialog = page.getByRole("dialog", { name: "Data coverage" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText("Faisalabad District");
+    await expect(dialog.locator(".data-coverage-location")).toContainText("Punjab");
+    await expect(dialog).toHaveCSS("border-radius", "20px");
+    await page.keyboard.press("Escape");
+    await expect(dialog).not.toBeVisible();
+    await page.goto("/team", { waitUntil: "domcontentloaded" });
+    await expect(dialog).not.toBeVisible();
+    await page.getByRole("button", { name: "Data coverage" }).click();
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Close" }).click();
+    await expect(dialog).not.toBeVisible();
+  });
+
   test("team cards open and close profile dialogs and protect external links", async ({ page }) => {
     const errors = collectConsoleErrors(page);
     await page.goto("/team", { waitUntil: "domcontentloaded" });
+    await dismissCoverageDialog(page);
 
-    for (const name of ["Ayesha", "Hasnain", "Wani", "Sharjeel", "Salman", "Ali"]) {
+    for (const name of [
+      "Ayesha Mazhar",
+      "Muhammad Hasnain",
+      "Muhammad Faheem",
+      "Sharjeel Ahmed Siddiqui",
+      "Raja Salman",
+      "Syed Ali Hasnain Zaidi",
+    ]) {
       await expect(page.getByRole("heading", { name, level: 3 })).toBeVisible();
     }
 
@@ -138,7 +198,7 @@ test.describe("production route smoke checks", () => {
     await trigger.click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole("heading", { name: "Ayesha's profile" })).toBeVisible();
+    await expect(dialog.getByRole("heading", { name: "Ayesha Mazhar's profile" })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(dialog).not.toBeVisible();
     await expect(trigger).toBeFocused();
@@ -146,14 +206,18 @@ test.describe("production route smoke checks", () => {
     const salmanCard = page.locator(".team-member-card").filter({
       has: page.getByRole("heading", { name: "Salman", level: 3 }),
     });
-    const cardLink = salmanCard.locator(".team-card-actions a");
+    const cardLink = salmanCard.locator(
+      '.team-card-actions a[href="https://github.com/raja-salman-hq"]',
+    );
     await expect(cardLink).toHaveCount(1);
     await expect(cardLink).toHaveAttribute("href", "https://github.com/raja-salman-hq");
     await expect(cardLink).toHaveAttribute("target", "_blank");
     await expect(cardLink).toHaveAttribute("rel", "noopener noreferrer");
 
     await salmanCard.getByRole("button", { name: "View profile" }).click();
-    const dialogLink = page.getByRole("dialog").locator("a[href^='https://']");
+    const dialogLink = page
+      .getByRole("dialog")
+      .locator('a[href="https://github.com/raja-salman-hq"]');
     await expect(dialogLink).toHaveCount(1);
     await expect(dialogLink).toHaveAttribute("target", "_blank");
     await expect(dialogLink).toHaveAttribute("rel", "noopener noreferrer");
@@ -164,6 +228,7 @@ test.describe("production route smoke checks", () => {
   test("primary navigation reaches each main page", async ({ page }) => {
     await stubBasemap(page);
     await page.goto("/", { waitUntil: "domcontentloaded" });
+    await dismissCoverageDialog(page);
 
     for (const route of [
       { name: "Explore", path: "/explore" },
@@ -219,9 +284,13 @@ test.describe("production route smoke checks", () => {
 
   test("hotspot selection updates the selected region on desktop and mobile", async ({ page }) => {
     await stubBasemap(page);
-    await page.goto("/explore?variable=air_temperature&region=punjab", {
+    const exploreUrl = realDataMode
+      ? "/explore?variable=land_surface_temperature&province=punjab&area=faisalabad"
+      : "/explore?variable=air_temperature&region=punjab";
+    await page.goto(exploreUrl, {
       waitUntil: "domcontentloaded",
     });
+    await dismissCoverageDialog(page);
     const hotspot = page.locator('.hotspot-item:not([aria-current="true"])').first();
     await expect(hotspot).toBeVisible();
     const regionLabel = await hotspot.locator(".hotspot-main strong").textContent();
@@ -231,9 +300,10 @@ test.describe("production route smoke checks", () => {
     await expect(page.locator(".trend-chart-content h3")).toContainText(regionLabel ?? "");
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/explore?variable=air_temperature&region=punjab", {
+    await page.goto(exploreUrl, {
       waitUntil: "domcontentloaded",
     });
+    await dismissCoverageDialog(page, false);
     await page.getByRole("button", { name: "Filters" }).click();
     const mobileSelect = page.locator(".mobile-insights-heading select");
     const previousRegion = await mobileSelect.inputValue();
@@ -243,8 +313,86 @@ test.describe("production route smoke checks", () => {
     await mobileHotspot.click();
     const selectedMobileHotspot = page.locator('.explore-filters-panel .hotspot-item[aria-current="true"]');
     await expect(selectedMobileHotspot).toContainText(mobileRegionLabel ?? "");
-    await expect(mobileSelect).not.toHaveValue(previousRegion);
+    if (realDataMode) {
+      await expect(page.getByLabel("Environmental variable")).toHaveValue("precipitation");
+    } else {
+      await expect(mobileSelect).not.toHaveValue(previousRegion);
+    }
     expect(mobileRegionLabel).toBeTruthy();
+  });
+
+  test("real pilot map, indicators, compare, exports, Urdu and mobile flow", async ({ page }) => {
+    test.skip(!realDataMode, "This flow is exercised with NEXT_PUBLIC_USE_MOCK=false.");
+    await stubBasemap(page);
+    await page.goto("/explore?province=pakistan", { waitUntil: "domcontentloaded" });
+    await dismissCoverageDialog(page);
+    await expect(page.locator(".data-status-badge")).toContainText("Draft data");
+
+    const regionSelect = page.locator("details.map-region-panel select");
+    await regionSelect.selectOption("punjab");
+    await expect(regionSelect).toHaveValue("punjab");
+    await expect(page).not.toHaveURL(/area=punjab/);
+    const marker = page.getByRole("button", { name: "Faisalabad, data available" });
+    await expect(marker).toBeVisible();
+    await marker.click();
+    await expect(page.locator(".map-breadcrumb")).toContainText("Faisalabad");
+
+    await page.locator(".map-breadcrumb").getByRole("button", { name: "Punjab" }).click();
+    await regionSelect.selectOption("faisalabad");
+    await expect(regionSelect).toHaveValue("faisalabad");
+    await expect(page.locator(".trend-chart-content h3").first()).toContainText("Faisalabad");
+    await expect(page.locator(".trend-summary-card").first()).toContainText(
+      "Trend statistics not available yet",
+    );
+
+    for (const variable of ["land_surface_temperature", "precipitation", "vegetation_index"]) {
+      await page.getByLabel("Environmental variable").selectOption(variable);
+      await expect(page.locator(".trend-chart-plot svg").first()).toBeVisible();
+      if (variable === "land_surface_temperature") {
+        await expect(page.locator(".trend-resolution-control")).toHaveCount(0);
+      }
+      if (variable === "precipitation" || variable === "vegetation_index") {
+        await expect(page.locator(".trend-resolution-control select")).toBeVisible();
+      }
+      if (variable === "precipitation") {
+        await page.locator(".trend-view-toggle button").nth(1).click();
+        await expect(page.locator(".trend-data-table tbody tr")).toHaveCount(24);
+        await expect(page.locator(".trend-data-table thead")).toContainText("Valid months");
+        await page.locator(".trend-resolution-control select").selectOption("monthly");
+        await expect(page.locator(".trend-data-table tbody tr")).toHaveCount(288);
+        await page.locator(".trend-resolution-control select").selectOption("yearly");
+        await page.locator(".trend-view-toggle button").first().click();
+      }
+    }
+
+    await page.getByRole("navigation", { name: "Main navigation" })
+      .getByRole("link", { name: "Compare" })
+      .click();
+    await expect(page.locator(".area-small-multiple-card")).toHaveCount(3);
+    await expect(page.locator(".compare-heading .eyebrow")).toContainText("Faisalabad");
+    await expect(page.locator(".area-small-multiple-heading h2")).toHaveText([
+      "Land surface temperature",
+      "Precipitation",
+      "Vegetation index",
+    ]);
+    const firstExport = page.locator(".area-small-multiple-heading").first();
+    await firstExport.locator("summary").click();
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      firstExport.getByRole("button", { name: "Download visible data as CSV" }).click(),
+    ]);
+    expect(download.suggestedFilename()).toContain("faisalabad");
+    const [pngDownload] = await Promise.all([
+      page.waitForEvent("download"),
+      firstExport.getByRole("button", { name: "Download chart as PNG" }).click(),
+    ]);
+    expect(pngDownload.suggestedFilename()).toContain("faisalabad");
+
+    await page.locator(".language-button").click();
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await page.setViewportSize({ width: 390, height: 844 });
+    const pageWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+    expect(pageWidth).toBeLessThanOrEqual(391);
   });
 
   test("landing stays within mobile and desktop viewports in English and Urdu", async ({ page }) => {
@@ -253,7 +401,8 @@ test.describe("production route smoke checks", () => {
       await page.setViewportSize({ width, height: 1000 });
       for (const language of ["en", "ur"] as const) {
         await page.goto("/?language=" + language, { waitUntil: "domcontentloaded" });
-        await expect(page.locator(".home-variable-card")).toHaveCount(7);
+        await dismissCoverageDialog(page, width === viewports[0] && language === "en");
+        await expect(page.locator(".home-variable-card")).toHaveCount(realDataMode ? 3 : 7);
         await expect(page.locator("html")).toHaveAttribute("dir", language === "ur" ? "rtl" : "ltr");
 
         const layout = await page.evaluate(() => ({
@@ -291,10 +440,13 @@ test.describe("WCAG 2.1 AA accessibility scans", () => {
           await page.goto(route.path + "?language=" + language + "&theme=" + theme, {
             waitUntil: "domcontentloaded",
           });
+          await dismissCoverageDialog(page);
           await expect(page.locator("main h1").first()).toBeVisible();
           await expect(page.locator("html")).toHaveAttribute("lang", language);
           await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-          await expect(page.locator(".header-actions .control-button").first()).toHaveCSS(
+          await expect(page.locator(
+            ".header-actions .control-button:not(.data-coverage-button):not(.language-button)",
+          )).toHaveCSS(
             "background-color",
             theme === "light" ? "rgb(255, 255, 255)" : "rgb(18, 27, 46)",
           );

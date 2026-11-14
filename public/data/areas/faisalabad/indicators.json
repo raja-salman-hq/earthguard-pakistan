@@ -1,0 +1,3303 @@
+{
+  "meta": {
+    "areaId": "faisalabad",
+    "areaName": "Faisalabad",
+    "provinceId": "punjab",
+    "period": {
+      "start": 2001,
+      "end": 2024
+    },
+    "status": "draft",
+    "warnings": [
+      "Annual GEE LST (data/annual/gee2024/Faisalabad_LST_Rainfall_NDVI_Annual_2001_2024.csv) vs monthly mean (data/cleaned/hasnain/MONTHLY_LST_2001-2024_FINAL.csv) differs by more than 1% in 2001 (1.01%), 2003 (1.93%), 2005 (1.06%), 2006 (1.17%), 2010 (1.17%), 2015 (2.51%), 2016 (1.10%), 2018 (2.11%), 2020 (1.44%), 2022 (1.22%), 2024 (5.12%); percentages use the preferred value as the denominator.",
+      "Annual GEE LST (data/annual/gee2024/Faisalabad_LST_Rainfall_NDVI_Annual_2001_2024.csv) vs Hasnain annual master (data/annual/hasnain/01_YEARLY_MASTER_CSV_2001-2024.csv) differs by more than 1% in 2003 (1.87%), 2005 (1.22%), 2010 (1.27%), 2015 (1.76%), 2017 (1.05%), 2018 (2.59%), 2019 (1.02%), 2020 (1.29%), 2024 (1.34%); percentages use the preferred value as the denominator.",
+      "Annual GEE rainfall (data/annual/gee2024/Faisalabad_LST_Rainfall_NDVI_Annual_2001_2024.csv) vs monthly sum (data/cleaned/hasnain/MONTHLY_RAINFALL_2001-2024_FINAL.csv) differs by more than 1% in 2001 (9.68%), 2002 (8.66%), 2003 (6.27%), 2004 (8.54%), 2005 (2.37%), 2006 (7.87%), 2007 (5.10%), 2008 (8.44%), 2009 (2.27%), 2010 (5.46%), 2011 (4.12%), 2012 (5.14%), 2013 (4.22%), 2014 (4.84%), 2015 (3.92%), 2016 (6.81%), 2017 (2.91%), 2018 (4.89%), 2019 (1.29%), 2020 (1.31%), 2021 (9.05%), 2022 (2.03%), 2023 (3.64%), 2024 (5.17%); percentages use the preferred value as the denominator.",
+      "Annual GEE rainfall (data/annual/gee2024/Faisalabad_LST_Rainfall_NDVI_Annual_2001_2024.csv) vs Hasnain annual master (data/annual/hasnain/01_YEARLY_MASTER_CSV_2001-2024.csv) differs by more than 1% in 2001 (9.68%), 2002 (8.66%), 2003 (6.27%), 2004 (8.54%), 2005 (2.37%), 2006 (7.87%), 2007 (5.10%), 2008 (8.44%), 2009 (2.27%), 2010 (5.46%), 2011 (4.12%), 2012 (5.14%), 2013 (4.22%), 2014 (4.84%), 2015 (3.92%), 2016 (6.81%), 2017 (2.91%), 2018 (4.89%), 2019 (1.29%), 2020 (1.31%), 2021 (9.05%), 2022 (2.03%), 2023 (3.64%), 2024 (5.17%); percentages use the preferred value as the denominator.",
+      "Annual GEE rainfall (data/annual/gee2024/Faisalabad_LST_Rainfall_NDVI_Annual_2001_2024.csv) vs Hasnain yearly rainfall (data/annual/hasnain/YEARLY_RAINFALL_2001-2024_FINAL.csv) differs by more than 1% in 2001 (9.68%), 2002 (8.66%), 2003 (6.27%), 2004 (8.54%), 2005 (2.37%), 2006 (7.87%), 2007 (5.10%), 2008 (8.44%), 2009 (2.27%), 2010 (5.46%), 2011 (4.12%), 2012 (5.14%), 2013 (4.22%), 2014 (4.84%), 2015 (3.92%), 2016 (6.81%), 2017 (2.91%), 2018 (4.89%), 2019 (1.29%), 2020 (1.31%), 2021 (9.05%), 2022 (2.03%), 2023 (3.64%), 2024 (5.17%); percentages use the preferred value as the denominator.",
+      "Annual GEE NDVI (data/annual/gee2024/Faisalabad_LST_Rainfall_NDVI_Annual_2001_2024.csv) vs Hasnain annual master (data/annual/hasnain/01_YEARLY_MASTER_CSV_2001-2024.csv) differs by more than 1% in 2001 (8.92%), 2002 (7.89%), 2003 (6.55%), 2004 (9.89%), 2005 (7.55%), 2006 (5.85%), 2007 (8.96%), 2008 (10.21%), 2009 (10.49%), 2010 (6.03%), 2011 (7.86%), 2012 (6.50%), 2013 (8.29%), 2014 (7.93%), 2015 (8.63%), 2016 (2.16%), 2017 (9.08%), 2018 (3.93%), 2019 (8.99%), 2020 (9.28%), 2021 (5.16%), 2022 (6.60%), 2023 (9.06%), 2024 (9.99%); percentages use the preferred value as the denominator.",
+      "Monthly NDVI (data/cleaned/ndvi/Faisalabad_NDVI_Monthly_Statistics_2024.csv) is incomplete (3 records; months 1, 2, 3 only); monthly NDVI is omitted.",
+      "NDVI metadata differs: the selected annual CSV reports MODIS/061/MOD13Q1 at 250 m, while the data-team quality report says MOD13A2 at 1000 m; verify the dataset/resolution with the team.",
+      "The preferred rainfall column is named Annual_Mean_Rainfall_mm, while the data-team quality report describes the measure as a yearly total; the published unit is mm/year per that report."
+    ]
+  },
+  "indicators": [
+    {
+      "id": "land_surface_temperature",
+      "name": "Land surface temperature",
+      "unit": "°C",
+      "monthly_unit": "°C",
+      "description": "Annual land surface temperature values for the Faisalabad pilot.",
+      "source": "data/annual/gee2024/Faisalabad_LST_Rainfall_NDVI_Annual_2001_2024.csv",
+      "monthly_source": "data/cleaned/hasnain/MONTHLY_LST_2001-2024_FINAL.csv",
+      "series": [
+        {
+          "year": 2001,
+          "value": 29.853172326323456,
+          "valid_months": 12
+        },
+        {
+          "year": 2002,
+          "value": 30.5902841986041,
+          "valid_months": 12
+        },
+        {
+          "year": 2003,
+          "value": 30.279863984972348,
+          "valid_months": 12
+        },
+        {
+          "year": 2004,
+          "value": 30.338258468854587,
+          "valid_months": 12
+        },
+        {
+          "year": 2005,
+          "value": 29.88387769514725,
+          "valid_months": 12
+        },
+        {
+          "year": 2006,
+          "value": 29.292524006755514,
+          "valid_months": 12
+        },
+        {
+          "year": 2007,
+          "value": 30.075202503683396,
+          "valid_months": 12
+        },
+        {
+          "year": 2008,
+          "value": 29.087276198287064,
+          "valid_months": 12
+        },
+        {
+          "year": 2009,
+          "value": 30.583575722915857,
+          "valid_months": 12
+        },
+        {
+          "year": 2010,
+          "value": 30.77953173155946,
+          "valid_months": 12
+        },
+        {
+          "year": 2011,
+          "value": 29.257364044892835,
+          "valid_months": 12
+        },
+        {
+          "year": 2012,
+          "value": 29.7393267718065,
+          "valid_months": 12
+        },
+        {
+          "year": 2013,
+          "value": 30.46502415407109,
+          "valid_months": 12
+        },
+        {
+          "year": 2014,
+          "value": 29.613747562133902,
+          "valid_months": 12
+        },
+        {
+          "year": 2015,
+          "value": 28.828466514113693,
+          "valid_months": 12
+        },
+        {
+          "year": 2016,
+          "value": 30.603205279938866,
+          "valid_months": 12
+        },
+        {
+          "year": 2017,
+          "value": 29.701328370059514,
+          "valid_months": 12
+        },
+        {
+          "year": 2018,
+          "value": 30.378238579590498,
+          "valid_months": 12
+        },
+        {
+          "year": 2019,
+          "value": 29.80202863932922,
+          "valid_months": 12
+        },
+        {
+          "year": 2020,
+          "value": 28.963222605254007,
+          "valid_months": 12
+        },
+        {
+          "year": 2021,
+          "value": 29.631656058337033,
+          "valid_months": 12
+        },
+        {
+          "year": 2022,
+          "value": 30.262044058145985,
+          "valid_months": 12
+        },
+        {
+          "year": 2023,
+          "value": 28.753211204711775,
+          "valid_months": 12
+        },
+        {
+          "year": 2024,
+          "value": 30.140026866378985,
+          "valid_months": 12
+        }
+      ],
+      "monthly_series": [
+        {
+          "date": "2001-01-01",
+          "value": 17.624231682214642,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-02-01",
+          "value": 23.765149478142757,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-03-01",
+          "value": 30.238419392508064,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-04-01",
+          "value": 34.88170871873383,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-05-01",
+          "value": 39.074261654373466,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-06-01",
+          "value": 35.122350455882994,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-07-01",
+          "value": 34.33879348700974,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-08-01",
+          "value": 34.276849501453725,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-09-01",
+          "value": 33.64097764788163,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-10-01",
+          "value": 31.457659193969143,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-11-01",
+          "value": 26.55874335967917,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-12-01",
+          "value": 20.87849491117657,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-01-01",
+          "value": 19.391102821064337,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-02-01",
+          "value": 23.105542856954383,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-03-01",
+          "value": 30.56429020808326,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-04-01",
+          "value": 36.4261921085851,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-05-01",
+          "value": 42.187883726760646,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-06-01",
+          "value": 36.78405799147618,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-07-01",
+          "value": 33.938578162041956,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-08-01",
+          "value": 33.428008649240724,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-09-01",
+          "value": 33.51696362832682,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-10-01",
+          "value": 29.96751212389124,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-11-01",
+          "value": 26.70120285801001,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-12-01",
+          "value": 21.008082593320783,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-01-01",
+          "value": 18.021472957103512,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-02-01",
+          "value": 20.39717435268141,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-03-01",
+          "value": 27.378853418132497,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-04-01",
+          "value": 35.26925353952536,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-05-01",
+          "value": 39.22299555332721,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-06-01",
+          "value": 38.26712509401352,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-07-01",
+          "value": 35.36973058044265,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-08-01",
+          "value": 33.96876862126751,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-09-01",
+          "value": 33.325313939066184,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-10-01",
+          "value": 30.99760667836622,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-11-01",
+          "value": 25.13316250808194,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-12-01",
+          "value": 19.003996265850443,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-01-01",
+          "value": 17.735140406666076,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-02-01",
+          "value": 23.397785134653784,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-03-01",
+          "value": 30.547669336429784,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-04-01",
+          "value": 35.684247291751916,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-05-01",
+          "value": 40.97423931984823,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-06-01",
+          "value": 35.21771847414473,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-07-01",
+          "value": 34.003245609405305,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-08-01",
+          "value": 33.514702574320225,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-09-01",
+          "value": 34.325468457651155,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-10-01",
+          "value": 29.455466577381447,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-11-01",
+          "value": 26.000262885895246,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-12-01",
+          "value": 19.606651870813444,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-01-01",
+          "value": 17.058546432765553,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-02-01",
+          "value": 19.08665775792689,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-03-01",
+          "value": 26.85368744199755,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-04-01",
+          "value": 32.92163402694401,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-05-01",
+          "value": 38.2624501035799,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-06-01",
+          "value": 40.61541418053241,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-07-01",
+          "value": 33.54841211993273,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-08-01",
+          "value": 35.05378632879002,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-09-01",
+          "value": 33.97730638500019,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-10-01",
+          "value": 31.443517797687484,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-11-01",
+          "value": 25.61448737250458,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-12-01",
+          "value": 20.374812177550318,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-01-01",
+          "value": 17.77296214390335,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-02-01",
+          "value": 23.74738198063884,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-03-01",
+          "value": 26.93326142346316,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-04-01",
+          "value": 35.65079435787161,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-05-01",
+          "value": 37.902235950756726,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-06-01",
+          "value": 36.22070423687446,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-07-01",
+          "value": 35.25626104301099,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-08-01",
+          "value": 34.48512262657191,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-09-01",
+          "value": 34.32482274004789,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-10-01",
+          "value": 30.683452579818063,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-11-01",
+          "value": 24.46925577385759,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-12-01",
+          "value": 18.17327325926611,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-01-01",
+          "value": 18.509760928655382,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-02-01",
+          "value": 21.018619844652388,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-03-01",
+          "value": 26.375581524535903,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-04-01",
+          "value": 37.80220289319641,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-05-01",
+          "value": 39.995501543800394,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-06-01",
+          "value": 40.020901130800944,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-07-01",
+          "value": 33.16664483354673,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-08-01",
+          "value": 34.68234952564424,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-09-01",
+          "value": 34.05560791428614,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-10-01",
+          "value": 32.00088420617428,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-11-01",
+          "value": 25.91758665514313,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-12-01",
+          "value": 19.890136032565024,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-01-01",
+          "value": 16.216024278570224,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-02-01",
+          "value": 21.386012832016128,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-03-01",
+          "value": 29.90262599786254,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-04-01",
+          "value": 35.84403281565443,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-05-01",
+          "value": 36.031741477210296,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-06-01",
+          "value": 33.40444862355461,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-07-01",
+          "value": 33.829566999177594,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-08-01",
+          "value": 32.42117784712421,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-09-01",
+          "value": 33.430749317165365,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-10-01",
+          "value": 31.155490354546455,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-11-01",
+          "value": 26.06002952133402,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-12-01",
+          "value": 20.073194652996758,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-01-01",
+          "value": 18.16485597793819,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-02-01",
+          "value": 22.14621335453315,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-03-01",
+          "value": 27.484860820457445,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-04-01",
+          "value": 35.56861980726696,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-05-01",
+          "value": 41.06440297148607,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-06-01",
+          "value": 40.75984011110099,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-07-01",
+          "value": 36.60095513302632,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-08-01",
+          "value": 33.73101814295332,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-09-01",
+          "value": 34.560755940992536,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-10-01",
+          "value": 31.182543558481992,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-11-01",
+          "value": 25.190557951891506,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-12-01",
+          "value": 21.13687168643704,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-01-01",
+          "value": 18.502851219506958,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-02-01",
+          "value": 21.540709904073307,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-03-01",
+          "value": 29.962261021019494,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-04-01",
+          "value": 38.509252061699335,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-05-01",
+          "value": 42.77563184319213,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-06-01",
+          "value": 39.49111087653559,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-07-01",
+          "value": 34.5044487643001,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-08-01",
+          "value": 30.767298474672444,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-09-01",
+          "value": 31.718137780885932,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-10-01",
+          "value": 30.97128531278451,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-11-01",
+          "value": 26.85976595590279,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-12-01",
+          "value": 19.43958240859251,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-01-01",
+          "value": 18.25702911669113,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-02-01",
+          "value": 20.112733767004944,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-03-01",
+          "value": 28.447802934540324,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-04-01",
+          "value": 35.110149533121366,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-05-01",
+          "value": 40.798855918561294,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-06-01",
+          "value": 35.721291947607625,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-07-01",
+          "value": 32.10916275218709,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-08-01",
+          "value": 33.11614352065665,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-09-01",
+          "value": 31.47694362049784,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-10-01",
+          "value": 31.588467538408143,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-11-01",
+          "value": 27.272001933049204,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-12-01",
+          "value": 19.779220717273425,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-01-01",
+          "value": 17.25638370696826,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-02-01",
+          "value": 20.241657969044876,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-03-01",
+          "value": 27.687941164051885,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-04-01",
+          "value": 33.468577856360724,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-05-01",
+          "value": 39.98867921059475,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-06-01",
+          "value": 41.33119015794272,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-07-01",
+          "value": 36.3576297715968,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-08-01",
+          "value": 35.564549938513295,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-09-01",
+          "value": 32.316233566882644,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-10-01",
+          "value": 28.861664467520814,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-11-01",
+          "value": 24.720746451678288,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-12-01",
+          "value": 20.368906175641403,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-01-01",
+          "value": 17.37000709004627,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-02-01",
+          "value": 20.73406346954847,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-03-01",
+          "value": 27.889903492683487,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-04-01",
+          "value": 34.28749529602719,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-05-01",
+          "value": 41.26840642854328,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-06-01",
+          "value": 39.421182709435726,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-07-01",
+          "value": 35.93202003201968,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-08-01",
+          "value": 32.88090302206626,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-09-01",
+          "value": 34.194055543826806,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-10-01",
+          "value": 31.887837984526833,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-11-01",
+          "value": 26.689793388048027,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-12-01",
+          "value": 20.70929076886544,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-01-01",
+          "value": 18.770850673598396,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-02-01",
+          "value": 20.021444876355414,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-03-01",
+          "value": 26.45119073851725,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-04-01",
+          "value": 33.59364241888455,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-05-01",
+          "value": 38.39769422856169,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-06-01",
+          "value": 38.31438311319889,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-07-01",
+          "value": 35.33487175900884,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-08-01",
+          "value": 35.27000942773828,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-09-01",
+          "value": 32.45603812659176,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-10-01",
+          "value": 30.22924804166068,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-11-01",
+          "value": 25.539656260308615,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-12-01",
+          "value": 21.720185629901366,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-01-01",
+          "value": 18.33854721126323,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-02-01",
+          "value": 20.71694070882873,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-03-01",
+          "value": 26.56064292028982,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-04-01",
+          "value": 34.25817391725068,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-05-01",
+          "value": 39.204099331019826,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-06-01",
+          "value": 37.5709854526503,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-07-01",
+          "value": 34.49108232722422,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-08-01",
+          "value": 32.880800774979036,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-09-01",
+          "value": 33.88803092878735,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-10-01",
+          "value": 30.22172538825915,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-11-01",
+          "value": 26.082939085859064,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-12-01",
+          "value": 20.41922977555523,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-01-01",
+          "value": 18.64037749658042,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-02-01",
+          "value": 22.233202611705696,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-03-01",
+          "value": 27.287270099093572,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-04-01",
+          "value": 37.20567484529015,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-05-01",
+          "value": 39.53219892593744,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-06-01",
+          "value": 36.700121986620424,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-07-01",
+          "value": 33.53450626316751,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-08-01",
+          "value": 34.75391461816238,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-09-01",
+          "value": 34.75388843073359,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-10-01",
+          "value": 30.260168881206532,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-11-01",
+          "value": 25.913849182577604,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-12-01",
+          "value": 22.37352689115555,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-01-01",
+          "value": 18.045085969009644,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-02-01",
+          "value": 22.78474314856112,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-03-01",
+          "value": 27.52443614340197,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-04-01",
+          "value": 36.09777006610643,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-05-01",
+          "value": 39.31049920830753,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-06-01",
+          "value": 36.456573321721876,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-07-01",
+          "value": 33.68209594873351,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-08-01",
+          "value": 33.01492188633935,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-09-01",
+          "value": 34.14534124586013,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-10-01",
+          "value": 30.96417895769296,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-11-01",
+          "value": 24.57601285620676,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-12-01",
+          "value": 20.891129883753187,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-01-01",
+          "value": 19.476127154613227,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-02-01",
+          "value": 22.18285793737717,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-03-01",
+          "value": 30.51891399580416,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-04-01",
+          "value": 34.69988063915986,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-05-01",
+          "value": 39.17170648000328,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-06-01",
+          "value": 36.05075708234921,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-07-01",
+          "value": 31.722102942017397,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-08-01",
+          "value": 34.32335930964424,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-09-01",
+          "value": 33.475331118793534,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-10-01",
+          "value": 30.020733415141674,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-11-01",
+          "value": 25.98835479039944,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-12-01",
+          "value": 19.228924628674257,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-01-01",
+          "value": 17.298650197263424,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-02-01",
+          "value": 19.724050912425643,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-03-01",
+          "value": 26.96769346325884,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-04-01",
+          "value": 33.85571029332215,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-05-01",
+          "value": 39.624437363927825,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-06-01",
+          "value": 39.64754019818716,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-07-01",
+          "value": 34.85321112899761,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-08-01",
+          "value": 35.471895795672985,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-09-01",
+          "value": 33.98398592106841,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-10-01",
+          "value": 30.78348718557709,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-11-01",
+          "value": 25.179298534049458,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-12-01",
+          "value": 21.43958338501334,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-01-01",
+          "value": 16.547170596540287,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-02-01",
+          "value": 22.35056607333715,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-03-01",
+          "value": 24.606366962671704,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-04-01",
+          "value": 32.780971828941674,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-05-01",
+          "value": 40.840612233408656,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-06-01",
+          "value": 36.39302330874692,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-07-01",
+          "value": 34.09408056131002,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-08-01",
+          "value": 33.71435936462286,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-09-01",
+          "value": 35.245693971261566,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-10-01",
+          "value": 31.217682306992003,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-11-01",
+          "value": 24.822855278609815,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-12-01",
+          "value": 19.936866857112726,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-01-01",
+          "value": 17.358406907956972,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-02-01",
+          "value": 23.538422737408762,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-03-01",
+          "value": 28.34656797339915,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-04-01",
+          "value": 32.204284525490365,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-05-01",
+          "value": 38.21800379352657,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-06-01",
+          "value": 36.70047170359046,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-07-01",
+          "value": 34.63263966775315,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-08-01",
+          "value": 33.561952439072755,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-09-01",
+          "value": 33.257922209613874,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-10-01",
+          "value": 31.16022347720146,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-11-01",
+          "value": 25.41720435562833,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-12-01",
+          "value": 19.710264774961395,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-01-01",
+          "value": 17.509051325865084,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-02-01",
+          "value": 21.686595365959914,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-03-01",
+          "value": 31.807563348595462,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-04-01",
+          "value": 36.76634563535514,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-05-01",
+          "value": 39.275073871508454,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-06-01",
+          "value": 37.75870561573895,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-07-01",
+          "value": 35.820798452157874,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-08-01",
+          "value": 35.66258703779463,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-09-01",
+          "value": 34.10961794239117,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-10-01",
+          "value": 31.603968530222957,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-11-01",
+          "value": 25.521458343779326,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-12-01",
+          "value": 20.05663713433712,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-01-01",
+          "value": 16.558158331903982,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-02-01",
+          "value": 22.37878384155603,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-03-01",
+          "value": 26.548248611239405,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-04-01",
+          "value": 33.620123759132,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-05-01",
+          "value": 36.291750372755274,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-06-01",
+          "value": 36.42303658938882,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-07-01",
+          "value": 34.226333874323245,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-08-01",
+          "value": 32.994176514441804,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-09-01",
+          "value": 32.83325501075386,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-10-01",
+          "value": 29.01968674486833,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-11-01",
+          "value": 23.91611809853058,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-12-01",
+          "value": 19.53419560522702,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-01-01",
+          "value": 15.643153143510538,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-02-01",
+          "value": 19.416241057173423,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-03-01",
+          "value": 26.199835789779357,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-04-01",
+          "value": 33.50061985564817,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-05-01",
+          "value": 41.710713763574205,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-06-01",
+          "value": 39.08540767545901,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-07-01",
+          "value": 33.03986666138873,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-08-01",
+          "value": 31.68459974665849,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-09-01",
+          "value": 32.45324891472154,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-10-01",
+          "value": 30.298974771398736,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-11-01",
+          "value": 22.969793289086567,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-12-01",
+          "value": 17.150205211096083,
+          "valid_months": 1
+        }
+      ],
+      "trend": null
+    },
+    {
+      "id": "precipitation",
+      "name": "Rainfall",
+      "unit": "mm/year",
+      "monthly_unit": "mm/month",
+      "description": "Annual and monthly rainfall values for the Faisalabad pilot.",
+      "source": "data/annual/gee2024/Faisalabad_LST_Rainfall_NDVI_Annual_2001_2024.csv",
+      "monthly_source": "data/cleaned/hasnain/MONTHLY_RAINFALL_2001-2024_FINAL.csv",
+      "series": [
+        {
+          "year": 2001,
+          "value": 289.9456510119374,
+          "valid_months": 12
+        },
+        {
+          "year": 2002,
+          "value": 195.60468667887838,
+          "valid_months": 12
+        },
+        {
+          "year": 2003,
+          "value": 290.6590404523362,
+          "valid_months": 12
+        },
+        {
+          "year": 2004,
+          "value": 219.51846223696623,
+          "valid_months": 12
+        },
+        {
+          "year": 2005,
+          "value": 334.53452656119066,
+          "valid_months": 12
+        },
+        {
+          "year": 2006,
+          "value": 326.7643850371702,
+          "valid_months": 12
+        },
+        {
+          "year": 2007,
+          "value": 379.67819377041627,
+          "valid_months": 12
+        },
+        {
+          "year": 2008,
+          "value": 377.90477075107657,
+          "valid_months": 12
+        },
+        {
+          "year": 2009,
+          "value": 324.3226398463771,
+          "valid_months": 12
+        },
+        {
+          "year": 2010,
+          "value": 391.76535475010496,
+          "valid_months": 12
+        },
+        {
+          "year": 2011,
+          "value": 435.4159816956414,
+          "valid_months": 12
+        },
+        {
+          "year": 2012,
+          "value": 348.3081922052423,
+          "valid_months": 12
+        },
+        {
+          "year": 2013,
+          "value": 321.92213451500135,
+          "valid_months": 12
+        },
+        {
+          "year": 2014,
+          "value": 295.9142550018805,
+          "valid_months": 12
+        },
+        {
+          "year": 2015,
+          "value": 425.791536160969,
+          "valid_months": 12
+        },
+        {
+          "year": 2016,
+          "value": 347.4470533296756,
+          "valid_months": 12
+        },
+        {
+          "year": 2017,
+          "value": 329.8965524086087,
+          "valid_months": 12
+        },
+        {
+          "year": 2018,
+          "value": 333.45115250446577,
+          "valid_months": 12
+        },
+        {
+          "year": 2019,
+          "value": 431.6953023692633,
+          "valid_months": 12
+        },
+        {
+          "year": 2020,
+          "value": 607.6089726325969,
+          "valid_months": 12
+        },
+        {
+          "year": 2021,
+          "value": 402.5970684046849,
+          "valid_months": 12
+        },
+        {
+          "year": 2022,
+          "value": 420.2133852412739,
+          "valid_months": 12
+        },
+        {
+          "year": 2023,
+          "value": 450.6463352442525,
+          "valid_months": 12
+        },
+        {
+          "year": 2024,
+          "value": 464.1655904451903,
+          "valid_months": 12
+        }
+      ],
+      "monthly_series": [
+        {
+          "date": "2001-01-01",
+          "value": 7.734308657974483,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-02-01",
+          "value": 7.69778780993736,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-03-01",
+          "value": 12.638618333003585,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-04-01",
+          "value": 7.432698006806529,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-05-01",
+          "value": 11.803239426711373,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-06-01",
+          "value": 90.62490111811933,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-07-01",
+          "value": 110.09855122756973,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-08-01",
+          "value": 40.845364210625036,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-09-01",
+          "value": 24.37436878206265,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-10-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-11-01",
+          "value": 0.014336277920212104,
+          "valid_months": 1
+        },
+        {
+          "date": "2001-12-01",
+          "value": 4.759897454837785,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-01-01",
+          "value": 7.134603974303499,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-02-01",
+          "value": 9.233670688243636,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-03-01",
+          "value": 14.127391956974048,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-04-01",
+          "value": 7.536059341181947,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-05-01",
+          "value": 14.230055412526257,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-06-01",
+          "value": 31.542202443680214,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-07-01",
+          "value": 26.69213134786745,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-08-01",
+          "value": 59.628264814216806,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-09-01",
+          "value": 32.5487748273891,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-10-01",
+          "value": 1.799386002843403,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-11-01",
+          "value": 2.6745292936161635,
+          "valid_months": 1
+        },
+        {
+          "date": "2002-12-01",
+          "value": 5.388102569481551,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-01-01",
+          "value": 10.525033759745007,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-02-01",
+          "value": 56.53802135857738,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-03-01",
+          "value": 24.26658501905053,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-04-01",
+          "value": 7.008856851598091,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-05-01",
+          "value": 7.303633456883794,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-06-01",
+          "value": 36.666203569412914,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-07-01",
+          "value": 66.04846747346402,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-08-01",
+          "value": 72.32793849267732,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-09-01",
+          "value": 25.06595430753606,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-10-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-11-01",
+          "value": 3.1190247006371776,
+          "valid_months": 1
+        },
+        {
+          "date": "2003-12-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-01-01",
+          "value": 15.892091895442716,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-02-01",
+          "value": 9.817298022898894,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-03-01",
+          "value": 6.390096602181918,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-04-01",
+          "value": 11.036003590806592,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-05-01",
+          "value": 6.2227673419226885,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-06-01",
+          "value": 66.01495137360871,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-07-01",
+          "value": 45.95180717254148,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-08-01",
+          "value": 57.328496562768436,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-09-01",
+          "value": 9.574807575458253,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-10-01",
+          "value": 2.9915842483959416,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-11-01",
+          "value": 4.140372420078723,
+          "valid_months": 1
+        },
+        {
+          "date": "2004-12-01",
+          "value": 2.908680103819814,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-01-01",
+          "value": 22.568211041484588,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-02-01",
+          "value": 42.8547520922108,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-03-01",
+          "value": 61.82957058342887,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-04-01",
+          "value": 6.910236786197745,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-05-01",
+          "value": 12.737125460971166,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-06-01",
+          "value": 31.33040680393712,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-07-01",
+          "value": 81.71087301783531,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-08-01",
+          "value": 36.356600443600804,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-09-01",
+          "value": 37.86570118542814,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-10-01",
+          "value": 2.579996409945648,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-11-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2005-12-01",
+          "value": 5.7220076178899975,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-01-01",
+          "value": 14.407556597044913,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-02-01",
+          "value": 14.981468251511908,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-03-01",
+          "value": 20.06167427531448,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-04-01",
+          "value": 10.538749429809101,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-05-01",
+          "value": 16.03652380856443,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-06-01",
+          "value": 57.04801647662404,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-07-01",
+          "value": 70.74130782358012,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-08-01",
+          "value": 77.17273349218108,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-09-01",
+          "value": 44.512253246952795,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-10-01",
+          "value": 11.800247822836882,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-11-01",
+          "value": 6.081219252422346,
+          "valid_months": 1
+        },
+        {
+          "date": "2006-12-01",
+          "value": 9.100572280824057,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-01-01",
+          "value": 5.575054883600816,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-02-01",
+          "value": 45.72869963180773,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-03-01",
+          "value": 44.462431250086496,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-04-01",
+          "value": 4.852340619451008,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-05-01",
+          "value": 11.10522392395011,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-06-01",
+          "value": 114.79745449120992,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-07-01",
+          "value": 101.81624160157756,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-08-01",
+          "value": 29.070825825828386,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-09-01",
+          "value": 36.765307031881946,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-10-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-11-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2007-12-01",
+          "value": 4.872195452600239,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-01-01",
+          "value": 29.18310390430364,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-02-01",
+          "value": 11.99098846938903,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-03-01",
+          "value": 6.227500128158581,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-04-01",
+          "value": 36.6113152639891,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-05-01",
+          "value": 30.596254977829094,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-06-01",
+          "value": 79.44978773652527,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-07-01",
+          "value": 79.65523701880821,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-08-01",
+          "value": 93.07349912187033,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-09-01",
+          "value": 33.79531580595133,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-10-01",
+          "value": 0.2991538209152144,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-11-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2008-12-01",
+          "value": 8.905662397230778,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-01-01",
+          "value": 19.553793143334065,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-02-01",
+          "value": 17.195128956474385,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-03-01",
+          "value": 35.92071343773888,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-04-01",
+          "value": 17.68332520559226,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-05-01",
+          "value": 10.863615885738422,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-06-01",
+          "value": 37.10755585906457,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-07-01",
+          "value": 70.57872132319015,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-08-01",
+          "value": 77.89959179169544,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-09-01",
+          "value": 40.450667395530175,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-10-01",
+          "value": 0.03398678439037945,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-11-01",
+          "value": 1.2047909056801567,
+          "valid_months": 1
+        },
+        {
+          "date": "2009-12-01",
+          "value": 3.1894634597198452,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-01-01",
+          "value": 7.56034618370776,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-02-01",
+          "value": 19.81934102203962,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-03-01",
+          "value": 14.28546574366334,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-04-01",
+          "value": 7.514346360966489,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-05-01",
+          "value": 9.486275434138912,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-06-01",
+          "value": 25.947188103352833,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-07-01",
+          "value": 126.57257718532652,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-08-01",
+          "value": 153.89535183516546,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-09-01",
+          "value": 45.426395114193625,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-10-01",
+          "value": 2.6360291973709065,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-11-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2010-12-01",
+          "value": 0.02759820719215701,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-01-01",
+          "value": 6.346638469637888,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-02-01",
+          "value": 34.24857657316213,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-03-01",
+          "value": 9.393630837122865,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-04-01",
+          "value": 16.974741183877686,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-05-01",
+          "value": 9.63001205740413,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-06-01",
+          "value": 78.85294476799405,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-07-01",
+          "value": 124.46541923073033,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-08-01",
+          "value": 93.33228031322847,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-09-01",
+          "value": 80.12277179981415,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-10-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-11-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2011-12-01",
+          "value": 0.004595539536567261,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-01-01",
+          "value": 10.22087639366222,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-02-01",
+          "value": 13.336917451184487,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-03-01",
+          "value": 10.409737220742059,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-04-01",
+          "value": 29.36887437313125,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-05-01",
+          "value": 6.440235367623019,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-06-01",
+          "value": 18.208962172569834,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-07-01",
+          "value": 73.16829537945566,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-08-01",
+          "value": 72.74257507903246,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-09-01",
+          "value": 109.77377321216716,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-10-01",
+          "value": 13.190852924733809,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-11-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2012-12-01",
+          "value": 9.353255454467444,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-01-01",
+          "value": 9.148749417974106,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-02-01",
+          "value": 51.67283615920746,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-03-01",
+          "value": 20.475748203589806,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-04-01",
+          "value": 15.901090618600795,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-05-01",
+          "value": 3.121952944389407,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-06-01",
+          "value": 67.02333885157235,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-07-01",
+          "value": 56.572276602217244,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-08-01",
+          "value": 81.00803878461814,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-09-01",
+          "value": 20.58176420110087,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-10-01",
+          "value": 6.604067036648109,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-11-01",
+          "value": 3.4068542383887848,
+          "valid_months": 1
+        },
+        {
+          "date": "2013-12-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-01-01",
+          "value": 14.793635410645075,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-02-01",
+          "value": 12.328236531962624,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-03-01",
+          "value": 37.15587836424302,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-04-01",
+          "value": 32.68993346844662,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-05-01",
+          "value": 21.181559677725545,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-06-01",
+          "value": 37.41503295619229,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-07-01",
+          "value": 64.21699013825936,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-08-01",
+          "value": 28.124234294082374,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-09-01",
+          "value": 62.08634583799815,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-10-01",
+          "value": 0.1826818557184088,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-11-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2014-12-01",
+          "value": 0.07283208878728015,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-01-01",
+          "value": 9.844446106028167,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-02-01",
+          "value": 36.081068364801574,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-03-01",
+          "value": 78.13704933876062,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-04-01",
+          "value": 12.207463674930175,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-05-01",
+          "value": 11.693151401529907,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-06-01",
+          "value": 27.05954524951117,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-07-01",
+          "value": 108.8380135489984,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-08-01",
+          "value": 82.2593752896545,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-09-01",
+          "value": 37.11675019887001,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-10-01",
+          "value": 4.349788759065923,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-11-01",
+          "value": 0.26387698630214484,
+          "valid_months": 1
+        },
+        {
+          "date": "2015-12-01",
+          "value": 1.244256925381429,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-01-01",
+          "value": 9.963542615139318,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-02-01",
+          "value": 6.360926508915304,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-03-01",
+          "value": 51.08590671630305,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-04-01",
+          "value": 11.001434689958508,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-05-01",
+          "value": 21.03186126688932,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-06-01",
+          "value": 55.97449501818992,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-07-01",
+          "value": 103.43094155105115,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-08-01",
+          "value": 95.60546129975972,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-09-01",
+          "value": 14.731455966805163,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-10-01",
+          "value": 1.7009360747167823,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-11-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2016-12-01",
+          "value": 0.23407402730528715,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-01-01",
+          "value": 24.079906432885235,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-02-01",
+          "value": 14.335669326998433,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-03-01",
+          "value": 18.17440552520672,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-04-01",
+          "value": 15.705844862502714,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-05-01",
+          "value": 11.363745252735976,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-06-01",
+          "value": 92.77700891123946,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-07-01",
+          "value": 78.56615654616465,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-08-01",
+          "value": 41.2991040231261,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-09-01",
+          "value": 34.92141532247149,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-10-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-11-01",
+          "value": 0.9927056567753193,
+          "valid_months": 1
+        },
+        {
+          "date": "2017-12-01",
+          "value": 7.2742936304132,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-01-01",
+          "value": 4.819675507945077,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-02-01",
+          "value": 15.419595661657363,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-03-01",
+          "value": 21.015236482388627,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-04-01",
+          "value": 11.041167640969721,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-05-01",
+          "value": 14.080758152361936,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-06-01",
+          "value": 95.11183681875838,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-07-01",
+          "value": 117.72058027769643,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-08-01",
+          "value": 39.14835103769212,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-09-01",
+          "value": 24.753699578589497,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-10-01",
+          "value": 0.864741633536295,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-11-01",
+          "value": 2.856572148703258,
+          "valid_months": 1
+        },
+        {
+          "date": "2018-12-01",
+          "value": 2.925797138652936,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-01-01",
+          "value": 21.990655744735207,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-02-01",
+          "value": 45.609951002344324,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-03-01",
+          "value": 33.27031615426933,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-04-01",
+          "value": 35.81032438182088,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-05-01",
+          "value": 23.346066573495243,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-06-01",
+          "value": 39.517019636260756,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-07-01",
+          "value": 98.13467238320563,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-08-01",
+          "value": 61.834361953050994,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-09-01",
+          "value": 38.59679618096449,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-10-01",
+          "value": 13.92983121787507,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-11-01",
+          "value": 7.229188190871673,
+          "valid_months": 1
+        },
+        {
+          "date": "2019-12-01",
+          "value": 6.875523328861785,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-01-01",
+          "value": 28.62940767937713,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-02-01",
+          "value": 16.958733673878225,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-03-01",
+          "value": 91.28632555488906,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-04-01",
+          "value": 28.689274267575534,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-05-01",
+          "value": 20.425478369118153,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-06-01",
+          "value": 80.4809744465627,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-07-01",
+          "value": 119.13302468626246,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-08-01",
+          "value": 159.835675932446,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-09-01",
+          "value": 55.139699950675215,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-10-01",
+          "value": 1.239682636243422,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-11-01",
+          "value": 4.473687960064191,
+          "valid_months": 1
+        },
+        {
+          "date": "2020-12-01",
+          "value": 9.264093202376326,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-01-01",
+          "value": 23.312711961364514,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-02-01",
+          "value": 5.446078345429899,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-03-01",
+          "value": 38.77629767790772,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-04-01",
+          "value": 13.730329753582584,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-05-01",
+          "value": 14.1269598077515,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-06-01",
+          "value": 28.52434603102501,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-07-01",
+          "value": 174.6230078621123,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-08-01",
+          "value": 43.98573478837294,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-09-01",
+          "value": 89.1761323159947,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-10-01",
+          "value": 3.9362265423083356,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-11-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2021-12-01",
+          "value": 3.413003957353809,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-01-01",
+          "value": 52.74985234086676,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-02-01",
+          "value": 10.571171425748476,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-03-01",
+          "value": 18.636967106762885,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-04-01",
+          "value": 0.9116856650511025,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-05-01",
+          "value": 2.6726086767970174,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-06-01",
+          "value": 52.10046575195738,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-07-01",
+          "value": 182.76021053001972,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-08-01",
+          "value": 69.25110846431896,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-09-01",
+          "value": 35.35820836761679,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-10-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-11-01",
+          "value": 3.271792983103415,
+          "valid_months": 1
+        },
+        {
+          "date": "2022-12-01",
+          "value": 0.45149385175221124,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-01-01",
+          "value": 12.248772370019285,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-02-01",
+          "value": 9.986991444731645,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-03-01",
+          "value": 47.369953281545655,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-04-01",
+          "value": 14.799345723922888,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-05-01",
+          "value": 37.255823874975626,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-06-01",
+          "value": 54.53556609242669,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-07-01",
+          "value": 153.2617202335589,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-08-01",
+          "value": 38.66709738309364,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-09-01",
+          "value": 78.79960175676739,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-10-01",
+          "value": 14.602219840627075,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-11-01",
+          "value": 4.223750922283833,
+          "valid_months": 1
+        },
+        {
+          "date": "2023-12-01",
+          "value": 1.3144195891569266,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-01-01",
+          "value": 6.844527249423276,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-02-01",
+          "value": 15.741804009306703,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-03-01",
+          "value": 47.852237756466224,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-04-01",
+          "value": 13.630376592658575,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-05-01",
+          "value": 12.786745027640901,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-06-01",
+          "value": 29.05273953745265,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-07-01",
+          "value": 140.2875658558686,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-08-01",
+          "value": 170.7487817314276,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-09-01",
+          "value": 47.83337601132579,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-10-01",
+          "value": 3.3524134612647987,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-11-01",
+          "value": 0,
+          "valid_months": 1
+        },
+        {
+          "date": "2024-12-01",
+          "value": 0.03862319499953616,
+          "valid_months": 1
+        }
+      ],
+      "trend": null
+    },
+    {
+      "id": "vegetation_index",
+      "name": "NDVI",
+      "unit": "unitless",
+      "description": "Annual unitless NDVI values for the Faisalabad pilot.",
+      "source": "data/annual/gee2024/Faisalabad_LST_Rainfall_NDVI_Annual_2001_2024.csv",
+      "series": [
+        {
+          "year": 2001,
+          "value": 0.406403986419831,
+          "valid_months": null
+        },
+        {
+          "year": 2002,
+          "value": 0.3959498845173036,
+          "valid_months": null
+        },
+        {
+          "year": 2003,
+          "value": 0.40295573122914263,
+          "valid_months": null
+        },
+        {
+          "year": 2004,
+          "value": 0.41776554559362167,
+          "valid_months": null
+        },
+        {
+          "year": 2005,
+          "value": 0.4194305933370864,
+          "valid_months": null
+        },
+        {
+          "year": 2006,
+          "value": 0.40900349461737706,
+          "valid_months": null
+        },
+        {
+          "year": 2007,
+          "value": 0.43577562165318057,
+          "valid_months": null
+        },
+        {
+          "year": 2008,
+          "value": 0.4103542626809373,
+          "valid_months": null
+        },
+        {
+          "year": 2009,
+          "value": 0.4133586588403838,
+          "valid_months": null
+        },
+        {
+          "year": 2010,
+          "value": 0.40813042156370444,
+          "valid_months": null
+        },
+        {
+          "year": 2011,
+          "value": 0.4499313143031362,
+          "valid_months": null
+        },
+        {
+          "year": 2012,
+          "value": 0.4057632298387237,
+          "valid_months": null
+        },
+        {
+          "year": 2013,
+          "value": 0.4327697534774639,
+          "valid_months": null
+        },
+        {
+          "year": 2014,
+          "value": 0.42378402202591947,
+          "valid_months": null
+        },
+        {
+          "year": 2015,
+          "value": 0.43871908927667636,
+          "valid_months": null
+        },
+        {
+          "year": 2016,
+          "value": 0.4174979257558827,
+          "valid_months": null
+        },
+        {
+          "year": 2017,
+          "value": 0.43367433435449665,
+          "valid_months": null
+        },
+        {
+          "year": 2018,
+          "value": 0.39494620224170096,
+          "valid_months": null
+        },
+        {
+          "year": 2019,
+          "value": 0.4538892120559342,
+          "valid_months": null
+        },
+        {
+          "year": 2020,
+          "value": 0.4714611274814721,
+          "valid_months": null
+        },
+        {
+          "year": 2021,
+          "value": 0.4190308958828912,
+          "valid_months": null
+        },
+        {
+          "year": 2022,
+          "value": 0.42814979506103146,
+          "valid_months": null
+        },
+        {
+          "year": 2023,
+          "value": 0.45142130436253075,
+          "valid_months": null
+        },
+        {
+          "year": 2024,
+          "value": 0.44847936040547537,
+          "valid_months": null
+        }
+      ],
+      "trend": null
+    }
+  ]
+}

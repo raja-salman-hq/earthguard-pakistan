@@ -63,6 +63,14 @@ data/raw_exports/*
 *.zip
 *.mp4
 *.mov
+# raw GIS bundles; previously tracked team inputs remain tracked
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.gpkg
+*.gdb/
 .venv/
 __pycache__/
 .ipynb_checkpoints/

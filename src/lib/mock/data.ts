@@ -88,6 +88,7 @@ const regionNames: Record<RegionId, string> = {
   "gilgit-baltistan": "Gilgit-Baltistan",
   "azad-kashmir": "Azad Kashmir",
   islamabad: "Islamabad",
+  faisalabad: "Faisalabad",
 };
 
 const regionIds: RegionId[] = [
@@ -162,7 +163,23 @@ const syntheticModels: Record<
   },
 };
 
-const syntheticTrends: Record<VariableId, TrendResponse> = {
+type SyntheticTrend = TrendResponse &
+  Required<
+    Pick<
+      TrendResponse,
+      | "slope"
+      | "unit"
+      | "pValue"
+      | "significant"
+      | "direction"
+      | "changeTotal"
+      | "changePercent"
+      | "confidence"
+      | "summary"
+    >
+  >;
+
+const syntheticTrends: Record<VariableId, SyntheticTrend> = {
   air_temperature: {
     slope: 0.035,
     unit: "°C/year",
@@ -297,7 +314,7 @@ function getSyntheticValue(
 ): number {
   const model = syntheticModels[variable];
   const yearIndex = year - 2000;
-  const regionIndex = regionIds.indexOf(region);
+  const regionIndex = Math.max(0, regionIds.indexOf(region));
   const seasonal = model.amplitude * Math.sin(((month - 1) / 12) * 2 * Math.PI + model.phase);
   const smallCycle = Math.sin(yearIndex * 1.7 + month * 0.9 + regionIndex) * model.amplitude * 0.025;
   const value =
