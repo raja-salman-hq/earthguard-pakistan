@@ -1,0 +1,9 @@
+EarthGuard-Pakistan - Data Quality Report
+AOI: Faisalabad
+Period: 2001-2024 (24 Years)
+LST Source: MODIS MOD11A2, 1000m, Mean: 22-45 C, Missing: 0%
+Rainfall Source: CHIRPS Daily, 5km, Yearly Total, Missing: 0%
+NDVI Source: MODIS MOD13A2, 1000m, Range -0.1 to 0.85, Missing: 0%
+Completeness: 100%
+Quality Flags: Cloud Mask Applied, Scale Factors Applied
+Checked by: Hasnain

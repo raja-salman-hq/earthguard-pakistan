@@ -1,0 +1,19 @@
+// Faisalabad NDVI 2001-2024
+var roi = ee.FeatureCollection("FAO/GAUL/2015/level2").filter(ee.Filter.eq('ADM2_NAME','Faisalabad'));
+
+var modisNDVI = ee.ImageCollection('MODIS/061/MOD13Q1')
+  .filterBounds(roi)
+  .filterDate('2001-01-01','2024-12-31')
+  .select('NDVI');
+
+var ndviClean = modisNDVI.map(function(img){
+  return img.multiply(0.0001).copyProperties(img, ['system:time_start']).rename('NDVI');
+});
+
+// Monthly mean nikal ke Export same logic se
+Export.table.toDrive({
+  collection: ndviCollection, // aapka monthly collection
+  description: 'Full_Historical_NDVI_2001-2024',
+  fileFormat: 'CSV',
+  selectors: ['year','month','NDVI']
+});

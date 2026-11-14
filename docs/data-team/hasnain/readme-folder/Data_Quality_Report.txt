@@ -1,0 +1,5 @@
+Quality Check:
+- Total Months: 288 (2001 se 2024 tak)
+- Missing Data: Zero
+- LST Range: 8°C se 48°C (Valid)
+- Cross-checked: CSV values = GEE Console values

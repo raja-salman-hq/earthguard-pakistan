@@ -1,0 +1,31 @@
+// Faisalabad LST 2001-2024
+var roi = ee.FeatureCollection("FAO/GAUL/2015/level2").filter(ee.Filter.eq('ADM2_NAME','Faisalabad'));
+
+var modis = ee.ImageCollection('MODIS/061/MOD11A2')
+  .filterBounds(roi)
+  .filterDate('2001-01-01','2024-12-31')
+  .select(['LST_Day_1km','QC_Day']);
+
+var lstClean = modis.map(function(img){
+  var qa = img.select('QC_Day');
+  var mask = qa.bitwiseAnd(3).eq(0); // Good Quality Only
+  var lst = img.select('LST_Day_1km').multiply(0.02).subtract(273.15).updateMask(mask).rename('LST_C');
+  return lst.copyProperties(img, ['system:time_start']);
+});
+
+var monthlyLST = ee.List.sequence(2001, 2024).iterate(function(y, prev){
+  var yearCol = ee.List.sequence(1,12).map(function(m){
+    var start = ee.Date.fromYMD(y,m,1);
+    var filtered = lstClean.filterDate(start, start.advance(1,'month'));
+    var mean = filtered.mean().reduceRegion({reducer: ee.Reducer.mean(), geometry: roi, scale: 1000, maxPixels: 1e13}).get('LST_C');
+    return ee.Feature(null, {'year': y, 'month': m, 'LST_C': mean});
+  });
+  return ee.List(prev).cat(yearCol);
+}, ee.List([]));
+
+Export.table.toDrive({
+  collection: ee.FeatureCollection(ee.List(monthlyLST)),
+  description: 'Full_Historical_LST_2001-2024',
+  fileFormat: 'CSV',
+  selectors: ['year','month','LST_C']
+});
