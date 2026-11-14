@@ -1,0 +1,4 @@
+system:index,Composite_Dates,Mean_NDVI,Month,Original_Image_Count,QA_Valid_Image_Count,Year,.geo
+0,"2024-01-01, 2024-01-17",0.523662341772152,January,2,1,2024,"{""type"":""MultiPoint"",""coordinates"":[]}"
+1,"2024-02-02, 2024-02-18",0.6071567047067997,February,2,2,2024,"{""type"":""MultiPoint"",""coordinates"":[]}"
+2,"2024-03-05, 2024-03-21",0.5670592844300384,March,2,2,2024,"{""type"":""MultiPoint"",""coordinates"":[]}"

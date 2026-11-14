@@ -1,0 +1,5 @@
+system:index,Category,Change_Celsius,Year_2001,Year_2024,.geo
+0,Total Study Area,0.5731708180348747,31.320852246421516,31.89402306445639,"{""type"":""MultiPoint"",""coordinates"":[]}"
+1,Urban,0.9957427912427761,32.25890672902285,33.25464952026562,"{""type"":""MultiPoint"",""coordinates"":[]}"
+2,Agriculture,0.6129686748561483,31.17439804852883,31.787366723384977,"{""type"":""MultiPoint"",""coordinates"":[]}"
+3,Urban_Agriculture_Difference,0.38277411638662784,1.084508680494018,1.467282796880646,"{""type"":""MultiPoint"",""coordinates"":[]}"

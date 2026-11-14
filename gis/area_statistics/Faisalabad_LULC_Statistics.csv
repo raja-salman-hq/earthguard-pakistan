@@ -1,0 +1,9 @@
+system:index,Area_hectares,Area_km2,Category,.geo
+0,70134.6712837929,701.3467128379289,Urban_2001,"{""type"":""MultiPoint"",""coordinates"":[]}"
+1,71534.70443691789,715.3470443691789,Urban_2024,"{""type"":""MultiPoint"",""coordinates"":[]}"
+2,883984.3446365254,8839.843446365254,Agriculture_2001,"{""type"":""MultiPoint"",""coordinates"":[]}"
+3,911076.9364055264,9110.769364055264,Agriculture_2024,"{""type"":""MultiPoint"",""coordinates"":[]}"
+4,1400.033153125,14.00033153125,New_Urban_Expansion,"{""type"":""MultiPoint"",""coordinates"":[]}"
+5,8889.596697352941,88.89596697352941,Agricultural_Land_Loss,"{""type"":""MultiPoint"",""coordinates"":[]}"
+6,35982.188466354164,359.82188466354165,Agricultural_Land_Gain,"{""type"":""MultiPoint"",""coordinates"":[]}"
+7,824.981284375,8.24981284375,Agriculture_Converted_To_Urban,"{""type"":""MultiPoint"",""coordinates"":[]}"
