@@ -117,6 +117,7 @@ export function SiteFrame({ children }: Readonly<{ children: React.ReactNode }>)
             {isDemoMode && <span className="demo-badge">{messages.demoBadge}</span>}
             {!isDemoMode && statusLabel && (
               <span className={`data-status-badge is-${dataQuery.data?.meta.status}`}>
+                <span className="data-status-dot" aria-hidden="true" />
                 {statusLabel}
               </span>
             )}

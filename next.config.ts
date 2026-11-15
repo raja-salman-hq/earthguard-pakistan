@@ -8,6 +8,7 @@ if (process.env.NEXT_PUBLIC_API_URL) {
 connectSources.push(
   "https://basemaps.cartocdn.com",
   "https://tiles.basemaps.cartocdn.com",
+  "https://api.open-meteo.com",
 );
 if (process.env.NODE_ENV === "development") {
   scriptSources.push("'unsafe-eval'");

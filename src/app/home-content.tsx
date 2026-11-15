@@ -24,6 +24,7 @@ import type { Language, MessageKey } from "@/lib/i18n";
 import type { RegionId, VariableId } from "@/types/api";
 import { TeamPreview } from "@/components/team/team-preview";
 import { isDemoMode } from "@/lib/api/client";
+import { LiveNowCard } from "@/components/live/live-now-card";
 
 type DemoDirection = "increasing" | "decreasing" | "no_change";
 
@@ -51,6 +52,7 @@ type RealFact = {
   latest: number | null;
   year: number;
   status: "draft" | "verified" | "placeholder";
+  series: Array<{ year: number; value: number | null }>;
 };
 
 type HeroProvinceShape = {
@@ -103,6 +105,16 @@ function formatNumber(value: number | null): string {
     return "—";
   }
   return new Intl.NumberFormat("en", { maximumFractionDigits: 1 }).format(value);
+}
+
+function formatRealValue(id: VariableId, value: number | null): string {
+  if (value === null) return "—";
+  const maximumFractionDigits =
+    id === "land_surface_temperature" ? 2 : id === "vegetation_index" ? 4 : 1;
+  return new Intl.NumberFormat("en", {
+    minimumFractionDigits: maximumFractionDigits,
+    maximumFractionDigits,
+  }).format(value);
 }
 
 function getSparklinePoints(values: number[]): string {
@@ -316,13 +328,17 @@ export default function HomeContent({
                   <stop offset="0" stopColor="var(--primary)" stopOpacity=".15" />
                   <stop offset="1" stopColor="var(--primary)" stopOpacity="0" />
                 </radialGradient>
+                <linearGradient id="home-punjab-gradient" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stopColor="#2dd4bf" />
+                  <stop offset="1" stopColor="#0f766e" />
+                </linearGradient>
               </defs>
               <ellipse cx="260" cy="214" rx="226" ry="194" fill="url(#home-map-glow)" />
               <g className="home-province-shapes">
                 {heroMap.shapes.map((shape) => (
                   <path
                     key={shape.regionId}
-                    className={`home-province-shape${isDemoMode ? "" : " is-neutral"}`}
+                    className={`home-province-shape${isDemoMode ? "" : shape.regionId === "punjab" ? " is-punjab" : " is-coverage-neutral"}`}
                     d={shape.path}
                     data-color-step={shape.colorStep}
                   >
@@ -330,6 +346,12 @@ export default function HomeContent({
                   </path>
                 ))}
               </g>
+              {!isDemoMode && (
+                <g className="home-faisalabad-marker" aria-hidden="true">
+                  <circle cx="331" cy="214" r="13" className="home-faisalabad-marker-ring" />
+                  <circle cx="331" cy="214" r="4" className="home-faisalabad-marker-dot" />
+                </g>
+              )}
             </svg>
             <figcaption className="home-map-caption">
               <span>
@@ -362,7 +384,42 @@ export default function HomeContent({
                 </span>
               </div>
             )}
+            {!isDemoMode && (
+              <div className="home-coverage-legend" aria-label="Map coverage legend">
+                <span><i className="home-coverage-swatch is-available" />Real data available</span>
+                <span><i className="home-coverage-swatch is-coming-soon" />Coming soon</span>
+              </div>
+            )}
           </figure>
+
+          {!isDemoMode && realFacts.length > 0 && (
+            <div className="home-real-fact-cards" aria-label="Latest Faisalabad indicator values">
+              {realFacts.map((fact) => (
+                <article className="home-floating-card home-real-fact-card" key={fact.id}>
+                  <div className="home-real-fact-heading">
+                    <span className="home-floating-title">
+                      <LocalizedText
+                        english={getVariableLabel(fact.id, "en")}
+                        urdu={getVariableLabel(fact.id, "ur")}
+                      />
+                    </span>
+                    <span className={`data-status-badge is-${fact.status}`}>
+                      <span className="data-status-dot" aria-hidden="true" />
+                      {fact.status === "verified" ? messages.en.verifiedDataBadge : messages.en.draftDataBadge}
+                    </span>
+                  </div>
+                  <strong className="home-real-fact-value" dir="ltr">
+                    {formatRealValue(fact.id, fact.latest)} <small>{fact.unit}</small>
+                  </strong>
+                  <span className="home-example-value-context">Latest annual value · {fact.year}</span>
+                  <svg className="home-sparkline" viewBox="0 0 168 38" role="img" aria-label={`${fact.name} annual values from ${fact.series[0]?.year ?? fact.year} to ${fact.series.at(-1)?.year ?? fact.year}`}>
+                    <polyline points={getSparklinePoints(fact.series.map((point) => point.value).filter((value): value is number => value !== null))} />
+                  </svg>
+                </article>
+              ))}
+            </div>
+          )}
+          {!isDemoMode && <LiveNowCard />}
 
           {isDemoMode && heroTrend && (
           <article className="home-floating-card home-floating-trend">
@@ -503,9 +560,11 @@ export default function HomeContent({
               />
             </p>
           </div>
-          <span className="demo-badge">
-            <LocalizedText english={messages.en.homeDemoBadge} urdu={messages.ur.homeDemoBadge} />
-          </span>
+          {isDemoMode && (
+            <span className="demo-badge">
+              <LocalizedText english={messages.en.homeDemoBadge} urdu={messages.ur.homeDemoBadge} />
+            </span>
+          )}
         </div>
         <div className="home-variable-grid">
           {variables.map((variable) => {

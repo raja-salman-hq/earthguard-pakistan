@@ -64,12 +64,14 @@ export const CoverageDialog = forwardRef<HTMLDialogElement, CoverageDialogProps>
       }}
     >
       <div className="coverage-dialog-content" lang={language} dir={language === "ur" ? "rtl" : "ltr"}>
-        <div className="coverage-dialog-icon" aria-hidden="true">
-          {variant === "welcome" ? <Info size={20} /> : <MapPinOff size={20} />}
+        <div className="coverage-dialog-header">
+          <div className="coverage-dialog-icon" aria-hidden="true">
+            {variant === "welcome" ? <Info size={20} /> : <MapPinOff size={20} />}
+          </div>
+          <h2 id="coverage-dialog-title">
+            {variant === "welcome" ? messages.dataCoverageTitle : messages.noDataDialogTitle}
+          </h2>
         </div>
-        <h2 id="coverage-dialog-title">
-          {variant === "welcome" ? messages.dataCoverageTitle : messages.noDataDialogTitle}
-        </h2>
         <p id="coverage-dialog-description">
           {variant === "welcome"
             ? messages.dataCoverageText

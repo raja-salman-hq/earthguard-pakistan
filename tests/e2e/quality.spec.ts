@@ -47,6 +47,22 @@ async function stubBasemap(page: Page): Promise<void> {
   );
 }
 
+async function stubWeather(page: Page): Promise<void> {
+  await page.route("https://api.open-meteo.com/v1/forecast**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        timezone_abbreviation: "GMT+5",
+        current: {
+          temperature_2m: 31.4,
+          apparent_temperature: 34.2,
+        },
+      }),
+    }),
+  );
+}
+
 async function dismissCoverageDialog(page: Page, expectToOpen = true): Promise<void> {
   const dialog = page.locator(".data-coverage-dialog");
   const pathname = new URL(page.url()).pathname;
@@ -55,7 +71,7 @@ async function dismissCoverageDialog(page: Page, expectToOpen = true): Promise<v
     await expect(dialog).toBeVisible();
   }
   if (await dialog.isVisible()) {
-    await dialog.getByRole("button", { name: "Close" }).click();
+    await dialog.locator(".coverage-dialog-actions .control-button").click();
   }
 }
 
@@ -65,6 +81,9 @@ test.describe("production route smoke checks", () => {
       const errors = collectConsoleErrors(page);
       if (route.path === "/explore") {
         await stubBasemap(page);
+      }
+      if (route.path === "/" || route.path === "/compare") {
+        await stubWeather(page);
       }
       const response = await page.goto(route.path, { waitUntil: "domcontentloaded" });
       await dismissCoverageDialog(page);
@@ -163,13 +182,28 @@ test.describe("production route smoke checks", () => {
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   });
 
+  test("landing shows real indicator cards and mocked live weather", async ({ page }) => {
+    test.skip(!realDataMode, "Real landing data is exercised with NEXT_PUBLIC_USE_MOCK=false.");
+    await stubWeather(page);
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await dismissCoverageDialog(page);
+    await expect(page.locator(".home-real-fact-card")).toHaveCount(3);
+    await expect(page.locator(".home-real-fact-card").first()).toContainText("2024");
+    await expect(page.locator(".live-now-card")).toContainText("31.4°C");
+    await expect(page.locator(".home-page .demo-badge")).toHaveCount(0);
+  });
+
   test("data coverage dialog opens on direct entry, is dismissible once, and reopens from the header", async ({ page }) => {
+    await stubWeather(page);
     await page.goto("/explore", { waitUntil: "domcontentloaded" });
     const dialog = page.getByRole("dialog", { name: "Data coverage" });
     await expect(dialog).toBeVisible();
     await expect(dialog).toContainText("Faisalabad District");
     await expect(dialog.locator(".data-coverage-location")).toContainText("Punjab");
     await expect(dialog).toHaveCSS("border-radius", "16px");
+    const dialogBox = await dialog.boundingBox();
+    expect(dialogBox).not.toBeNull();
+    expect(Math.abs((dialogBox?.x ?? 0) + (dialogBox?.width ?? 0) / 2 - page.viewportSize()!.width / 2)).toBeLessThanOrEqual(2);
     await page.keyboard.press("Escape");
     await expect(dialog).not.toBeVisible();
     await page.goto("/team", { waitUntil: "domcontentloaded" });
@@ -203,7 +237,11 @@ test.describe("production route smoke checks", () => {
     await page.getByRole("button", { name: "Close" }).click();
     await page.locator("details.map-region-panel select").selectOption("punjab");
     await page.getByRole("button", { name: /Lahore.*No data yet/ }).click();
-    await expect(page.getByRole("dialog", { name: "Data not available yet" })).toContainText("Lahore has no data yet");
+    const noDataDialog = page.getByRole("dialog", { name: "Data not available yet" });
+    await expect(noDataDialog).toContainText("Lahore has no data yet");
+    const noDataBox = await noDataDialog.boundingBox();
+    expect(noDataBox).not.toBeNull();
+    expect(Math.abs((noDataBox?.x ?? 0) + (noDataBox?.width ?? 0) / 2 - page.viewportSize()!.width / 2)).toBeLessThanOrEqual(2);
   });
 
   test("team cards open and close profile dialogs and protect external links", async ({ page }) => {
@@ -401,6 +439,7 @@ test.describe("production route smoke checks", () => {
   test("real pilot map, indicators, compare, exports, Urdu and mobile flow", async ({ page }) => {
     test.skip(!realDataMode, "This flow is exercised with NEXT_PUBLIC_USE_MOCK=false.");
     await stubBasemap(page);
+    await stubWeather(page);
     await page.goto("/explore?province=pakistan", { waitUntil: "domcontentloaded" });
     await dismissCoverageDialog(page);
     await expect(page.locator(".data-status-badge")).toContainText("Draft data");
@@ -450,8 +489,8 @@ test.describe("production route smoke checks", () => {
     await expect(page.locator(".compare-heading .eyebrow")).toContainText("Faisalabad");
     await expect(page.locator(".area-small-multiple-heading h2")).toHaveText([
       "Land surface temperature",
-      "Precipitation",
-      "Vegetation index",
+      "Rainfall",
+      "NDVI",
     ]);
     const firstValueBeforeYearChange = await page.locator(".compare-year-card").first().locator(".compare-value-grid").innerText();
     await page.locator(".compare-year-controls select").selectOption("2023");
@@ -461,7 +500,7 @@ test.describe("production route smoke checks", () => {
     await page.getByRole("button", { name: /add another region/i }).click();
     await expect(page.getByRole("dialog")).toContainText("Comparing regions");
     await page.getByRole("dialog").getByRole("button", { name: "Close" }).click();
-    const firstExport = page.locator(".area-small-multiple-heading").first();
+    const firstExport = page.locator(".compare-heading .export-menu");
     await firstExport.locator("summary").click();
     const [download] = await Promise.all([
       page.waitForEvent("download"),
@@ -471,9 +510,11 @@ test.describe("production route smoke checks", () => {
     const csvPath = await download.path();
     expect(csvPath).not.toBeNull();
     const csv = await readFile(csvPath!, "utf8");
-    expect(csv).toContain("\uFEFF\"area\",\"indicator\",\"year\",\"month\",\"value\",\"unit\",\"valid_months\",\"source file\",\"status\"");
-    expect(csv).toContain("2001");
-    expect(csv).toContain("2024");
+    expect(csv).toContain(
+      "\uFEFF\"area\",\"indicator\",\"previous_year\",\"previous_value\",\"year\",\"value\",\"difference\",\"percent_difference\",\"unit\",\"source file\",\"status\"",
+    );
+    expect(csv).toContain("2022");
+    expect(csv).toContain("2023");
     const [pngDownload] = await Promise.all([
       page.waitForEvent("download"),
       firstExport.getByRole("button", { name: "Download chart as PNG" }).click(),
@@ -489,12 +530,15 @@ test.describe("production route smoke checks", () => {
 
   test("landing stays within mobile and desktop viewports in English and Urdu", async ({ page }) => {
     const viewports = [320, 390, 768, 1024, 1440, 1920];
+    await stubWeather(page);
     for (const width of viewports) {
       await page.setViewportSize({ width, height: 1000 });
       for (const language of ["en", "ur"] as const) {
         await page.goto("/?language=" + language, { waitUntil: "domcontentloaded" });
         await dismissCoverageDialog(page, width === viewports[0] && language === "en");
-        await expect(page.locator(".home-variable-card")).toHaveCount(realDataMode ? 3 : 7);
+        await expect(
+          page.locator('.home-section[aria-labelledby="home-variables-title"] .home-variable-card'),
+        ).toHaveCount(realDataMode ? 3 : 7);
         await expect(page.locator("html")).toHaveAttribute("dir", language === "ur" ? "rtl" : "ltr");
 
         const layout = await page.evaluate(() => ({
@@ -528,6 +572,9 @@ test.describe("WCAG 2.1 AA accessibility scans", () => {
         test(route.name + " (" + language + ", " + theme + ")", async ({ page }) => {
           if (route.path === "/explore") {
             await stubBasemap(page);
+          }
+          if (route.path === "/" || route.path === "/compare") {
+            await stubWeather(page);
           }
           await page.goto(route.path + "?language=" + language + "&theme=" + theme, {
             waitUntil: "domcontentloaded",

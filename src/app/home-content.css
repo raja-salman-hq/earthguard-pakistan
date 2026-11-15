@@ -98,6 +98,7 @@ html[dir="rtl"] .home-page a:hover .home-link-arrow {
   background: color-mix(in srgb, var(--primary) 12%, transparent);
   content: "";
   filter: blur(58px);
+  animation: home-map-breathe 7s ease-in-out infinite;
 }
 
 .home-map-stage {
@@ -142,10 +143,204 @@ html[dir="rtl"] .home-page a:hover .home-link-arrow {
 .home-province-shape[data-color-step="5"] { fill: var(--map-sequential-5); }
 .home-province-shape.is-neutral { fill: var(--map-no-data); }
 
+/* Coverage colors communicate availability only; they never encode data values. */
+.home-province-shape.is-punjab {
+  fill: url("#home-punjab-gradient");
+  filter: drop-shadow(0 0 8px rgb(34 211 166 / 18%));
+}
+
+.home-province-shape.is-coverage-neutral {
+  fill: var(--map-no-data);
+}
+
+.home-province-shape.is-coverage-neutral:nth-child(2n) { fill: #31415b; }
+.home-province-shape.is-coverage-neutral:nth-child(3n) { fill: #3a4b67; }
+.home-province-shape.is-coverage-neutral:nth-child(4n) { fill: #273852; }
+
 .home-province-shape:hover {
   filter: brightness(1.18) drop-shadow(0 0 5px color-mix(in srgb, var(--primary) 45%, transparent));
   stroke: var(--text);
   stroke-width: 2px;
+}
+
+.home-province-shape.is-punjab:hover {
+  filter: brightness(1.12) drop-shadow(0 0 13px rgb(34 211 166 / 44%));
+}
+
+.home-coverage-legend {
+  position: absolute;
+  inset-block-end: 14px;
+  inset-inline-start: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+
+.home-coverage-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.home-coverage-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.home-coverage-swatch.is-available { background: var(--primary); }
+.home-coverage-swatch.is-coming-soon { background: #34445f; }
+
+.home-faisalabad-marker-ring {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2;
+  animation: home-marker-pulse 2.4s ease-out infinite;
+}
+
+.home-faisalabad-marker-dot {
+  fill: var(--primary);
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+
+.home-real-fact-cards {
+  position: absolute;
+  inset: 20px 14px;
+  display: grid;
+  align-content: space-between;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.home-real-fact-card {
+  position: relative;
+  width: min(250px, 52%);
+  pointer-events: auto;
+  animation: home-card-float 6s ease-in-out infinite;
+}
+
+.home-real-fact-card:nth-child(2) { align-self: center; animation-delay: -2s; }
+.home-real-fact-card:nth-child(3) { align-self: end; animation-delay: -4s; }
+
+.home-real-fact-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.home-real-fact-heading .data-status-badge {
+  min-height: 26px;
+  padding-inline: 8px;
+  font-size: 9px;
+}
+
+.home-real-fact-value {
+  color: var(--text);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.home-real-fact-value small {
+  color: var(--muted);
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+.live-now-card {
+  position: absolute;
+  inset-block-end: 18px;
+  inset-inline-end: 16px;
+  z-index: 3;
+  display: grid;
+  width: min(270px, 52%);
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--cool) 34%, var(--border));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(16px);
+}
+
+.live-now-heading,
+.live-now-time,
+.live-now-attribution {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-now-heading {
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.live-now-heading > div {
+  display: grid;
+  gap: 2px;
+}
+
+.live-now-heading span:last-child,
+.live-now-weather span,
+.live-now-note,
+.live-now-attribution {
+  color: var(--muted);
+  font-size: 0.67rem;
+  line-height: 1.5;
+}
+
+.live-now-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--cool) 14%, var(--surface));
+  color: var(--cool);
+}
+
+.live-now-weather {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.live-now-weather strong {
+  color: var(--text);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.live-now-error { margin: 0; color: var(--heat) !important; }
+.live-now-note { margin: 0; }
+.live-now-attribution {
+  min-height: 44px;
+  color: var(--cool);
+}
+.live-now-attribution svg { flex: 0 0 auto; }
+.live-now-temperature-skeleton { width: 100px; height: 28px; border-radius: 7px; background: var(--surface-raised); animation: skeleton-shimmer 2.4s ease-in-out infinite; }
+.live-now-time-skeleton { width: 100%; height: 18px; border-radius: 6px; background: var(--surface-raised); animation: skeleton-shimmer 2.4s ease-in-out infinite; }
+
+@keyframes home-map-breathe {
+  0%, 100% { opacity: 0.72; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+@keyframes home-marker-pulse {
+  0% { opacity: 0.9; transform: scale(0.8); transform-origin: 331px 214px; }
+  75%, 100% { opacity: 0; transform: scale(2.2); transform-origin: 331px 214px; }
+}
+
+@keyframes home-card-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 
 .home-map-caption,
@@ -316,6 +511,14 @@ html[dir="rtl"] .home-page a:hover .home-link-arrow {
 
 .home-section {
   padding-block: 42px 32px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero-visual::before,
+  .home-real-fact-card,
+  .home-faisalabad-marker-ring {
+    animation: none;
+  }
 }
 
 .home-section-heading {
@@ -678,6 +881,29 @@ html[lang="ur"] .language-copy-ur {
 
   .home-map-stage {
     min-height: 300px;
+    grid-column: 1 / -1;
+  }
+
+  .home-real-fact-cards {
+    position: relative;
+    inset: auto;
+    grid-column: 1 / -1;
+    display: grid;
+  }
+
+  .home-real-fact-card,
+  .live-now-card {
+    position: relative;
+    inset: auto;
+    width: 100%;
+  }
+
+  .home-real-fact-card:nth-child(2),
+  .home-real-fact-card:nth-child(3) {
+    align-self: auto;
+  }
+
+  .live-now-card {
     grid-column: 1 / -1;
   }
 

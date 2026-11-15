@@ -38,7 +38,11 @@ export function YearComparisonBarChart({
   ];
 
   return (
-    <figure className="compare-bar-chart" aria-label={`${title}: ${previousYear} and ${year} values`}>
+    <figure
+      className="compare-bar-chart"
+      data-export-chart
+      aria-label={`${title}: ${previousYear} and ${year} values`}
+    >
       <figcaption>{title} <span>({unit})</span></figcaption>
       <div className="compare-bar-chart-plot" role="img" aria-label={`${title}, ${previousYear}: ${formatValue(previousValue)} ${unit}; ${year}: ${formatValue(value)} ${unit}`}>
         <ResponsiveContainer width="100%" height="100%">

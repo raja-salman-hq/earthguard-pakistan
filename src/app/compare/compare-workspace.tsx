@@ -18,6 +18,7 @@ import { getRegionLabel, getVariableLabel } from "@/lib/i18n";
 import { useUiStore } from "@/store/ui-store";
 import type { ComparisonExportRow, ExportSeries } from "@/lib/utils/data-export";
 import { requestCoverageDialog } from "@/components/ui/CoverageDialog";
+import { LiveNowCard } from "@/components/live/live-now-card";
 import { regionIdSchema } from "@/types/api";
 import type { CompareMode, RegionId, VariableId } from "@/types/api";
 
@@ -313,6 +314,7 @@ export default function CompareWorkspace() {
             />
           </div>
         </header>
+        <LiveNowCard />
         <section className="compare-toolbar" aria-label={messages.compareYearSelector}>
           <div className="compare-year-controls">
             <button type="button" aria-label={messages.comparePreviousYear} onClick={() => setCompareYear((year) => Math.max(2002, year - 1))} disabled={compareYear === 2002}>

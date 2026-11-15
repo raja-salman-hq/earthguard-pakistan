@@ -321,6 +321,7 @@ html[dir="rtl"] .map-floating-panel > summary::after {
 
 .header-actions {
   gap: 9px;
+  flex-wrap: wrap;
 }
 
 .demo-badge {
@@ -337,6 +338,48 @@ html[dir="rtl"] .map-floating-panel > summary::after {
   font-weight: 700;
   letter-spacing: 0.08em;
   white-space: nowrap;
+}
+
+.data-status-badge {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 11px;
+  border: 1px solid color-mix(in srgb, var(--primary) 36%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 9%, var(--surface));
+  color: var(--text);
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.data-status-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.data-status-badge.is-verified {
+  border-color: color-mix(in srgb, var(--cool) 42%, var(--border));
+}
+
+.data-status-badge.is-verified .data-status-dot {
+  background: var(--cool);
+}
+
+.data-status-badge.is-placeholder,
+.data-status-badge.is-error {
+  border-color: color-mix(in srgb, var(--heat) 48%, var(--border));
+}
+
+.data-status-badge.is-placeholder .data-status-dot,
+.data-status-badge.is-error .data-status-dot {
+  background: var(--heat);
 }
 
 .control-button {
@@ -363,7 +406,82 @@ html[dir="rtl"] .map-floating-panel > summary::after {
   flex: 1;
 }
 
+.live-now-card {
+  display: grid;
+  width: min(320px, 100%);
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--cool) 34%, var(--border));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(16px);
+}
+
+.live-now-heading,
+.live-now-time,
+.live-now-attribution {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-now-heading {
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.live-now-heading > div {
+  display: grid;
+  gap: 2px;
+}
+
+.live-now-heading span:last-child,
+.live-now-weather span,
+.live-now-note,
+.live-now-attribution {
+  color: var(--muted);
+  font-size: 0.67rem;
+  line-height: 1.5;
+}
+
+.live-now-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--cool) 14%, var(--surface));
+  color: var(--cool);
+}
+
+.live-now-weather {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.live-now-weather strong {
+  color: var(--text);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.live-now-error { margin: 0; color: var(--heat) !important; }
+.live-now-note { margin: 0; }
+.live-now-attribution {
+  min-height: 44px;
+  color: var(--cool);
+}
+.live-now-attribution svg { flex: 0 0 auto; }
+.live-now-temperature-skeleton { width: 100px; height: 28px; border-radius: 7px; background: var(--surface-raised); animation: skeleton-shimmer 2.4s ease-in-out infinite; }
+.live-now-time-skeleton { width: 100%; height: 18px; border-radius: 6px; background: var(--surface-raised); animation: skeleton-shimmer 2.4s ease-in-out infinite; }
+
 .data-coverage-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
   width: min(560px, calc(100vw - 32px));
   max-width: calc(100vw - 32px);
   max-height: calc(100dvh - 32px);
@@ -405,8 +523,16 @@ html[dir="rtl"] .map-floating-panel > summary::after {
 
 .coverage-dialog-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.coverage-dialog-actions > button {
+  min-height: 44px;
+  align-items: center;
+  padding-inline: 20px;
+  border-radius: 10px;
 }
 
 .coverage-indicator-chips,
@@ -442,7 +568,13 @@ html[dir="rtl"] .map-floating-panel > summary::after {
 .data-coverage-dialog-content {
   display: grid;
   gap: 16px;
-  padding: clamp(22px, 5vw, 36px);
+  padding: 24px clamp(22px, 5vw, 28px) 28px;
+}
+
+.coverage-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .data-coverage-eyebrow {
@@ -4658,26 +4790,38 @@ html[lang="ur"] .compare-page :is(h1, h2) {
 
   @media (max-width: 640px) {
     .data-coverage-dialog {
-      width: 100%;
-      max-width: none;
-      max-height: min(86dvh, 640px);
-      margin: auto 0 0;
-      border-radius: 16px 16px 0 0;
+      width: min(520px, calc(100vw - 32px));
+      max-width: calc(100vw - 32px);
+      max-height: calc(100dvh - 32px);
+      margin: auto;
+      border-radius: 16px;
     }
 
     .coverage-dialog-actions {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .coverage-dialog-actions > button {
+      width: auto;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .coverage-dialog-actions {
       display: grid;
+      gap: 12px;
     }
 
     .coverage-dialog-actions > button {
       width: 100%;
     }
   }
+}
 
-  @media (prefers-reduced-motion: reduce) {
-    .coverage-dialog {
-      animation: none;
-    }
+@media (prefers-reduced-motion: reduce) {
+  .coverage-dialog {
+    animation: none;
   }
 }
 

@@ -24,7 +24,8 @@ type ExportStatus = "png" | "csv" | "link" | "error" | null;
 export function ExportMenu({ metadata, series, chartId, comparisonRows }: ExportMenuProps) {
   const messages = useMessages();
   const [status, setStatus] = useState<ExportStatus>(null);
-  const hasData = series.some((item) => item.points.length > 0);
+  const hasData =
+    (comparisonRows?.length ?? 0) > 0 || series.some((item) => item.points.length > 0);
   const exportMetadata: ExportMetadata = { ...metadata, isDemo: isDemoMode };
 
   async function exportPng() {

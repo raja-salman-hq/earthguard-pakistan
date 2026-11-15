@@ -48,6 +48,10 @@ export default function HomePage() {
             latest: point?.value ?? null,
             year: point?.year ?? 2024,
             status: areaData.meta.status === "verified" ? "verified" : "draft",
+            series: indicator.series.map((seriesPoint) => ({
+              year: seriesPoint.year,
+              value: seriesPoint.value,
+            })),
           };
         })}
       />
