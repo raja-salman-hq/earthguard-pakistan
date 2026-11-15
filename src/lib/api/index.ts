@@ -72,6 +72,7 @@ export function getAreas() {
 }
 
 export { getAreaIndicators };
+export { getAreaStatistics } from "./area-statistics";
 
 export function getAreaStudyArea(areaId: "faisalabad") {
   return getAreaStudyGeometry(areaId);

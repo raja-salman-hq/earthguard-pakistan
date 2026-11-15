@@ -1,3 +1,5 @@
+import type { AreaMaps } from "@/types/area-data";
+
 export type ExportPoint = {
   date: string;
   value: number | null;
@@ -62,7 +64,6 @@ function downloadBlob(blob: Blob, fileName: string): void {
   anchor.href = url;
   anchor.download = fileName;
   anchor.click();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 export function downloadSeriesCsv(
@@ -223,6 +224,97 @@ export function downloadComparisonCsv(rows: ComparisonExportRow[], fileName: str
   downloadBlob(new Blob([content], { type: "text/csv;charset=utf-8" }), `${safeFileName(fileName)}.csv`);
 }
 
+export function downloadIndicatorOverTimeCsv(
+  series: ExportSeries[],
+  fileName: string,
+  source: string,
+  status: string,
+  area: string,
+): void {
+  const byYear = new Map<number, Array<number | string>>();
+  for (const [index, item] of series.entries()) {
+    for (const point of item.points) {
+      const year = Number(point.date.slice(0, 4));
+      const values = byYear.get(year) ?? Array.from({ length: 9 }, () => "");
+      values[index] = point.value ?? "";
+      values[index + 3] = item.unit;
+      values[index + 6] = point.valid_months ?? "";
+      byYear.set(year, values);
+    }
+  }
+  const rows: Array<Array<string | number>> = [
+    ["year", "LST", "rainfall", "NDVI", "LST_unit", "rainfall_unit", "NDVI_unit", "LST_valid_months", "rainfall_valid_months", "NDVI_valid_months", "area", "source", "status"],
+    ...Array.from(byYear.entries()).sort(([left], [right]) => left - right).map(([year, values]) => [year, ...values, area, source, status]),
+  ];
+  const content = `\uFEFF${rows.map((row) => row.map(quoteCsvCell).join(",")).join("\r\n")}`;
+  downloadBlob(new Blob([content], { type: "text/csv;charset=utf-8" }), `${safeFileName(fileName)}.csv`);
+}
+
+export function downloadMapStatsCsv(maps: AreaMaps, fileName: string, area: string, status: string): void {
+  const rows: Array<Array<string | number>> = [
+    ["area", "map", "year", "min", "mean", "max", "unit", "source file", "status"],
+    ["Faisalabad", "Land surface temperature", 2001, maps.images.lst_2001.stats.min, maps.images.lst_2001.stats.mean, maps.images.lst_2001.stats.max, maps.images.lst_2001.unit, maps.images.lst_2001.source_file, status],
+    ["Faisalabad", "Land surface temperature", 2024, maps.images.lst_2024.stats.min, maps.images.lst_2024.stats.mean, maps.images.lst_2024.stats.max, maps.images.lst_2024.unit, maps.images.lst_2024.source_file, status],
+    [area, "Land surface temperature change", "2001-2024", maps.images.lst_change.stats.min, maps.images.lst_change.stats.mean, maps.images.lst_change.stats.max, maps.images.lst_change.unit, maps.images.lst_change.source_file, status],
+  ];
+  const content = `\uFEFF${rows.map((row) => row.map(quoteCsvCell).join(",")).join("\r\n")}`;
+  downloadBlob(new Blob([content], { type: "text/csv;charset=utf-8" }), `${safeFileName(fileName)}.csv`);
+}
+
+async function loadMapImage(file: string): Promise<HTMLImageElement> {
+  return waitForImage(`/data/areas/faisalabad/maps/${file}`);
+}
+
+export async function downloadMapsPng(
+  maps: AreaMaps,
+  metadata: ExportMetadata,
+  status: string,
+): Promise<void> {
+  const [start, end, change] = await Promise.all([
+    loadMapImage(maps.images.lst_2001.file),
+    loadMapImage(maps.images.lst_2024.file),
+    loadMapImage(maps.images.lst_change.file),
+  ]);
+  const canvas = document.createElement("canvas");
+  canvas.width = 2400;
+  canvas.height = 1500;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("The browser could not prepare a canvas for map export.");
+  const rootStyle = getComputedStyle(document.documentElement);
+  context.fillStyle = rootStyle.getPropertyValue("--surface").trim();
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle = rootStyle.getPropertyValue("--text").trim();
+  context.font = `600 42px ${getComputedStyle(document.body).fontFamily}`;
+  context.fillText(metadata.title, 60, 70);
+  context.font = `24px ${getComputedStyle(document.body).fontFamily}`;
+  context.fillStyle = rootStyle.getPropertyValue("--muted").trim();
+  context.fillText(`Faisalabad · 2001 vs 2024 · ${maps.images.lst_2001.unit} · ${status}`, 60, 112);
+  context.fillText(`Same color scale in both maps · ${maps.images.lst_2001.source_file}`, 60, 150);
+  const drawWidth = 680;
+  const drawHeight = 720;
+  context.drawImage(start, 60, 210, drawWidth, drawHeight);
+  context.drawImage(end, 860, 210, drawWidth, drawHeight);
+  context.drawImage(change, 1660, 210, drawWidth, drawHeight);
+  context.fillStyle = rootStyle.getPropertyValue("--text").trim();
+  context.font = `600 28px ${getComputedStyle(document.body).fontFamily}`;
+  context.fillText("2001", 60, 970);
+  context.fillText("2024", 860, 970);
+  context.fillText("Change, 2001 to 2024", 1660, 970);
+  const gradient = context.createLinearGradient(60, 1040, 1260, 1040);
+  maps.images.lst_2001.legend_stops.forEach((stop, index, stops) => {
+    gradient.addColorStop(index / (stops.length - 1), stop);
+  });
+  context.fillStyle = gradient;
+  context.fillRect(60, 1040, 1200, 28);
+  context.fillStyle = rootStyle.getPropertyValue("--muted").trim();
+  context.font = `22px ${getComputedStyle(document.body).fontFamily}`;
+  context.fillText(`${maps.images.lst_2001.vmin.toFixed(1)} ${maps.images.lst_2001.unit}`, 60, 1105);
+  context.fillText(`${maps.images.lst_2001.vmax.toFixed(1)} ${maps.images.lst_2001.unit}`, 1010, 1105);
+  context.fillText(`Source: ${maps.images.lst_change.source_file} · Status: ${status}`, 60, 1190);
+  const blob = await canvasToBlob(canvas);
+  downloadBlob(blob, `${safeFileName(metadata.fileName)}.png`);
+}
+
 export async function downloadImagePng(imageSource: string, fileName: string): Promise<void> {
   const image = await waitForImage(imageSource);
   const canvas = document.createElement("canvas");
@@ -235,6 +327,65 @@ export async function downloadImagePng(imageSource: string, fileName: string): P
   context.drawImage(image, 0, 0);
   const blob = await canvasToBlob(canvas);
   downloadBlob(blob, `${safeFileName(fileName)}.png`);
+}
+
+export async function downloadChartsPng(
+  charts: SVGSVGElement[],
+  metadata: ExportMetadata,
+  labels: {
+    dataCredit: string;
+    period: string;
+    region: string;
+    status?: string;
+  },
+): Promise<void> {
+  if (charts.length === 0) throw new Error("No rendered charts are available to export.");
+  const imageUrls: string[] = [];
+  const images = await Promise.all(
+    charts.map(async (svg) => {
+      const clone = svg.cloneNode(true) as SVGSVGElement;
+      const bounds = svg.getBoundingClientRect();
+      const width = Number(svg.getAttribute("width")) || bounds.width;
+      const height = Number(svg.getAttribute("height")) || bounds.height;
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      clone.setAttribute("width", String(width));
+      clone.setAttribute("height", String(height));
+      clone.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      const rootStyle = getComputedStyle(document.documentElement);
+      for (const token of ["accent", "border", "heat", "muted", "text"]) {
+        clone.style.setProperty(`--${token}`, rootStyle.getPropertyValue(`--${token}`).trim());
+      }
+      const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)], { type: "image/svg+xml;charset=utf-8" }));
+      imageUrls.push(url);
+      return { image: await waitForImage(url), width, height };
+    }),
+  );
+  const logicalWidth = Math.max(600, images.reduce((total, item) => total + item.width, 0));
+  const logicalHeight = Math.max(...images.map((item) => item.height), 300) + 100;
+  const scale = 2;
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1200, Math.ceil(logicalWidth * scale));
+  canvas.height = Math.ceil(logicalHeight * scale);
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("The browser could not prepare a canvas for chart export.");
+  const rootStyle = getComputedStyle(document.documentElement);
+  context.scale(scale, scale);
+  context.fillStyle = rootStyle.getPropertyValue("--surface").trim();
+  context.fillRect(0, 0, logicalWidth, logicalHeight);
+  context.fillStyle = rootStyle.getPropertyValue("--text").trim();
+  context.font = `600 18px ${getComputedStyle(document.body).fontFamily}`;
+  context.fillText(metadata.title, 20, 27);
+  context.font = `12px ${getComputedStyle(document.body).fontFamily}`;
+  context.fillStyle = rootStyle.getPropertyValue("--muted").trim();
+  context.fillText(`${labels.region}: ${metadata.regionLabel} · ${labels.period}: ${metadata.yearRangeLabel} · ${labels.dataCredit}: ${metadata.source} · ${labels.status ?? "Status"}: ${metadata.statusLabel ?? ""}`, 20, 52);
+  let x = 0;
+  for (const item of images) {
+    context.drawImage(item.image, x, 80, item.width, item.height);
+    x += item.width;
+  }
+  const blob = await canvasToBlob(canvas);
+  imageUrls.forEach((url) => URL.revokeObjectURL(url));
+  downloadBlob(blob, `${safeFileName(metadata.fileName)}.png`);
 }
 
 export async function downloadChartPng(
@@ -298,7 +449,8 @@ export async function downloadChartPng(
     const scale = 2;
     const headerHeight = 256;
     const canvas = document.createElement("canvas");
-    canvas.width = Math.ceil(width * scale);
+    const exportWidth = Math.max(width, 600);
+    canvas.width = Math.ceil(exportWidth * scale);
     canvas.height = Math.ceil((height + headerHeight) * scale);
     const context = canvas.getContext("2d");
     if (!context) {
@@ -307,10 +459,10 @@ export async function downloadChartPng(
 
     context.scale(scale, scale);
     context.fillStyle = rootStyle.getPropertyValue("--surface").trim();
-    context.fillRect(0, 0, width, height + headerHeight);
+    context.fillRect(0, 0, exportWidth, height + headerHeight);
     context.fillStyle = rootStyle.getPropertyValue("--text").trim();
     context.font = `600 18px ${getComputedStyle(document.body).fontFamily}`;
-    context.fillText(metadata.title, 20, 27, width - 40);
+    context.fillText(metadata.title, 20, 27, exportWidth - 40);
 
     const details = [
       `${labels.variable}: ${metadata.variableLabel}`,
@@ -324,7 +476,7 @@ export async function downloadChartPng(
     context.font = `12px ${getComputedStyle(document.body).fontFamily}`;
     context.fillStyle = rootStyle.getPropertyValue("--muted").trim();
     details.forEach((line, index) => {
-      context.fillText(line, 20, 51 + index * 18, width - 40);
+      context.fillText(line, 20, 51 + index * 18, exportWidth - 40);
     });
     const dashPatterns: number[][] = [[], [6, 4], [2, 3], [8, 3, 2, 3]];
     series.forEach((item, index) => {
@@ -344,12 +496,12 @@ export async function downloadChartPng(
     });
 
     if (metadata.isDemo) {
-      const badgeWidth = Math.min(width - 40, context.measureText(labels.demoLabel).width + 20);
+      const badgeWidth = Math.min(exportWidth - 40, context.measureText(labels.demoLabel).width + 20);
       context.fillStyle = rootStyle.getPropertyValue("--primary").trim();
-      context.fillRect(width - badgeWidth - 20, 10, badgeWidth, 24);
+      context.fillRect(exportWidth - badgeWidth - 20, 10, badgeWidth, 24);
       context.fillStyle = rootStyle.getPropertyValue("--background").trim();
       context.font = `600 10px ${getComputedStyle(document.body).fontFamily}`;
-      context.fillText(labels.demoLabel, width - badgeWidth - 10, 26, badgeWidth - 10);
+      context.fillText(labels.demoLabel, exportWidth - badgeWidth - 10, 26, badgeWidth - 10);
     }
 
     context.drawImage(image, 0, headerHeight, width, height);

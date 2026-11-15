@@ -35,12 +35,29 @@ export const CoverageDialog = forwardRef<HTMLDialogElement, CoverageDialogProps>
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
+    const handleBeforeToggle = (event: Event) => {
+      const newState = (event as Event & { newState?: string }).newState;
+      if (newState === "open" && document.activeElement instanceof HTMLElement) {
+        lastTrigger.current = document.activeElement;
+      }
+    };
+    const handleToggle = () => {
+      if (dialog.open) {
+        dialog.querySelector<HTMLElement>(".coverage-dialog-content")?.focus({ preventScroll: true });
+      }
+    };
     const handleClose = () => {
       onClose();
       lastTrigger.current?.focus();
     };
+    dialog.addEventListener("beforetoggle", handleBeforeToggle);
+    dialog.addEventListener("toggle", handleToggle);
     dialog.addEventListener("close", handleClose);
-    return () => dialog.removeEventListener("close", handleClose);
+    return () => {
+      dialog.removeEventListener("beforetoggle", handleBeforeToggle);
+      dialog.removeEventListener("toggle", handleToggle);
+      dialog.removeEventListener("close", handleClose);
+    };
   }, [onClose]);
 
   function close() {
@@ -63,7 +80,13 @@ export const CoverageDialog = forwardRef<HTMLDialogElement, CoverageDialogProps>
         close();
       }}
     >
-      <div className="coverage-dialog-content" lang={language} dir={language === "ur" ? "rtl" : "ltr"}>
+      <div
+        className="coverage-dialog-content"
+        lang={language}
+        dir={language === "ur" ? "rtl" : "ltr"}
+        tabIndex={-1}
+        autoFocus
+      >
         <div className="coverage-dialog-header">
           <div className="coverage-dialog-icon" aria-hidden="true">
             {variant === "welcome" ? <Info size={20} /> : <MapPinOff size={20} />}
@@ -71,6 +94,14 @@ export const CoverageDialog = forwardRef<HTMLDialogElement, CoverageDialogProps>
           <h2 id="coverage-dialog-title">
             {variant === "welcome" ? messages.dataCoverageTitle : messages.noDataDialogTitle}
           </h2>
+          <button
+            className="coverage-dialog-close"
+            type="button"
+            aria-label="Close"
+            onClick={close}
+          >
+            <span aria-hidden="true">×</span>
+          </button>
         </div>
         <p id="coverage-dialog-description">
           {variant === "welcome"
@@ -100,7 +131,7 @@ export const CoverageDialog = forwardRef<HTMLDialogElement, CoverageDialogProps>
               {messages.noDataDialogExplore}
             </button>
           )}
-          <button className="control-button" type="button" onClick={close}>
+          <button className="control-button coverage-dialog-secondary" type="button" onClick={close}>
             {messages.dataCoverageClose}
           </button>
         </div>

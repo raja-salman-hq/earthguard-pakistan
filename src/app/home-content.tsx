@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import "./home-content.css";
+import Image from "next/image";
 import {
   Activity,
   ArrowDownRight,
@@ -22,6 +23,7 @@ import type { LucideIcon } from "lucide-react";
 import { getRegionLabel, getVariableLabel, messages } from "@/lib/i18n";
 import type { Language, MessageKey } from "@/lib/i18n";
 import type { RegionId, VariableId } from "@/types/api";
+import type { AreaMaps } from "@/types/area-data";
 import { TeamPreview } from "@/components/team/team-preview";
 import { isDemoMode } from "@/lib/api/client";
 import { LiveNowCard } from "@/components/live/live-now-card";
@@ -78,6 +80,7 @@ type HomeContentProps = {
   heroTrend: Pick<LandingInsight, "direction" | "significant"> | null;
   insights: LandingInsight[];
   realFacts?: RealFact[];
+  mapTeaser?: AreaMaps;
 };
 
 const variableIcons: Record<VariableId, LucideIcon> = {
@@ -216,6 +219,7 @@ export default function HomeContent({
   heroTrend,
   insights,
   realFacts = [],
+  mapTeaser,
 }: HomeContentProps) {
   const sparklinePoints = isDemoMode ? getSparklinePoints(heroSparklineValues) : "";
   const questions: Array<{ title: MessageKey; description: MessageKey; href: string; Icon: LucideIcon }> = isDemoMode ? [
@@ -275,13 +279,13 @@ export default function HomeContent({
         <div className="home-hero-copy">
           <span className="eyebrow">
             <LocalizedText
-              english={isDemoMode ? messages.en.homeHeroEyebrow : messages.en.homePilotEyebrow}
-              urdu={isDemoMode ? messages.ur.homeHeroEyebrow : messages.ur.homePilotEyebrow}
+              english={isDemoMode ? messages.en.homeHeroEyebrow : messages.en.homeLandingEyebrow}
+              urdu={isDemoMode ? messages.ur.homeHeroEyebrow : messages.ur.homeLandingEyebrow}
             />
           </span>
           <h1>
             <LocalizedText
-              english={isDemoMode ? messages.en.homeHeroTitle : messages.en.homePilotTitle}
+              english={isDemoMode ? messages.en.homeHeroTitle : <>Explore the <span className="home-gradient-word">Faisalabad</span> data pilot</>}
               urdu={isDemoMode ? messages.ur.homeHeroTitle : messages.ur.homePilotTitle}
             />
           </h1>
@@ -298,6 +302,18 @@ export default function HomeContent({
             />
             <ArrowRight aria-hidden="true" className="home-link-arrow" />
           </a>
+          {!isDemoMode && (
+            <div className="home-hero-actions">
+              <a className="home-secondary-button" href="#how-title">
+                <LocalizedText english={messages.en.homeHowTitle} urdu={messages.ur.homeHowTitle} />
+              </a>
+              <div className="home-trust-row" aria-label="Faisalabad pilot coverage">
+                <span><LocalizedText english={messages.en.homeTrustIndicators} urdu={messages.ur.homeTrustIndicators} /></span>
+                <span><LocalizedText english={messages.en.homeTrustYears} urdu={messages.ur.homeTrustYears} /></span>
+                <span><LocalizedText english={messages.en.homeTrustZone} urdu={messages.ur.homeTrustZone} /></span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="home-hero-visual">
@@ -507,6 +523,23 @@ export default function HomeContent({
         </div>
       </section>
 
+      {!isDemoMode && (
+        <section className="home-stats-ribbon page-shell" aria-label="Faisalabad pilot statistics">
+          {realFacts.map((fact) => (
+            <article className="home-stat-tile" key={fact.id}>
+              <span><LocalizedText english={getVariableLabel(fact.id, "en")} urdu={getVariableLabel(fact.id, "ur")} /></span>
+              <strong dir="ltr">{formatRealValue(fact.id, fact.latest)}</strong>
+              <small dir="ltr">{fact.unit} · {fact.year}</small>
+            </article>
+          ))}
+          <article className="home-stat-tile">
+          <span><LocalizedText english={messages.en.homeYearsOfData} urdu={messages.ur.homeYearsOfData} /></span>
+            <strong dir="ltr">24</strong>
+            <small><LocalizedText english={messages.en.homeYearsCaption} urdu={messages.ur.homeYearsCaption} /></small>
+          </article>
+        </section>
+      )}
+
       <section className="home-section page-shell" aria-labelledby="home-questions-title">
         <div className="home-section-heading">
           <span className="eyebrow">
@@ -570,9 +603,10 @@ export default function HomeContent({
           {variables.map((variable) => {
             const Icon = variableIcons[variable.id];
             const descriptionKey = variableDescriptionKeys[variable.id];
+            const realFact = realFacts.find((fact) => fact.id === variable.id);
             return (
               <a
-                className="home-variable-card"
+                className={`home-variable-card home-indicator-card indicator-${variable.id}`}
                 href={`/explore?variable=${variable.id}`}
                 key={variable.id}
               >
@@ -589,30 +623,42 @@ export default function HomeContent({
                     urdu={messages.ur[descriptionKey]}
                   />
                 </span>
+                {!isDemoMode && realFact && (
+                  <>
+                    <strong className="home-indicator-latest" dir="ltr">
+                      {formatRealValue(realFact.id, realFact.latest)} <small>{realFact.unit}</small>
+                    </strong>
+                    <svg className="home-indicator-sparkline" viewBox="0 0 168 38" role="img" aria-label={`${realFact.name} annual values`}>
+                      <polyline points={getSparklinePoints(realFact.series.map((point) => point.value).filter((value): value is number => value !== null))} />
+                    </svg>
+                  </>
+                )}
                 <span className="home-variable-unit" dir="ltr">{variable.unit}</span>
+                <span className="home-card-link">{messages.en.homeIndicatorLink}<ArrowRight className="home-link-arrow" aria-hidden="true" /></span>
               </a>
             );
           })}
         </div>
       </section>
 
-      {!isDemoMode && (
-        <section className="home-section page-shell" aria-labelledby="home-facts-title">
+      {!isDemoMode && mapTeaser && (
+        <section className="home-section page-shell" aria-labelledby="home-map-teaser-title">
           <div className="home-section-heading">
-            <span className="eyebrow">{messages.en.homePilotEyebrow}</span>
-            <h2 id="home-facts-title">Faisalabad pilot coverage</h2>
-            <p>Three indicators, 2001 to 2024, for Faisalabad District and the 10 km surrounding zone.</p>
+            <span className="eyebrow"><LocalizedText english={messages.en.homeMapTeaserEyebrow} urdu={messages.ur.homeMapTeaserEyebrow} /></span>
+            <h2 id="home-map-teaser-title"><LocalizedText english={messages.en.homeMapTeaserTitle} urdu={messages.ur.homeMapTeaserTitle} /></h2>
+            <p><LocalizedText english={messages.en.homeMapTeaserSubtitle} urdu={messages.ur.homeMapTeaserSubtitle} /></p>
           </div>
-          <div className="home-variable-grid">
-            {realFacts.map((fact) => (
-              <article className="home-variable-card" key={fact.id}>
-                <span className="home-variable-card-title">{fact.name}</span>
-                <strong dir="ltr"><bdi>{formatNumber(fact.latest)}</bdi> {fact.unit}</strong>
-                <span className="home-variable-description">Latest value: <bdi dir="ltr">{fact.year}</bdi></span>
-                <span className="data-status-badge">{fact.status === "verified" ? "Verified data" : "Draft data"}</span>
-              </article>
-            ))}
-          </div>
+          <figure className="home-map-teaser">
+            <div className="home-map-teaser-frame">
+              <Image src={`/data/areas/faisalabad/maps/${mapTeaser.images.lst_2024.file}`} fill sizes="(max-width: 900px) 100vw, 55vw" alt="Faisalabad land surface temperature map for 2024" />
+              <div className="home-map-teaser-clip">
+                <Image src={`/data/areas/faisalabad/maps/${mapTeaser.images.lst_2001.file}`} fill sizes="(max-width: 900px) 100vw, 55vw" alt="Faisalabad land surface temperature map for 2001" />
+              </div>
+              <span className="home-map-teaser-year home-map-teaser-year-start">2001</span>
+              <span className="home-map-teaser-year home-map-teaser-year-end">2024</span>
+            </div>
+            <figcaption><LocalizedText english={messages.en.homeMapTeaserCaption} urdu={messages.ur.homeMapTeaserCaption} /> · {mapTeaser.images.lst_2001.unit}</figcaption>
+          </figure>
         </section>
       )}
 
@@ -740,6 +786,28 @@ export default function HomeContent({
           </article>
         </div>
       </section>
+
+      {!isDemoMode && (
+        <section className="home-section page-shell" aria-labelledby="home-roadmap-title">
+          <div className="home-section-heading">
+            <span className="eyebrow"><LocalizedText english={messages.en.homeRoadmapEyebrow} urdu={messages.ur.homeRoadmapEyebrow} /></span>
+            <h2 id="home-roadmap-title"><LocalizedText english={messages.en.homeRoadmapTitle} urdu={messages.ur.homeRoadmapTitle} /></h2>
+            <p><LocalizedText english={messages.en.homeRoadmapSubtitle} urdu={messages.ur.homeRoadmapSubtitle} /></p>
+          </div>
+          <div className="home-roadmap-grid">
+            <article className="home-roadmap-card is-current">
+              <span className="home-roadmap-status"><LocalizedText english={messages.en.homeRoadmapNow} urdu={messages.ur.homeRoadmapNow} /></span>
+              <h3><LocalizedText english={messages.en.homeRoadmapNowTitle} urdu={messages.ur.homeRoadmapNowTitle} /></h3>
+              <p><LocalizedText english={messages.en.homeRoadmapNowText} urdu={messages.ur.homeRoadmapNowText} /></p>
+            </article>
+            <article className="home-roadmap-card is-locked">
+              <span className="home-roadmap-status"><LocalizedText english={messages.en.homeRoadmapNext} urdu={messages.ur.homeRoadmapNext} /></span>
+              <h3><LocalizedText english={messages.en.homeRoadmapNextTitle} urdu={messages.ur.homeRoadmapNextTitle} /></h3>
+              <p><LocalizedText english={messages.en.homeRoadmapNextText} urdu={messages.ur.homeRoadmapNextText} /></p>
+            </article>
+          </div>
+        </section>
+      )}
 
       <section className="home-credits page-shell" aria-labelledby="home-credits-title">
         <div>

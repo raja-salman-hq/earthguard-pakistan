@@ -12,12 +12,15 @@ import {
 } from "@/components/landing/pakistan-hero-map-data";
 import type { RegionId, VariableId } from "@/types/api";
 import { isDemoMode } from "@/lib/api/client";
+import { areaMapsSchema } from "@/types/area-data";
 import areaData from "../../public/data/areas/faisalabad/indicators.json";
+import areaMapsData from "../../public/data/areas/faisalabad/maps/maps.json";
 
 export const metadata = getPageMetadata("home");
 
 export default function HomePage() {
   if (!isDemoMode) {
+    const mapTeaser = areaMapsSchema.parse(areaMapsData);
     const variables: Array<{ id: VariableId; unit: string }> = [
       { id: "land_surface_temperature", unit: "°C" },
       { id: "precipitation", unit: "mm/year" },
@@ -54,6 +57,7 @@ export default function HomePage() {
             })),
           };
         })}
+        mapTeaser={mapTeaser}
       />
     );
   }

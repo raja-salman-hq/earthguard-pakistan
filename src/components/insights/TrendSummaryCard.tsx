@@ -6,6 +6,7 @@ import { useUiStore } from "@/store/ui-store";
 import { NoDataError } from "@/lib/api/static-data";
 import { NoDataNotice } from "@/components/ui/no-data-notice";
 import type { TrendResponse, VariableId } from "@/types/api";
+import type { AreaStatistics } from "@/types/area-statistics";
 import { SignificanceBadge } from "./SignificanceBadge";
 import { TrendTakeaway } from "./TrendTakeaway";
 
@@ -18,6 +19,7 @@ type TrendSummaryCardProps = {
   loading: boolean;
   error: unknown;
   onRetry: () => void;
+  areaStatistics?: AreaStatistics;
 };
 
 function formatNumber(value: number): string {
@@ -33,6 +35,7 @@ export function TrendSummaryCard({
   loading,
   error,
   onRetry,
+  areaStatistics,
 }: TrendSummaryCardProps) {
   const messages = useMessages();
   const language = useUiStore((state) => state.language);
@@ -64,7 +67,11 @@ export function TrendSummaryCard({
     return (
       <section className="trend-summary-card" aria-labelledby={headingId}>
         <h2 id={headingId}>{messages.trendSummaryTitle}</h2>
-        <p>{messages.trendStatisticsUnavailable}</p>
+        {areaStatistics ? (
+          <AreaStatisticsSummary statistics={areaStatistics} />
+        ) : (
+          <p>{messages.trendStatisticsUnavailable}</p>
+        )}
       </section>
     );
   }
@@ -97,8 +104,43 @@ export function TrendSummaryCard({
     return (
       <section className="trend-summary-card" aria-labelledby={headingId}>
         <h2 id={headingId}>{messages.trendSummaryTitle}</h2>
-        <p>{messages.trendStatisticsUnavailable}</p>
+        {areaStatistics ? (
+          <AreaStatisticsSummary statistics={areaStatistics} />
+        ) : (
+          <p>{messages.trendStatisticsUnavailable}</p>
+        )}
       </section>
+    );
+  }
+
+  function AreaStatisticsSummary({ statistics }: { statistics: AreaStatistics }) {
+    const total = statistics.lst.find((row) => row.category === "Total Study Area");
+    const lulc = statistics.lulc.filter((row) =>
+      ["Urban_2001", "Urban_2024", "Agriculture_2001", "Agriculture_2024"].includes(row.category),
+    );
+
+    return (
+      <div className="area-statistics-summary">
+        <p className="area-statistics-summary-intro">
+          Static Faisalabad area statistics from the supplied CSV files. These values describe the study area and are not a computed trend test.
+        </p>
+        {total && (
+          <div className="area-statistics-highlight">
+            <span>Study-area LST change</span>
+            <strong dir="ltr">+{total.changeCelsius.toFixed(2)} °C</strong>
+            <small dir="ltr">{total.year2001.toFixed(2)} °C → {total.year2024.toFixed(2)} °C</small>
+          </div>
+        )}
+        <div className="area-statistics-grid">
+          {lulc.map((row) => (
+            <div className="area-statistics-metric" key={row.category}>
+              <span>{row.category.replaceAll("_", " ")}</span>
+              <bdi dir="ltr">{row.areaKm2.toFixed(1)} km²</bdi>
+            </div>
+          ))}
+        </div>
+        <small className="area-statistics-source">Source: {statistics.source}</small>
+      </div>
     );
   }
 

@@ -351,7 +351,7 @@ export default function CompareWorkspace() {
             <span className={`data-status-badge is-${status}`}><span className="data-status-dot" aria-hidden="true" />{statusLabel}</span>
             <ExportMenu
               metadata={{
-              fileName: `faisalabad-comparison-${previousYear}-${compareYear}`,
+              fileName: `faisalabad_compare_${previousYear}-vs-${compareYear}_${status}`,
               title: messages.compareTitle,
               variableLabel: messages.compareIndicators,
               regionLabel: "Punjab",
@@ -364,6 +364,9 @@ export default function CompareWorkspace() {
               }}
               series={currentTabSeries}
               comparisonRows={activeTab === "year" ? rows : undefined}
+              exportMode={activeTab}
+              disabledReason={activeTab === "regions" ? "Region comparison is not available yet." : undefined}
+              mapData={activeTab === "maps" ? mapsQuery.data : undefined}
               imageSrc={
                 activeTab === "maps" && mapsQuery.data
                   ? `/data/areas/faisalabad/maps/${mapsQuery.data.images.lst_2024.file}`

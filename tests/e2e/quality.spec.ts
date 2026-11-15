@@ -200,7 +200,7 @@ test.describe("production route smoke checks", () => {
     await expect(dialog).toBeVisible();
     await expect(dialog).toContainText("Faisalabad District");
     await expect(dialog.locator(".data-coverage-location")).toContainText("Punjab");
-    await expect(dialog).toHaveCSS("border-radius", "16px");
+    await expect(dialog).toHaveCSS("border-radius", "20px");
     const dialogBox = await dialog.boundingBox();
     expect(dialogBox).not.toBeNull();
     expect(Math.abs((dialogBox?.x ?? 0) + (dialogBox?.width ?? 0) / 2 - page.viewportSize()!.width / 2)).toBeLessThanOrEqual(2);
@@ -210,7 +210,7 @@ test.describe("production route smoke checks", () => {
     await expect(dialog).not.toBeVisible();
     await page.getByRole("button", { name: "Data coverage" }).click();
     await expect(dialog).toBeVisible();
-    await dialog.getByRole("button", { name: "Close" }).click();
+    await dialog.locator(".coverage-dialog-secondary").click();
     await expect(dialog).not.toBeVisible();
   });
 
@@ -234,7 +234,7 @@ test.describe("production route smoke checks", () => {
     await page.goto("/explore", { waitUntil: "domcontentloaded" });
     await dismissCoverageDialog(page);
     await page.getByRole("button", { name: "Data coverage" }).click();
-    await page.getByRole("button", { name: "Close" }).click();
+    await page.locator(".coverage-dialog-secondary").click();
     await page.locator("details.map-region-panel select").selectOption("punjab");
     await page.getByRole("button", { name: /Lahore.*No data yet/ }).click();
     const noDataDialog = page.getByRole("dialog", { name: "Data not available yet" });
@@ -452,16 +452,14 @@ test.describe("production route smoke checks", () => {
     await expect(page).not.toHaveURL(/area=punjab/);
     const marker = page.getByRole("button", { name: "Faisalabad, data available" });
     await expect(marker).toBeVisible();
-    await marker.click();
+    await marker.click({ force: true });
     await expect(page.locator(".map-breadcrumb")).toContainText("Faisalabad");
 
     await page.locator(".map-breadcrumb").getByRole("button", { name: "Punjab" }).click();
     await regionSelect.selectOption("faisalabad");
     await expect(regionSelect).toHaveValue("faisalabad");
     await expect(page.locator(".trend-chart-content h3").first()).toContainText("Faisalabad");
-    await expect(page.locator(".trend-summary-card").first()).toContainText(
-      "Trend statistics not available yet",
-    );
+    await expect(page.locator(".trend-summary-card").first()).toContainText("Study-area LST change");
 
     for (const variable of ["land_surface_temperature", "precipitation", "vegetation_index"]) {
       await page.getByLabel("Environmental variable").selectOption(variable);
@@ -497,26 +495,74 @@ test.describe("production route smoke checks", () => {
     await expect(page.locator(".compare-year-card").first().locator(".compare-value-grid")).not.toHaveText(firstValueBeforeYearChange);
     await page.locator(".compare-year-card").first().getByRole("button", { name: /view table/i }).click();
     await expect(page.locator(".compare-year-card").first().locator(".compare-year-table")).toBeVisible();
-    await page.getByRole("button", { name: /add another region/i }).click();
+    await page.locator(".compare-add-region").click();
     await expect(page.getByRole("dialog")).toContainText(
       "Region comparison is not available yet. Real data exists only for Faisalabad.",
     );
-    await page.getByRole("dialog").getByRole("button", { name: "Close" }).click();
+    await page.getByRole("dialog").locator(".coverage-dialog-secondary").click();
 
     await page.getByRole("tab", { name: "Indicators over time" }).click();
     await expect(page.locator(".compare-over-time-card")).toHaveCount(3);
     await expect(page.getByText("Any relationship between indicators is exploratory; correlation is not causation.")).toBeVisible();
+    const indicatorPayload = areaIndicatorsSchema.parse(
+      JSON.parse(await readFile("public/data/areas/faisalabad/indicators.json", "utf8")),
+    );
+    const lst2024 = indicatorPayload.indicators.find((indicator) => indicator.id === "land_surface_temperature")?.series.find((point) => point.year === 2024)?.value;
+    const compareExport = page.locator(".compare-heading .export-menu");
+    const openExportMenu = async () => {
+      if (await compareExport.locator("details").getAttribute("open") === null) {
+        await compareExport.locator("summary").click();
+      }
+    };
+    await openExportMenu();
+    const [indicatorCsvDownload] = await Promise.all([
+      page.waitForEvent("download"),
+      compareExport.getByRole("button", { name: "Download visible data as CSV" }).click(),
+    ]);
+    const indicatorCsv = await readFile((await indicatorCsvDownload.path())!, "utf8");
+    expect(indicatorCsv.charCodeAt(0)).toBe(0xfeff);
+    expect(indicatorCsv).toContain('"year","LST"');
+    expect(indicatorCsv).toContain(String(lst2024));
+    await openExportMenu();
+    const [indicatorPngDownload] = await Promise.all([
+      page.waitForEvent("download"),
+      compareExport.getByRole("button", { name: "Download chart as PNG" }).click(),
+    ]);
+    const indicatorPng = await readFile((await indicatorPngDownload.path())!);
+    expect([...indicatorPng.subarray(0, 8)]).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+    expect(indicatorPng.readUInt32BE(16)).toBeGreaterThanOrEqual(1200);
+    expect(indicatorPng.length).toBeGreaterThan(20_000);
     await page.getByRole("tab", { name: "Maps" }).click();
     await expect(page.locator(".compare-maps-view")).toBeVisible();
     await expect(page.locator(".compare-maps-view img")).toHaveCount(3);
+    await openExportMenu();
+    const [mapCsvDownload] = await Promise.all([
+      page.waitForEvent("download"),
+      compareExport.getByRole("button", { name: "Download visible data as CSV" }).click(),
+    ]);
+    const mapCsv = await readFile((await mapCsvDownload.path())!, "utf8");
+    expect(mapCsv.charCodeAt(0)).toBe(0xfeff);
+    expect(mapCsv).toContain('"min","mean","max"');
+    await openExportMenu();
+    const [mapPngDownload] = await Promise.all([
+      page.waitForEvent("download"),
+      compareExport.getByRole("button", { name: "Download chart as PNG" }).click(),
+    ]);
+    const mapPng = await readFile((await mapPngDownload.path())!);
+    expect([...mapPng.subarray(0, 8)]).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+    expect(mapPng.readUInt32BE(16)).toBeGreaterThanOrEqual(1200);
+    expect(mapPng.length).toBeGreaterThan(20_000);
+    if (await compareExport.locator("details").getAttribute("open") !== null) {
+      await compareExport.locator("summary").click();
+    }
     await page.getByRole("tab", { name: "Regions" }).click();
     await expect(page.locator(".compare-locked-card")).toBeVisible();
     await expect(page.getByRole("dialog")).toHaveCount(1);
-    await page.getByRole("dialog").getByRole("button", { name: "Close" }).click();
+    await page.getByRole("dialog").locator(".coverage-dialog-secondary").click();
     await page.getByRole("tab", { name: "Year vs year" }).click();
 
-    const firstExport = page.locator(".compare-heading .export-menu");
-    await firstExport.locator("summary").click();
+    const firstExport = compareExport;
+    await openExportMenu();
     const [download] = await Promise.all([
       page.waitForEvent("download"),
       firstExport.getByRole("button", { name: "Download visible data as CSV" }).click(),
@@ -576,6 +622,110 @@ test.describe("production route smoke checks", () => {
         );
         expect(smallTargets).toEqual([]);
       }
+    }
+  });
+
+  test("dialogs and live cards stay contained across responsive states", async ({ page }) => {
+    test.skip(!realDataMode, "This flow is exercised with NEXT_PUBLIC_USE_MOCK=false.");
+    test.setTimeout(120_000);
+    await stubWeather(page);
+    const widths = [320, 390, 768, 1440];
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/compare", { waitUntil: "domcontentloaded" });
+      await page.evaluate(() => window.sessionStorage.clear());
+      await page.goto("/", { waitUntil: "domcontentloaded" });
+      const welcome = page.locator(".data-coverage-dialog");
+      await expect(welcome).toBeVisible();
+      await page.waitForTimeout(300);
+      const welcomeGeometry = await welcome.evaluate((element) => {
+        const dialog = element.getBoundingClientRect();
+        const content = getComputedStyle(element.querySelector(".coverage-dialog-content")!);
+        return {
+          left: Math.abs(dialog.left - (window.innerWidth - dialog.width) / 2),
+          top: Math.abs(dialog.top - (window.innerHeight - dialog.height) / 2),
+          width: dialog.width,
+          height: dialog.height,
+          contentLeft: Number.parseFloat(content.paddingLeft),
+          contentRight: Number.parseFloat(content.paddingRight),
+          viewportHeight: window.innerHeight,
+        };
+      });
+      expect(welcomeGeometry.left).toBeLessThanOrEqual(2);
+      expect(welcomeGeometry.top).toBeLessThanOrEqual(2);
+      expect(welcomeGeometry.contentLeft).toBeGreaterThanOrEqual(20);
+      expect(welcomeGeometry.contentRight).toBeGreaterThanOrEqual(20);
+      expect(welcomeGeometry.height).toBeLessThanOrEqual(welcomeGeometry.viewportHeight - 32 + 2);
+      await expect(welcome.locator(".coverage-dialog-actions > button").nth(0)).toHaveCSS("height", "44px");
+      await expect(welcome.locator(".coverage-dialog-actions > button").nth(1)).toHaveCSS("height", "44px");
+      expect(await page.evaluate(() => document.activeElement?.tagName)).toBe("DIV");
+      await welcome.screenshot({ path: `test-results/dialog-welcome-en-dark-${width}.png` });
+      await welcome.locator(".coverage-dialog-actions .control-button").click();
+      await page.getByRole("button", { name: /switch theme/i }).click();
+      await page.locator(".data-coverage-button").click();
+      await expect(welcome).toBeVisible();
+      await welcome.screenshot({ path: `test-results/dialog-welcome-en-light-${width}.png` });
+      await welcome.locator(".coverage-dialog-actions .control-button").click();
+      await page.locator(".language-button").click();
+      await page.locator(".data-coverage-button").click();
+      await expect(welcome).toBeVisible();
+      await welcome.screenshot({ path: `test-results/dialog-welcome-ur-light-${width}.png` });
+      await welcome.locator(".coverage-dialog-actions .control-button").click();
+      await page.locator(".header-actions .control-button").nth(-2).click();
+      await page.locator(".data-coverage-button").click();
+      await expect(welcome).toBeVisible();
+      await welcome.screenshot({ path: `test-results/dialog-welcome-ur-dark-${width}.png` });
+      await welcome.locator(".coverage-dialog-actions .control-button").click();
+
+      await page.goto("/compare", { waitUntil: "domcontentloaded" });
+      await expect(page.locator(".compare-heading .live-now-card")).toBeVisible();
+      const liveCard = page.locator(".compare-heading .live-now-card");
+      const compareAdd = page.locator(".compare-add-region");
+      const assertNoIntersection = async (other: ReturnType<typeof page.locator>) => {
+        const otherHandle = await other.elementHandle();
+        if (!otherHandle) throw new Error("Expected responsive comparison control to exist.");
+        const intersects = await liveCard.evaluate((card, target) => {
+          const first = card.getBoundingClientRect();
+          const second = (target as HTMLElement).getBoundingClientRect();
+          return !(first.right <= second.left || first.left >= second.right || first.bottom <= second.top || first.top >= second.bottom);
+        }, otherHandle);
+        expect(intersects).toBe(false);
+      };
+      await assertNoIntersection(compareAdd);
+      if (await liveCard.getByRole("button", { name: "Collapse live card" }).count() === 0) {
+        await liveCard.getByRole("button", { name: "Expand live card" }).click();
+      }
+      await page.screenshot({ path: `test-results/compare-live-expanded-${width}.png`, fullPage: false });
+      await liveCard.getByRole("button", { name: "Collapse live card" }).click();
+      await page.screenshot({ path: `test-results/compare-live-collapsed-${width}.png`, fullPage: false });
+      await liveCard.getByRole("button", { name: "Expand live card" }).click();
+      await page.locator(".compare-add-region").click();
+      const noData = page.locator(".data-coverage-dialog");
+      await expect(noData).toContainText("Region comparison is not available yet");
+      await noData.screenshot({ path: `test-results/dialog-no-data-ur-dark-${width}.png` });
+      await noData.locator(".coverage-dialog-actions .control-button").click();
+      await page.locator(".language-button").click();
+      await page.locator(".compare-add-region").click();
+      await noData.screenshot({ path: `test-results/dialog-no-data-en-dark-${width}.png` });
+      await noData.locator(".coverage-dialog-actions .control-button").click();
+      await page.locator(".header-actions .control-button").nth(-2).click();
+      await page.locator(".compare-add-region").click();
+      await noData.screenshot({ path: `test-results/dialog-no-data-en-light-${width}.png` });
+      await noData.locator(".coverage-dialog-actions .control-button").click();
+      await page.locator(".language-button").click();
+      await page.locator(".compare-add-region").click();
+      await noData.screenshot({ path: `test-results/dialog-no-data-ur-light-${width}.png` });
+      await noData.locator(".coverage-dialog-actions .control-button").click();
+      await page.locator(".header-actions .control-button").nth(-2).click();
+      if (await liveCard.getByRole("button", { name: "Collapse live card" }).count() === 0) {
+        await liveCard.getByRole("button", { name: "Expand live card" }).click();
+      }
+      await liveCard.getByRole("button", { name: "Collapse live card" }).click();
+      await expect(liveCard).toHaveAttribute("aria-label", /Live Faisalabad/);
+      await expect(liveCard.getByRole("button", { name: /expand/i })).toBeVisible();
+      await liveCard.getByRole("button", { name: /expand/i }).click();
+      await expect(liveCard.getByRole("button", { name: "Collapse live card" })).toBeVisible();
+      await page.locator(".language-button").click();
     }
   });
 });

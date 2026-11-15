@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
-import { getPakistanProvinceRegions, getTimeSeries, getTrend, getVariables } from "@/lib/api";
+import { getAreaStatistics, getPakistanProvinceRegions, getTimeSeries, getTrend, getVariables } from "@/lib/api";
 import { isDemoMode } from "@/lib/api/client";
 import { useMessages } from "@/hooks/use-messages";
 import { useUiStore } from "@/store/ui-store";
@@ -115,6 +115,12 @@ export default function ExploreWorkspace() {
     staleTime: 60_000,
     placeholderData: isDemoMode ? (previousData) => previousData : undefined,
   });
+  const areaStatisticsQuery = useQuery({
+    queryKey: ["area-statistics", selectedArea],
+    queryFn: () => getAreaStatistics("faisalabad"),
+    enabled: !isDemoMode && selectedArea === "faisalabad",
+    staleTime: Infinity,
+  });
   const exportSeriesQuery = useQuery({
     queryKey: ["timeseries", variableId, selectedRegion, selectedArea, yearRange[0], yearRange[1], chartResolution],
     queryFn: () =>
@@ -163,6 +169,7 @@ export default function ExploreWorkspace() {
         loading={trendQuery.isPending}
         error={trendQuery.error}
         onRetry={() => void trendQuery.refetch()}
+        areaStatistics={areaStatisticsQuery.data}
       />
     );
   }
