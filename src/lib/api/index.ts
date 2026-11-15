@@ -22,6 +22,7 @@ import { requestValidated } from "./client";
 import { getPakistanProvinceBoundaries } from "./pakistan-provinces";
 import {
   getAreaIndicators,
+  getAreaMaps,
   getAreasConfig,
   getAreaStudyGeometry,
   NoDataError,
@@ -209,4 +210,5 @@ export function getHotspots(query: HotspotsQuery) {
   });
 }
 
+export { getAreaMaps };
 export { NoDataError };

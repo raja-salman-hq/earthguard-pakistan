@@ -498,8 +498,23 @@ test.describe("production route smoke checks", () => {
     await page.locator(".compare-year-card").first().getByRole("button", { name: /view table/i }).click();
     await expect(page.locator(".compare-year-card").first().locator(".compare-year-table")).toBeVisible();
     await page.getByRole("button", { name: /add another region/i }).click();
-    await expect(page.getByRole("dialog")).toContainText("Comparing regions");
+    await expect(page.getByRole("dialog")).toContainText(
+      "Region comparison is not available yet. Real data exists only for Faisalabad.",
+    );
     await page.getByRole("dialog").getByRole("button", { name: "Close" }).click();
+
+    await page.getByRole("tab", { name: "Indicators over time" }).click();
+    await expect(page.locator(".compare-over-time-card")).toHaveCount(3);
+    await expect(page.getByText("Any relationship between indicators is exploratory; correlation is not causation.")).toBeVisible();
+    await page.getByRole("tab", { name: "Maps" }).click();
+    await expect(page.locator(".compare-maps-view")).toBeVisible();
+    await expect(page.locator(".compare-maps-view img")).toHaveCount(3);
+    await page.getByRole("tab", { name: "Regions" }).click();
+    await expect(page.locator(".compare-locked-card")).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(1);
+    await page.getByRole("dialog").getByRole("button", { name: "Close" }).click();
+    await page.getByRole("tab", { name: "Year vs year" }).click();
+
     const firstExport = page.locator(".compare-heading .export-menu");
     await firstExport.locator("summary").click();
     const [download] = await Promise.all([

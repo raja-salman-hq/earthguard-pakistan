@@ -9,6 +9,7 @@ import {
   type ExportMetadata,
   type ExportSeries,
   downloadComparisonCsv,
+  downloadImagePng,
   type ComparisonExportRow,
 } from "@/lib/utils/data-export";
 
@@ -17,11 +18,12 @@ type ExportMenuProps = {
   series: ExportSeries[];
   chartId?: string;
   comparisonRows?: ComparisonExportRow[];
+  imageSrc?: string;
 };
 
 type ExportStatus = "png" | "csv" | "link" | "error" | null;
 
-export function ExportMenu({ metadata, series, chartId, comparisonRows }: ExportMenuProps) {
+export function ExportMenu({ metadata, series, chartId, comparisonRows, imageSrc }: ExportMenuProps) {
   const messages = useMessages();
   const [status, setStatus] = useState<ExportStatus>(null);
   const hasData =
@@ -48,7 +50,12 @@ export function ExportMenu({ metadata, series, chartId, comparisonRows }: Export
         },
       )[0];
       if (!chart) {
-        throw new Error("No rendered chart is available to export.");
+        if (!imageSrc) {
+          throw new Error("No rendered chart is available to export.");
+        }
+        await downloadImagePng(imageSrc, metadata.fileName);
+        setStatus("png");
+        return;
       }
 
       await downloadChartPng(chart, exportMetadata, series, {

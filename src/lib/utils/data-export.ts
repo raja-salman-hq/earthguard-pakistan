@@ -223,6 +223,20 @@ export function downloadComparisonCsv(rows: ComparisonExportRow[], fileName: str
   downloadBlob(new Blob([content], { type: "text/csv;charset=utf-8" }), `${safeFileName(fileName)}.csv`);
 }
 
+export async function downloadImagePng(imageSource: string, fileName: string): Promise<void> {
+  const image = await waitForImage(imageSource);
+  const canvas = document.createElement("canvas");
+  canvas.width = image.naturalWidth;
+  canvas.height = image.naturalHeight;
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("The browser could not create an image canvas.");
+  }
+  context.drawImage(image, 0, 0);
+  const blob = await canvasToBlob(canvas);
+  downloadBlob(blob, `${safeFileName(fileName)}.png`);
+}
+
 export async function downloadChartPng(
   svg: SVGSVGElement,
   metadata: ExportMetadata,

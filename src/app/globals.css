@@ -3784,6 +3784,210 @@ html[lang="ur"] .compare-page :is(h1, h2) {
   margin: 0;
 }
 
+.compare-heading-actions .live-now-card {
+  width: min(280px, 30vw);
+}
+
+.compare-tabs {
+  display: flex;
+  gap: 8px;
+  margin-block-end: 20px;
+  overflow-x: auto;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  scrollbar-width: thin;
+}
+
+.compare-tabs button {
+  min-height: 44px;
+  flex: 1 0 auto;
+  padding-inline: 16px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font: 600 12px var(--font-inter), sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.compare-tabs button[aria-selected="true"] {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface-raised));
+  color: var(--text);
+}
+
+.compare-over-time-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.compare-over-time-card,
+.compare-maps-view,
+.compare-locked-card {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+}
+
+.compare-over-time-heading,
+.compare-map-heading,
+.compare-change-map figcaption {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.compare-over-time-heading h2,
+.compare-map-heading h2,
+.compare-locked-card h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.compare-over-time-heading p,
+.compare-map-heading p,
+.compare-change-map figcaption span {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.compare-over-time-chart {
+  width: 100%;
+  height: 260px;
+  margin-block: 12px 8px;
+}
+
+.compare-exploratory-note,
+.compare-map-caption {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+.compare-locked-card {
+  display: grid;
+  max-width: 680px;
+  gap: 12px;
+  justify-items: start;
+}
+
+.compare-locked-card > svg {
+  width: 26px;
+  height: 26px;
+  color: var(--heat);
+}
+
+.compare-locked-card p {
+  max-width: 580px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.compare-locked-card > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.compare-map-heading {
+  margin-block-end: 14px;
+}
+
+.compare-map-swipe {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 128 / 136;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-raised);
+}
+
+.compare-map-image,
+.compare-map-image-clip {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.compare-map-image { object-fit: cover; image-rendering: auto; }
+.compare-map-image-clip { z-index: 1; }
+
+.compare-map-label {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgb(11 18 32 / 78%);
+  color: #fff;
+  font: 700 11px var(--font-jetbrains-mono), monospace;
+}
+
+.compare-map-label-start { inset-inline-start: 10px; }
+.compare-map-label-end { inset-inline-end: 10px; }
+
+.compare-map-slider {
+  display: grid;
+  gap: 5px;
+  margin-block: 12px 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.compare-map-slider input {
+  width: 100%;
+  min-height: 44px;
+  accent-color: var(--primary);
+}
+
+.compare-map-legend {
+  max-width: 520px;
+  margin-block: 14px 0;
+}
+
+.compare-map-legend-bar {
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.compare-map-legend-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  color: var(--muted);
+  font: 0.68rem var(--font-jetbrains-mono), monospace;
+}
+
+.compare-change-map {
+  margin: 24px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.compare-change-map img {
+  display: block;
+  width: min(100%, 560px);
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-raised);
+}
+
 .compare-toolbar {
   display: flex;
   align-items: center;
@@ -4460,6 +4664,13 @@ html[lang="ur"] .compare-page :is(h1, h2) {
   .compare-heading-actions {
     width: 100%;
     justify-content: stretch;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .compare-heading-actions .live-now-card {
+    width: 100%;
+    order: -1;
   }
 
   .compare-heading-actions .data-status-badge,
@@ -4533,6 +4744,16 @@ html[lang="ur"] .compare-page :is(h1, h2) {
     flex: 1;
     padding-inline: 8px;
     font-size: 11px;
+  }
+
+  .compare-over-time-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .compare-over-time-card,
+  .compare-maps-view,
+  .compare-locked-card {
+    padding: 16px;
   }
 
   .compare-mobile-toggle {

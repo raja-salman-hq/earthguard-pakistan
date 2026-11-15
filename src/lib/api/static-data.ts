@@ -1,10 +1,12 @@
 import {
   areaIdSchema,
   areaIndicatorsSchema,
+  areaMapsSchema,
   areasConfigSchema,
   studyAreaFeatureCollectionSchema,
   type AreaId,
   type AreaIndicators,
+  type AreaMaps,
   type AreasConfig,
 } from "@/types/area-data";
 import { readStaticJson } from "./client";
@@ -37,6 +39,17 @@ export async function getAreaIndicators(areaId: string): Promise<AreaIndicators>
   }
 
   return areaIndicatorsSchema.parse(await readStaticJson(area.dataPath));
+}
+
+export async function getAreaMaps(areaId: string): Promise<AreaMaps> {
+  const parsedAreaId = areaIdSchema.safeParse(areaId);
+  if (!parsedAreaId.success || parsedAreaId.data !== "faisalabad") {
+    throw new NoDataError(areaId || "this area");
+  }
+
+  return areaMapsSchema.parse(
+    await readStaticJson(`/data/areas/${parsedAreaId.data}/maps/maps.json`),
+  );
 }
 
 export async function getAreaStudyGeometry(areaId: AreaId) {

@@ -110,6 +110,46 @@ export const areaIndicatorsSchema = z.object({
   indicators: z.array(indicatorDataSchema).min(1),
 });
 
+const mapBoundsSchema = z.object({
+  west: z.number().finite(),
+  south: z.number().finite(),
+  east: z.number().finite(),
+  north: z.number().finite(),
+});
+
+export const areaMapImageSchema = z.object({
+  file: z.string().min(1),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+  bounds: mapBoundsSchema,
+  coordinates: z.array(z.tuple([z.number().finite(), z.number().finite()])).length(4),
+  unit: z.string().min(1),
+  vmin: z.number().finite(),
+  vmax: z.number().finite(),
+  cmap: z.string().min(1),
+  diverging: z.boolean(),
+  legend_stops: z.array(z.string().regex(/^#[0-9a-f]{6}$/i)).min(2),
+  stats: z.object({
+    min: z.number().finite(),
+    mean: z.number().finite(),
+    max: z.number().finite(),
+    valid_pixels: z.number().int().nonnegative(),
+  }),
+  source_file: z.string().min(1),
+  source_crs: z.string().min(1),
+  resampling: z.string().min(1),
+  clipped_to_aoi: z.boolean(),
+});
+
+export const areaMapsSchema = z.object({
+  images: z.object({
+    lst_2001: areaMapImageSchema,
+    lst_2024: areaMapImageSchema,
+    lst_change: areaMapImageSchema,
+  }),
+  generated: z.string().datetime(),
+});
+
 export const studyAreaFeatureCollectionSchema = z.object({
   type: z.literal("FeatureCollection"),
   features: z
@@ -161,6 +201,7 @@ export type AreaId = z.infer<typeof areaIdSchema>;
 export type AreaConfig = z.infer<typeof areaConfigSchema>;
 export type AreasConfig = z.infer<typeof areasConfigSchema>;
 export type AreaIndicators = z.infer<typeof areaIndicatorsSchema>;
+export type AreaMaps = z.infer<typeof areaMapsSchema>;
 export type IndicatorData = z.infer<typeof indicatorDataSchema>;
 export type AnnualSeriesPoint = z.infer<typeof annualSeriesPointSchema>;
 export type MonthlySeriesPoint = z.infer<typeof monthlySeriesPointSchema>;

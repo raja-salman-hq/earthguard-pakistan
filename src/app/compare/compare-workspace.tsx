@@ -1,9 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useId, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useId, useMemo, useState, useSyncExternalStore } from "react";
 import type { KeyboardEvent } from "react";
-import { ArrowDown, ArrowRight, ArrowUp, ChevronLeft, ChevronRight, CloudRain, Leaf, Plus, Table2, ThermometerSun } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUp, ChevronLeft, ChevronRight, CloudRain, Leaf, Lock, Plus, Table2, ThermometerSun } from "lucide-react";
+import { z } from "zod";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { ExportMenu } from "@/components/layout/ExportMenu";
 import { VariableSelect } from "@/components/filters/VariableSelect";
@@ -12,7 +13,7 @@ import { SignificanceBadge } from "@/components/insights/SignificanceBadge";
 import { TrendTakeaway } from "@/components/insights/TrendTakeaway";
 import { ComponentErrorBoundary } from "@/components/ui/component-error-boundary";
 import { useMessages } from "@/hooks/use-messages";
-import { getAreaIndicators, getRegions, getTimeSeries, getTrend, getVariables } from "@/lib/api";
+import { getAreaIndicators, getAreaMaps, getRegions, getTimeSeries, getTrend, getVariables } from "@/lib/api";
 import { isDemoMode } from "@/lib/api/client";
 import { getRegionLabel, getVariableLabel } from "@/lib/i18n";
 import { useUiStore } from "@/store/ui-store";
@@ -21,6 +22,18 @@ import { requestCoverageDialog } from "@/components/ui/CoverageDialog";
 import { LiveNowCard } from "@/components/live/live-now-card";
 import { regionIdSchema } from "@/types/api";
 import type { CompareMode, RegionId, VariableId } from "@/types/api";
+import { IndicatorOverTimeCharts } from "@/components/charts/IndicatorOverTimeCharts";
+import { FaisalabadMapsView } from "@/components/compare/FaisalabadMapsView";
+
+const compareTabSchema = z.enum(["year", "indicators", "maps", "regions"]);
+type CompareTab = z.infer<typeof compareTabSchema>;
+
+const compareTabs: Array<{ id: CompareTab }> = [
+  { id: "year" },
+  { id: "indicators" },
+  { id: "maps" },
+  { id: "regions" },
+];
 
 const CompareLineChart = dynamic(
   () => import("@/components/charts/CompareLineChart").then((module) => module.CompareLineChart),
@@ -113,6 +126,7 @@ export default function CompareWorkspace() {
   const setRegion = useUiStore((state) => state.setRegion);
   const [selectorsOpen, setSelectorsOpen] = useState(false);
   const [compareYear, setCompareYear] = useState(2024);
+  const [activeTab, setActiveTab] = useState<CompareTab>("year");
   const [tablesOpen, setTablesOpen] = useState<Record<string, boolean>>({});
   const hydrated = useSyncExternalStore(
     () => () => undefined,
@@ -127,6 +141,31 @@ export default function CompareWorkspace() {
     enabled: !isDemoMode,
     staleTime: Infinity,
   });
+  const mapsQuery = useQuery({
+    queryKey: ["area-maps", "faisalabad"],
+    queryFn: () => getAreaMaps("faisalabad"),
+    enabled: !isDemoMode && activeTab === "maps",
+    staleTime: Infinity,
+  });
+  useEffect(() => {
+    const applyTabFromUrl = () => {
+      const parsed = compareTabSchema.safeParse(new URLSearchParams(window.location.search).get("tab"));
+      setActiveTab(parsed.success ? parsed.data : "year");
+    };
+    applyTabFromUrl();
+    window.addEventListener("popstate", applyTabFromUrl);
+    return () => window.removeEventListener("popstate", applyTabFromUrl);
+  }, []);
+
+  function selectTab(tab: CompareTab): void {
+    setActiveTab(tab);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", tab);
+    window.history.replaceState(window.history.state, "", url);
+    if (tab === "regions") {
+      requestCoverageDialog("no-data", undefined, messages.compareRegionsUnavailable);
+    }
+  }
   const regionsQuery = useQuery({ queryKey: ["regions"], queryFn: getRegions });
   const variableData = variablesQuery.data ?? [];
   const selectedVariableData = variableData.find((item) => item.id === variable);
@@ -285,6 +324,19 @@ export default function CompareWorkspace() {
           status: statusLabel,
         };
       });
+    const annualExportSeries: ExportSeries[] = (areaIndicatorsQuery.data?.indicators ?? [])
+      .filter((indicator) => (realIndicatorIds as readonly string[]).includes(indicator.id))
+      .map((indicator) => ({
+        label: indicator.name,
+        unit: indicator.unit,
+        resolution: "yearly" as const,
+        points: indicator.series.map((point) => ({
+          date: `${point.year}-01-01`,
+          value: point.value,
+          valid_months: point.valid_months,
+        })),
+      }));
+    const currentTabSeries = activeTab === "year" ? [] : annualExportSeries;
 
     return (
       <main className="compare-page">
@@ -295,7 +347,8 @@ export default function CompareWorkspace() {
             <p>{messages.compareYearDescription}</p>
           </div>
           <div className="compare-heading-actions">
-            <span className={`data-status-badge is-${status}`}>{statusLabel}</span>
+            <LiveNowCard />
+            <span className={`data-status-badge is-${status}`}><span className="data-status-dot" aria-hidden="true" />{statusLabel}</span>
             <ExportMenu
               metadata={{
               fileName: `faisalabad-comparison-${previousYear}-${compareYear}`,
@@ -309,12 +362,84 @@ export default function CompareWorkspace() {
               demoLabel: messages.exportSyntheticCredit,
               statusLabel,
               }}
-              series={[]}
-              comparisonRows={rows}
+              series={currentTabSeries}
+              comparisonRows={activeTab === "year" ? rows : undefined}
+              imageSrc={
+                activeTab === "maps" && mapsQuery.data
+                  ? `/data/areas/faisalabad/maps/${mapsQuery.data.images.lst_2024.file}`
+                  : undefined
+              }
             />
           </div>
         </header>
-        <LiveNowCard />
+        <nav className="compare-tabs" role="tablist" aria-label="Compare views">
+          {compareTabs.map((tab) => (
+            <button
+              key={tab.id}
+              id={`compare-tab-${tab.id}`}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              aria-controls={`compare-tabpanel-${tab.id}`}
+              tabIndex={activeTab === tab.id ? 0 : -1}
+              onClick={() => selectTab(tab.id)}
+              onKeyDown={(event) => {
+                if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+                event.preventDefault();
+                const index = compareTabs.findIndex((item) => item.id === tab.id);
+                const nextIndex = event.key === "ArrowRight"
+                  ? (index + 1) % compareTabs.length
+                  : (index - 1 + compareTabs.length) % compareTabs.length;
+                selectTab(compareTabs[nextIndex].id);
+                document.getElementById(`compare-tab-${compareTabs[nextIndex].id}`)?.focus();
+              }}
+            >
+              {tab.id === "year"
+                ? messages.compareTabYear
+                : tab.id === "indicators"
+                  ? messages.compareTabIndicators
+                  : tab.id === "maps"
+                    ? messages.compareTabMaps
+                    : messages.compareTabRegions}
+            </button>
+          ))}
+        </nav>
+        {activeTab === "indicators" && (
+          <section id="compare-tabpanel-indicators" role="tabpanel" aria-labelledby="compare-tab-indicators">
+            <IndicatorOverTimeCharts
+              indicators={areaIndicatorsQuery.data?.indicators.filter((indicator) => (realIndicatorIds as readonly string[]).includes(indicator.id)) ?? []}
+              previousYear={previousYear}
+              selectedYear={compareYear}
+            />
+            <p className="compare-exploratory-note">{messages.compareExploratoryNote}</p>
+          </section>
+        )}
+        {activeTab === "maps" && (
+          <section id="compare-tabpanel-maps" role="tabpanel" aria-labelledby="compare-tab-maps">
+            {mapsQuery.isPending ? (
+              <div className="compare-selection-skeleton" role="status" aria-label="Loading maps"><div className="skeleton skeleton-block" /></div>
+            ) : mapsQuery.isError ? (
+              <p className="compare-state-card" role="status">{messages.compareMapsProgress}</p>
+            ) : (
+              <FaisalabadMapsView maps={mapsQuery.data} statusLabel={statusLabel} />
+            )}
+          </section>
+        )}
+        {activeTab === "regions" && (
+          <section id="compare-tabpanel-regions" role="tabpanel" aria-labelledby="compare-tab-regions">
+            <div className="compare-locked-card">
+              <Lock aria-hidden="true" />
+              <h2>Region comparison is not available yet</h2>
+              <p>{messages.compareRegionsUnavailable}</p>
+              <div>
+                <button className="primary-button" type="button" onClick={() => selectTab("year")}>Compare years</button>
+                <button className="control-button" type="button" onClick={() => selectTab("indicators")}>View indicators over time</button>
+              </div>
+            </div>
+          </section>
+        )}
+        {activeTab === "year" && (
+        <section id="compare-tabpanel-year" role="tabpanel" aria-labelledby="compare-tab-year">
         <section className="compare-toolbar" aria-label={messages.compareYearSelector}>
           <div className="compare-year-controls">
             <button type="button" aria-label={messages.comparePreviousYear} onClick={() => setCompareYear((year) => Math.max(2002, year - 1))} disabled={compareYear === 2002}>
@@ -387,6 +512,8 @@ export default function CompareWorkspace() {
               );
             })}
           </section>
+        )}
+        </section>
         )}
       </main>
     );
